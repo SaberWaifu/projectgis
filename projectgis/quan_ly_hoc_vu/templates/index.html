@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Phân Tích Không Gian - Toán GIS Enterprise</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+    <style>
+        :root {
+            /* Color Palette */
+            --primary-color: #1e3a8a;       /* Deep Ocean Blue */
+            --primary-hover: #172554;
+            --accent-color: #3b82f6;        /* Bright Blue */
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            
+            --bg-body: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-sidebar: #ffffff;
+            
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            
+            --border-light: #e2e8f0;
+            --border-hover: #cbd5e1;
+            
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            
+            /* Dimensions */
+            --header-height: 70px;
+            --sidebar-width: 400px;
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            
+            /* Shadows */
+            --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* --- GLOBAL RESET --- */
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            overflow: hidden; /* App-like feel */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+        }
+
+        /* --- SCROLLBAR CUSTOMIZATION --- */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* --- HEADER SECTION --- */
+        .app-header {
+            height: var(--header-height);
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            box-shadow: var(--shadow-xs);
+        }
+
+        .brand-wrapper {
+            display: flex; align-items: center; gap: 12px; text-decoration: none;
+        }
+        .brand-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.2rem;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+        }
+        .brand-text {
+            font-size: 1.25rem; font-weight: 800; color: var(--primary-color);
+            letter-spacing: -0.5px;
+        }
+        .brand-text span { color: var(--accent-color); }
+
+        /* Navigation Pills */
+        .nav-pills-custom { display: flex; gap: 8px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
+        .nav-link-custom {
+            padding: 8px 20px; font-size: 0.9rem; font-weight: 600;
+            color: var(--text-secondary); text-decoration: none;
+            border-radius: 8px; transition: all 0.2s ease;
+        }
+        .nav-link-custom:hover { color: var(--text-primary); background: rgba(255,255,255,0.5); }
+        .nav-link-custom.active {
+            background: white; color: var(--primary-color);
+            box-shadow: var(--shadow-xs);
+        }
+
+        .header-actions { display: flex; align-items: center; gap: 16px; }
+        .user-menu {
+            display: flex; align-items: center; gap: 12px;
+            padding-left: 20px; border-left: 1px solid var(--border-light);
+        }
+        .user-info { text-align: right; line-height: 1.2; }
+        .user-name { font-weight: 700; font-size: 0.9rem; color: var(--text-primary); }
+        .user-role { font-size: 0.75rem; color: var(--text-secondary); }
+        .user-avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: #e0e7ff; color: var(--primary-color);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; border: 2px solid white;
+            box-shadow: 0 0 0 1px var(--border-light);
+        }
+
+        /* --- MAIN LAYOUT --- */
+        .app-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- SIDEBAR PANEL (LEFT) --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-light);
+            display: flex; flex-direction: column;
+            z-index: 500;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+        .sidebar-title { font-size: 1.1rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
+        .sidebar-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
+
+        /* Search Box */
+        .search-container { position: relative; margin-top: 16px; }
+        .search-input {
+            width: 100%; padding: 12px 16px 12px 42px;
+            border: 1px solid var(--border-light); border-radius: var(--radius-md);
+            background: var(--bg-body); font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .search-input:focus {
+            background: white; border-color: var(--accent-color);
+            outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .search-icon {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: var(--text-tertiary); font-size: 1.1rem;
+        }
+
+        /* Filters */
+        .filter-group { display: flex; gap: 8px; margin-top: 16px; }
+        .filter-btn {
+            flex: 1; padding: 8px; font-size: 0.8rem; font-weight: 600;
+            text-align: center; border-radius: var(--radius-sm);
+            cursor: pointer; border: 1px solid var(--border-light);
+            background: white; color: var(--text-secondary);
+            transition: 0.2s;
+        }
+        .filter-btn:hover { background: #f8fafc; color: var(--text-primary); }
+        .filter-btn.active {
+            background: #eff6ff; color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        /* Student List */
+        .student-list-container {
+            flex: 1; overflow-y: auto; padding: 16px 20px;
+            background: #f8fafc;
+        }
+        
+        .student-card {
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 16px; margin-bottom: 12px;
+            cursor: pointer; position: relative;
+            transition: all 0.2s ease;
+        }
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent-color);
+        }
+        .student-card.active {
+            border: 2px solid var(--accent-color);
+            background: #f0f7ff;
+        }
+        .student-card.active::before {
+            content: ''; position: absolute; left: 0; top: 12px; bottom: 12px;
+            width: 4px; background: var(--accent-color);
+            border-radius: 0 4px 4px 0;
+        }
+
+        .card-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .st-name { font-weight: 700; font-size: 1rem; color: var(--text-primary); margin-bottom: 2px; }
+        .st-meta { font-size: 0.75rem; color: var(--text-tertiary); display: flex; gap: 8px; }
+        
+        .st-badge {
+            font-size: 0.7rem; font-weight: 700; padding: 4px 10px;
+            border-radius: 20px; letter-spacing: 0.5px;
+        }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef9c3; color: #854d0e; }
+
+        .location-row {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 0.85rem; color: var(--text-secondary);
+            padding-top: 10px; margin-top: 10px;
+            border-top: 1px dashed var(--border-light);
+        }
+        
+        /* Action Button inside card */
+        .btn-card-action {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; margin-top: 12px; padding: 10px;
+            background: white; border: 1px solid var(--accent-color);
+            color: var(--accent-color); font-weight: 600; font-size: 0.85rem;
+            border-radius: var(--radius-sm); transition: 0.2s;
+        }
+        .btn-card-action:hover {
+            background: var(--accent-color); color: white;
+        }
+
+        /* --- MAP CONTAINER (RIGHT) --- */
+        .map-wrapper {
+            flex: 1; position: relative; background: #e2e8f0;
+        }
+        #map { width: 100%; height: 100%; z-index: 1; }
+
+        /* --- LEAFLET CUSTOMIZATION --- */
+        .leaflet-pane img { max-width: none !important; }
+        .leaflet-popup-content-wrapper { border-radius: 12px; box-shadow: var(--shadow-lg); }
+        .leaflet-popup-content { margin: 15px; font-family: 'Be Vietnam Pro', sans-serif; }
+        
+        /* Ẩn bảng text chỉ đường mặc định của Routing Machine */
+        .leaflet-routing-container { display: none !important; }
+
+        /* --- FLOATING WIDGETS --- */
+        
+        /* 1. Radar Control Panel */
+        .radar-panel {
+            position: absolute; top: 20px; right: 20px; z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px; border-radius: var(--radius-lg);
+            width: 320px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255,255,255,0.6);
+            transition: transform 0.3s ease;
+        }
+        .radar-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px;
+        }
+        .radar-title { font-size: 0.9rem; font-weight: 700; color: var(--primary-color); display: flex; align-items: center; gap: 8px; }
+        .radar-value { font-weight: 800; color: var(--accent-color); font-size: 1.1rem; }
+
+        .range-slider { width: 100%; margin-bottom: 10px; cursor: pointer; }
+        
+        .btn-scan {
+            width: 100%; padding: 12px; border: none;
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            color: white; font-weight: 700; border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .btn-scan:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4); }
+
+        /* 2. Route Info Overlay (Thông tin lộ trình) */
+        .route-overlay {
+            position: absolute; bottom: 30px; left: 50%;
+            transform: translateX(-50%) translateY(150%); /* Ẩn mặc định */
+            z-index: 999;
+            background: var(--bg-surface);
+            padding: 16px 24px;
+            border-radius: 50px;
+            display: flex; align-items: center; gap: 30px;
+            box-shadow: var(--shadow-lg);
+            opacity: 0; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .route-overlay.visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        .info-block { text-align: center; }
+        .info-label { font-size: 0.7rem; text-transform: uppercase; color: var(--text-tertiary); font-weight: 700; letter-spacing: 0.5px; }
+        .info-value { font-size: 1.2rem; font-weight: 800; color: var(--primary-color); }
+        .info-divider { width: 1px; height: 30px; background: var(--border-light); }
+
+        .btn-close-route {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: #f1f5f9; border: none;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-secondary); cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-close-route:hover { background: var(--danger); color: white; }
+
+        /* 3. Map Control Buttons */
+        .map-controls {
+            position: absolute; bottom: 30px; right: 20px;
+            display: flex; flex-direction: column; gap: 12px; z-index: 1000;
+        }
+        .ctrl-btn {
+            width: 48px; height: 48px; background: white;
+            border-radius: 12px; border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem; color: var(--text-primary);
+            box-shadow: var(--shadow-md); cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ctrl-btn:hover { background: var(--primary-color); color: white; transform: scale(1.05); }
+
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="brand-wrapper">
+            <div class="brand-icon"><i class="bi bi-layers-fill"></i></div>
+            <div class="brand-text">TOÁN <span>GIS PRO</span></div>
+        </div>
+
+        <nav class="d-none d-md-block">
+            <div class="nav-pills-custom">
+                <a href="/" class="nav-link-custom">Tổng Quan</a>
+                <a href="/quan-ly/" class="nav-link-custom">Quản Lý Lớp</a>
+                <a href="#" class="nav-link-custom active">Bản Đồ Số</a>
+                <a href="/danh-sach-chi-nhanh/" class="nav-link-custom">Chi Nhánh</a>
+                <a href="/xep-lich/" class="nav-link-custom">Xếp Lịch AI</a>
+            </div>
+        </nav>
+
+        <div class="header-actions">
+            <div class="btn btn-light rounded-circle p-2 text-secondary position-relative">
+                <i class="bi bi-bell-fill"></i>
+                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+            </div>
+            <div class="user-menu">
+                <div class="user-info d-none d-sm-block">
+                    <div class="user-name">Quản Trị Viên</div>
+                    <div class="user-role">System Admin</div>
+                </div>
+                <div class="user-avatar">AD</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-body">
+        
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">Danh Sách Học Viên</div>
+                <div class="sidebar-subtitle">Quản lý vị trí & phân tuyến tự động</div>
+                
+                <div class="search-container">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Nhập tên, mã học viên..." onkeyup="filterList()">
+                </div>
+
+                <div class="filter-group">
+                    <div class="filter-btn active">Tất cả</div>
+                    <div class="filter-btn">Chưa xếp</div>
+                    <div class="filter-btn">Đã xếp</div>
+                </div>
+            </div>
+
+            <div class="student-list-container" id="studentContainer">
+                {% for hv in hoc_vien %}
+                <div class="student-card animate-card" id="card-{{ hv.id }}" onclick="selectStudent({{ hv.id }})">
+                    <div class="card-header-row">
+                        <div>
+                            <div class="st-name">{{ hv.ten }}</div>
+                            <div class="st-meta">
+                                <span>#{{ hv.id }}</span>
+                                <span>•</span>
+                                <span>Khối {{ hv.khoi_lop }}</span>
+                            </div>
+                        </div>
+                        {% if hv.co_so_gan_nhat %}
+                            <span class="st-badge badge-success">Đã xếp</span>
+                        {% else %}
+                            <span class="st-badge badge-warning">Chờ xử lý</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="location-row">
+                        {% if hv.co_so_gan_nhat %}
+                            <i class="bi bi-building-check text-success"></i>
+                            <span>Phân về: <b>{{ hv.co_so_gan_nhat.ten }}</b></span>
+                        {% else %}
+                            <i class="bi bi-exclamation-triangle text-warning"></i>
+                            <span>Chưa có lộ trình tối ưu</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="btn-card-action">
+                        <i class="bi bi-map-fill me-2"></i> Xem Đường Đi
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if not hoc_vien %}
+                <div class="text-center py-5">
+                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" width="80" class="opacity-50 mb-3">
+                    <p class="text-secondary fw-bold">Chưa có dữ liệu học viên</p>
+                    <a href="/quan-ly/" class="btn btn-sm btn-primary">Thêm mới ngay</a>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="p-3 border-top bg-white text-center text-secondary" style="font-size: 0.8rem;">
+                Hiển thị <strong>{{ hoc_vien.count }}</strong> học viên trong hệ thống
+            </div>
+        </aside>
+
+        <main class="map-wrapper">
+            <div id="map"></div>
+
+            <div class="radar-panel">
+                <div class="radar-header">
+                    <div class="radar-title"><i class="bi bi-radar"></i> QUÉT BÁN KÍNH</div>
+                    <div class="radar-value" id="radiusValue">5 km</div>
+                </div>
+                
+                <input type="range" class="form-range range-slider" min="1" max="20" step="1" id="radiusRange" value="5" oninput="updateRadiusLabel(this.value)">
+                
+                <button class="btn-scan" onclick="scanNearby()">
+                    <i class="bi bi-crosshair"></i> Tìm Cơ Sở Gần Tôi
+                </button>
+            </div>
+
+            <div id="routeOverlay" class="route-overlay">
+                <div class="info-block text-start" style="min-width: 120px;">
+                    <div class="info-label">Học Viên</div>
+                    <div class="info-value" id="overlayName" style="font-size: 1rem;">---</div>
+                </div>
+                <div class="info-divider"></div>
+                <div class="info-block">
+                    <div class="info-label">Khoảng Cách</div>
+                    <div class="info-value" id="overlayDist">...</div>
+                </div>
+                <div class="info-divider"></div>
+                <div class="info-block">
+                    <div class="info-label">Thời Gian</div>
+                    <div class="info-value" id="overlayTime">...</div>
+                </div>
+                
+                <button class="btn-close-route" onclick="clearRoute(true)" title="Đóng & Reset Map">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="map-controls">
+                <button class="ctrl-btn" onclick="map.zoomIn()" title="Phóng to"><i class="bi bi-plus-lg"></i></button>
+                <button class="ctrl-btn" onclick="map.zoomOut()" title="Thu nhỏ"><i class="bi bi-dash-lg"></i></button>
+                <button class="ctrl-btn" onclick="clearRoute(true)" title="Reset Map"><i class="bi bi-arrow-counterclockwise"></i></button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- A. CHUẨN BỊ DỮ LIỆU ---
+        const students = [
+            {% for hv in hoc_vien %}
+            {
+                id: {{ hv.id }},
+                name: "{{ hv.ten }}",
+                lat: {{ hv.lat|stringformat:"f" }},
+                lon: {{ hv.lon|stringformat:"f" }},
+                assigned: {% if hv.co_so_gan_nhat %}true{% else %}false{% endif %},
+                {% if hv.co_so_gan_nhat %}
+                dest_lat: {{ hv.co_so_gan_nhat.lat|stringformat:"f" }},
+                dest_lon: {{ hv.co_so_gan_nhat.lon|stringformat:"f" }}
+                {% endif %}
+            },
+            {% endfor %}
+        ];
+
+        const facilities = [
+            {% for cs in co_so %}
+            {
+                name: "{{ cs.ten }}",
+                addr: "{{ cs.dia_chi|default:'Chưa cập nhật' }}",
+                lat: {{ cs.lat|stringformat:"f" }},
+                lon: {{ cs.lon|stringformat:"f" }},
+                img: "{% if cs.hinh_anh %}/media/{{ cs.hinh_anh }}{% else %}https://via.placeholder.com/300x150?text=Campus{% endif %}"
+            },
+            {% endfor %}
+        ];
+
+        // --- B. KHỞI TẠO BẢN ĐỒ ---
+        const map = L.map('map', {zoomControl: false}).setView([10.762622, 106.660172], 12);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap | Toán GIS Enterprise',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Custom Icons
+        const iconSchool = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/167/167707.png',
+            iconSize: [48, 48], popupAnchor: [0, -24]
+        });
+        const iconStudent = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/9131/9131546.png',
+            iconSize: [44, 44], iconAnchor: [22, 44]
+        });
+        const iconUser = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/747/747376.png',
+            iconSize: [44, 44], iconAnchor: [22, 44]
+        });
+
+        // Layer Groups
+        const layers = {
+            facilities: L.layerGroup().addTo(map),
+            routes: L.layerGroup().addTo(map),
+            radar: L.layerGroup().addTo(map)
+        };
+
+        let routingControl = null;
+
+        // Render Facilities (Always visible)
+        facilities.forEach(f => {
+            const popupHtml = `
+                <div style="text-align: center; width: 200px;">
+                    <img src="${f.img}" style="width: 100%; border-radius: 8px; margin-bottom: 8px;">
+                    <h6 style="color: var(--primary-color); font-weight: 700; margin-bottom: 4px;">${f.name}</h6>
+                    <small style="color: #666;">${f.addr}</small>
+                </div>
+            `;
+            L.marker([f.lat, f.lon], {icon: iconSchool})
+             .bindPopup(popupHtml)
+             .addTo(layers.facilities);
+        });
+
+        // --- C. CHỨC NĂNG: CHỌN HỌC VIÊN ---
+        function selectStudent(id) {
+            // 1. Dọn dẹp map cũ
+            clearRoute(false);
+
+            // 2. Active UI Sidebar
+            document.querySelectorAll('.student-card').forEach(c => c.classList.remove('active'));
+            const card = document.getElementById('card-' + id);
+            if(card) {
+                card.classList.add('active');
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            // 3. Tìm data
+            const st = students.find(s => s.id === id);
+            if(!st) return;
+
+            // 4. Vẽ Marker Học sinh
+            L.marker([st.lat, st.lon], {icon: iconStudent})
+             .addTo(layers.routes)
+             .bindPopup(`<b>${st.name}</b>`)
+             .openPopup();
+
+            // 5. Cập nhật Info Overlay
+            document.getElementById('overlayName').innerText = st.name;
+            document.getElementById('overlayDist').innerText = "...";
+            document.getElementById('overlayTime').innerText = "...";
+            document.getElementById('routeOverlay').classList.add('visible');
+
+            // 6. Vẽ Routing (Nếu có)
+            if (st.assigned) {
+                const p1 = L.latLng(st.lat, st.lon);
+                const p2 = L.latLng(st.dest_lat, st.dest_lon);
+
+                routingControl = L.Routing.control({
+                    waypoints: [p1, p2],
+                    lineOptions: { styles: [{color: '#3b82f6', opacity: 0.8, weight: 6}] },
+                    createMarker: () => null,
+                    addWaypoints: false, draggableWaypoints: false, fitSelectedRoutes: true, show: false
+                }).addTo(map);
+
+                // Lấy thông số đường đi
+                routingControl.on('routesfound', function(e) {
+                    const summary = e.routes[0].summary;
+                    document.getElementById('overlayDist').innerText = (summary.totalDistance / 1000).toFixed(1) + " km";
+                    document.getElementById('overlayTime').innerText = Math.round(summary.totalTime / 60) + " phút";
+                });
+            } else {
+                map.setView([st.lat, st.lon], 16);
+                document.getElementById('overlayDist').innerText = "N/A";
+                document.getElementById('overlayTime').innerText = "Chưa xếp";
+            }
+        }
+
+        // --- D. CHỨC NĂNG: CLEAR & RESET ---
+        function clearRoute(resetView = false) {
+            layers.routes.clearLayers();
+            layers.radar.clearLayers();
+            
+            if (routingControl) {
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+
+            document.querySelectorAll('.student-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('routeOverlay').classList.remove('visible');
+
+            if(resetView) {
+                map.setView([10.762622, 106.660172], 12);
+            }
+        }
+
+        // --- E. CHỨC NĂNG: RADAR SCAN ---
+        function updateRadiusLabel(val) { document.getElementById('radiusValue').innerText = val + " km"; }
+
+        function scanNearby() {
+            if (!navigator.geolocation) return alert("Trình duyệt không hỗ trợ GPS.");
+            
+            navigator.geolocation.getCurrentPosition(pos => {
+                clearRoute(false);
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                const rad = document.getElementById('radiusRange').value * 1000;
+
+                // User Marker
+                L.marker([lat, lon], {icon: iconUser}).addTo(layers.radar).bindPopup("Vị trí của bạn").openPopup();
+                
+                // Circle
+                const circle = L.circle([lat, lon], {
+                    color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.1, radius: rad
+                }).addTo(layers.radar);
+                
+                map.fitBounds(circle.getBounds());
+
+                // Count Facilities
+                let count = 0;
+                facilities.forEach(f => {
+                    if (map.distance([lat, lon], [f.lat, f.lon]) <= rad) count++;
+                });
+                alert(`Tìm thấy ${count} cơ sở trong bán kính ${rad/1000}km.`);
+            });
+        }
+
+        // --- F. SEARCH FILTER ---
+        function filterList() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.student-card').forEach(card => {
+                const name = card.querySelector('.st-name').innerText.toLowerCase();
+                card.style.display = name.includes(term) ? 'block' : 'none';
+            });
+        }
+
+        // Fix Map Size on Load
+        setTimeout(() => map.invalidateSize(), 500);
+
+    </script>
+</body>
+</html>
