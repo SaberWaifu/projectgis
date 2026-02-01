@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Trung Tâm Toán GIS 2026</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        /* --- 1. CORE VARIABLES & RESET --- */
+        :root {
+            --primary: #0d6efd;
+            --primary-dark: #0a58ca;
+            --secondary: #6c757d;
+            --accent: #ffc107;
+            --dark-bg: #0f172a;
+            --light-bg: #f8f9fa;
+            --glass: rgba(255, 255, 255, 0.95);
+            --gradient-main: linear-gradient(135deg, #0d6efd 0%, #00d2ff 100%);
+            --shadow-soft: 0 10px 40px -10px rgba(0,64,128,0.15);
+            --shadow-hover: 0 20px 60px -10px rgba(0,64,128,0.25);
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--light-bg);
+            color: #334155;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6, .navbar-brand {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* --- 2. PRELOADER (MÀN HÌNH CHỜ) --- */
+        #preloader {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #ffffff; z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        .loader-spin {
+            width: 60px; height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- 3. ADVANCED NAVBAR --- */
+        .navbar {
+            padding: 15px 0;
+            background: transparent;
+            transition: all 0.4s ease-in-out;
+        }
+        .navbar.scrolled {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 10px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-weight: 800; font-size: 1.5rem; color: #fff !important;
+            letter-spacing: 1px;
+        }
+        .navbar-brand span { color: var(--accent); }
+        .nav-link {
+            color: rgba(255,255,255,0.85) !important;
+            font-weight: 600; margin: 0 10px;
+            position: relative; transition: 0.3s;
+        }
+        .nav-link:hover, .nav-link.active { color: #fff !important; }
+        .nav-link::after {
+            content: ''; position: absolute; bottom: 0; left: 50%;
+            width: 0; height: 2px; background: var(--accent);
+            transition: 0.3s; transform: translateX(-50%);
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        .btn-admin {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white; border-radius: 30px;
+            padding: 8px 25px; transition: 0.3s;
+        }
+        .btn-admin:hover {
+            background: var(--accent); color: #000;
+            border-color: var(--accent); transform: translateY(-2px);
+        }
+
+        /* --- 4. HERO SECTION (BANNER) --- */
+        .hero-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex; align-items: center;
+            background: var(--dark-bg);
+            overflow: hidden;
+            color: white;
+            padding-top: 80px;
+        }
+        /* Hiệu ứng nền động (Background Shapes) */
+        .hero-bg-shapes div {
+            position: absolute; border-radius: 50%;
+            filter: blur(80px); opacity: 0.4; z-index: 0;
+            animation: floatShape 10s infinite alternate;
+        }
+        .shape-1 {
+            width: 400px; height: 400px; background: var(--primary);
+            top: -100px; right: -50px;
+        }
+        .shape-2 {
+            width: 300px; height: 300px; background: #00d2ff;
+            bottom: 50px; left: -100px; animation-delay: -5s !important;
+        }
+        @keyframes floatShape {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(30px, 50px); }
+        }
+
+        .hero-content { position: relative; z-index: 2; }
+        .hero-badge {
+            display: inline-block; padding: 8px 20px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50px; border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 25px; color: var(--accent); font-weight: 600;
+            font-size: 0.9rem; letter-spacing: 1px;
+        }
+        .hero-title {
+            font-size: 4.5rem; font-weight: 800;
+            line-height: 1.1; margin-bottom: 25px;
+            background: linear-gradient(to right, #fff, #a5b4fc);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero-desc {
+            font-size: 1.25rem; color: #cbd5e1;
+            margin-bottom: 40px; max-width: 700px; line-height: 1.8;
+        }
+
+        /* Nút bấm Hero */
+        .btn-hero {
+            padding: 15px 35px; border-radius: 50px;
+            font-weight: 700; font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative; overflow: hidden; z-index: 1;
+            border: none; margin-bottom: 10px;
+        }
+        .btn-primary-glow {
+            background: var(--gradient-main);
+            color: white; box-shadow: 0 10px 30px rgba(13, 110, 253, 0.4);
+        }
+        .btn-primary-glow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(13, 110, 253, 0.6);
+            color: white;
+        }
+        
+        /* Nút Xếp Lịch (Màu Tím) */
+        .btn-schedule {
+            background: linear-gradient(135deg, #6f42c1, #d63384);
+            color: white; box-shadow: 0 10px 30px rgba(214, 51, 132, 0.4);
+        }
+        .btn-schedule:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(214, 51, 132, 0.6);
+            color: white;
+        }
+
+        /* Nút Quản Lý Lớp (Màu Xanh Lá - MỚI) */
+        .btn-class-mgr {
+            background: linear-gradient(135deg, #198754, #20c997);
+            color: white; box-shadow: 0 10px 30px rgba(32, 201, 151, 0.4);
+        }
+        .btn-class-mgr:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(32, 201, 151, 0.6);
+            color: white;
+        }
+
+        .btn-outline-glass {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white; 
+        }
+        .btn-outline-glass:hover {
+            background: white; color: var(--dark-bg);
+            transform: translateY(-5px);
+        }
+
+        /* --- 5. STATS SECTION (THỐNG KÊ) --- */
+        .stats-wrapper {
+            margin-top: -80px; position: relative; z-index: 10;
+        }
+        .stats-card {
+            background: white; border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow-soft);
+            display: flex; justify-content: space-around;
+            align-items: center; text-align: center;
+        }
+        .stat-item h3 {
+            font-size: 3rem; font-weight: 800;
+            color: var(--primary); margin: 0;
+            background: var(--gradient-main);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .stat-item p {
+            font-size: 0.9rem; font-weight: 700;
+            text-transform: uppercase; color: #64748b;
+            letter-spacing: 1px; margin-top: 5px;
+        }
+        .stat-divider {
+            width: 1px; height: 60px; background: #e2e8f0;
+        }
+
+        /* --- 6. FEATURES SECTION (TÍNH NĂNG) --- */
+        .section-title {
+            text-align: center; margin-bottom: 60px;
+        }
+        .section-title h6 {
+            color: var(--primary); font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+        .section-title h2 {
+            font-size: 2.5rem; font-weight: 800; color: #1e293b;
+        }
+
+        .feature-box {
+            background: white; border-radius: 24px;
+            padding: 40px 30px; height: 100%;
+            transition: all 0.4s ease;
+            border: 1px solid #f1f5f9;
+        }
+        .feature-box:hover {
+            transform: translateY(-15px);
+            box-shadow: var(--shadow-hover);
+            border-color: transparent;
+        }
+        .icon-wrapper {
+            width: 80px; height: 80px;
+            background: #eff6ff; border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; color: var(--primary);
+            margin-bottom: 25px; transition: 0.3s;
+        }
+        .feature-box:hover .icon-wrapper {
+            background: var(--primary); color: white;
+            transform: rotate(10deg);
+        }
+        .feature-box h4 { font-weight: 700; margin-bottom: 15px; }
+        .feature-box p { color: #64748b; line-height: 1.6; }
+
+        /* --- 7. TIMELINE SECTION (QUY TRÌNH) --- */
+        .timeline-section { background: #f0f4f8; position: relative; }
+        .timeline-step {
+            position: relative; padding-left: 50px;
+            margin-bottom: 40px;
+        }
+        .timeline-step::before {
+            content: ''; position: absolute; left: 15px; top: 0; bottom: -40px;
+            width: 2px; background: #cbd5e1;
+        }
+        .timeline-step:last-child::before { display: none; }
+        .step-number {
+            position: absolute; left: 0; top: 0;
+            width: 32px; height: 32px;
+            background: var(--primary); color: white;
+            border-radius: 50%; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2; box-shadow: 0 0 0 5px #f0f4f8;
+        }
+        .step-content {
+            background: white; padding: 20px;
+            border-radius: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        /* --- 8. CTA SECTION (KÊU GỌI) --- */
+        .cta-section {
+            background: var(--gradient-main);
+            color: white; padding: 80px 0;
+            border-radius: 30px; margin: 0 20px;
+            text-align: center; position: relative; overflow: hidden;
+        }
+        .cta-pattern {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(rgba(255,255,255,0.2) 1px, transparent 1px);
+            background-size: 30px 30px; opacity: 0.3;
+        }
+
+        /* --- 9. FOOTER --- */
+        footer {
+            background: var(--dark-bg); color: #94a3b8;
+            padding-top: 80px; border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .footer-brand { color: white; font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; display: block; }
+        .footer-brand span { color: var(--accent); }
+        .footer-link {
+            color: #94a3b8; text-decoration: none;
+            display: block; margin-bottom: 12px; transition: 0.3s;
+        }
+        .footer-link:hover { color: var(--accent); transform: translateX(5px); }
+        .social-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            display: inline-flex; align-items: center; justify-content: center;
+            color: white; margin-right: 10px; transition: 0.3s;
+        }
+        .social-icon:hover { background: var(--primary); transform: translateY(-3px); }
+
+        /* Scroll Top Button */
+        #scrollTop {
+            position: fixed; bottom: 30px; right: 30px;
+            width: 50px; height: 50px; background: var(--primary);
+            color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; cursor: pointer;
+            opacity: 0; visibility: hidden; transition: 0.3s; z-index: 99;
+            box-shadow: 0 10px 20px rgba(13, 110, 253, 0.4);
+        }
+        #scrollTop.active { opacity: 1; visibility: visible; }
+        #scrollTop:hover { transform: translateY(-5px); background: var(--primary-dark); }
+
+        /* Responsive Fixes */
+        @media (max-width: 991px) {
+            .hero-title { font-size: 3rem; }
+            .stats-wrapper { margin-top: 30px; }
+            .stat-divider { display: none; }
+            .stat-item { margin-bottom: 30px; }
+            .navbar-collapse { background: var(--dark-bg); padding: 20px; border-radius: 15px; margin-top: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="preloader">
+        <div class="loader-spin"></div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">TOÁN <span>GIS</span></a>
+            <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link active" href="/">Trang Chủ</a></li>
+                    
+                    <li class="nav-item"><a class="nav-link" href="/quan-ly-lop/">Quản Lý Lớp</a></li>
+                    
+                    <li class="nav-item"><a class="nav-link" href="/quan-ly/">Học Viên</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/xep-lich/">Xếp Lịch AI</a></li> 
+                    <li class="nav-item"><a class="nav-link" href="/hoc-vien-moi/">Bản Đồ GIS</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/danh-sach-chi-nhanh/">Hệ Thống</a></li>
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-admin" href="/admin/"><i class="bi bi-shield-lock me-2"></i>Admin</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-section">
+        <div class="hero-bg-shapes">
+            <div class="shape-1"></div>
+            <div class="shape-2"></div>
+        </div>
+        <div class="container hero-content">
+            <div class="row align-items-center">
+                <div class="col-lg-7" data-aos="fade-right" data-aos-duration="1000">
+                    <span class="hero-badge"><i class="bi bi-stars me-2"></i>Phiên bản GIS 2026</span>
+                    <h1 class="hero-title">Điều Phối Giáo Dục <br> Chuẩn Tương Lai</h1>
+                    <p class="hero-desc">
+                        Hệ thống tự động hóa việc xếp lớp học viên dựa trên thuật toán không gian. 
+                        Tối ưu quãng đường di chuyển cho học sinh khối 6, 8, 9 với độ chính xác tuyệt đối.
+                    </p>
+                    
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="/quan-ly/" class="btn btn-hero btn-primary-glow">
+                            <i class="bi bi-person-plus-fill me-2"></i>Đăng Ký Học Viên
+                        </a>
+                        
+                        <a href="/quan-ly-lop/" class="btn btn-hero btn-class-mgr">
+                            <i class="bi bi-mortarboard-fill me-2"></i>Quản Lý Lớp Học
+                        </a>
+
+                        <a href="/xep-lich/" class="btn btn-hero btn-schedule">
+                            <i class="bi bi-calendar-check-fill me-2"></i>Xếp Lịch AI
+                        </a>
+
+                        <a href="/hoc-vien-moi/" class="btn btn-hero btn-outline-glass">
+                            <i class="bi bi-map-fill me-2"></i>Bản Đồ
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-5 text-center d-none d-lg-block" data-aos="fade-left" data-aos-duration="1000">
+                    <img src="https://cdn-icons-png.flaticon.com/512/9805/9805342.png" alt="GIS Map 3D" style="width: 90%; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5)); animation: floatShape 6s infinite ease-in-out;">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container stats-wrapper" data-aos="fade-up" data-aos-offset="-100">
+        <div class="stats-card">
+            <div class="stat-item">
+                <h3><span class="counter" data-target="4">0</span>+</h3>
+                <p>Năm Kinh Nghiệm</p>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <h3><span class="counter" data-target="100">0</span>%</h3>
+                <p>Số Hóa Dữ Liệu</p>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <h3><span class="counter" data-target="3">0</span></h3>
+                <p>Khối Lớp (6-8-9)</p>
+            </div>
+        </div>
+    </div>
+
+    <section class="py-5 my-5">
+        <div class="container">
+            <div class="section-title" data-aos="fade-up">
+                <h6>Tính Năng Vượt Trội</h6>
+                <h2>Tại Sao Chọn Toán GIS?</h2>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="feature-box">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                        <h4>Định Vị Chuẩn Xác</h4>
+                        <p>Sử dụng công thức Haversine kết hợp API bản đồ mở để tính toán khoảng cách thực tế từ nhà học viên đến từng cơ sở.</p>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="feature-box">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-cpu-fill"></i>
+                        </div>
+                        <h4>AI Điều Phối</h4>
+                        <p>Thuật toán Python tự động phân tích và đề xuất lớp học phù hợp nhất chỉ trong 0.5 giây sau khi nhập liệu.</p>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="feature-box">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-bar-chart-fill"></i>
+                        </div>
+                        <h4>Báo Cáo Trực Quan</h4>
+                        <p>Hệ thống Dashboard hiển thị biểu đồ phân bố học sinh, giúp quản lý đưa ra quyết định mở rộng chi nhánh chính xác.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 timeline-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <div class="section-title text-start">
+                        <h6>Quy Trình Hoạt Động</h6>
+                        <h2>Đơn Giản & Hiệu Quả</h2>
+                        <p class="text-muted mt-3">Chỉ với 3 bước đơn giản để xếp lớp cho học viên mới.</p>
+                    </div>
+                    <img src="https://cdni.iconscout.com/illustration/premium/thumb/workflow-automation-illustration-download-in-svg-png-gif-file-formats--business-process-management-pack-illustrations-3720703.png?f=webp" class="img-fluid" alt="Workflow">
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="timeline-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h5>Nhập Liệu Thông Minh</h5>
+                            <p class="mb-0 text-muted">Admin nhập thông tin và tọa độ học viên vào Form quản lý. Hệ thống tự động xác thực dữ liệu.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h5>Xử Lý GIS (Backend)</h5>
+                            <p class="mb-0 text-muted">Python Engine chạy ngầm, tính toán khoảng cách tới tất cả chi nhánh và tìm phương án tối ưu (Min Distance).</p>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h5>Kết Quả & Trực Quan Hóa</h5>
+                            <p class="mb-0 text-muted">Học viên được gán lớp tự động. Bản đồ hiển thị đường nối và lộ trình di chuyển chi tiết.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container py-5">
+        <div class="cta-section" data-aos="zoom-in">
+            <div class="cta-pattern"></div>
+            <div class="position-relative z-2">
+                <h2 class="mb-3 fw-bold">Sẵn Sàng Tối Ưu Hóa?</h2>
+                <p class="mb-4 opacity-75">Tham gia hệ thống quản lý học vụ hiện đại nhất dành cho trung tâm Toán.</p>
+                <a href="/quan-ly/" class="btn btn-light btn-custom text-primary shadow">
+                    <i class="bi bi-rocket-takeoff-fill me-2"></i>Bắt Đầu Ngay
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row gy-5">
+                <div class="col-lg-4">
+                    <a href="#" class="footer-brand">TOÁN <span>GIS</span></a>
+                    <p>Giải pháp công nghệ giáo dục tiên phong, ứng dụng bản đồ số vào công tác quản lý học vụ và tuyển sinh.</p>
+                    <div class="mt-4">
+                        <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-youtube"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <h5 class="text-white mb-4">Liên Kết</h5>
+                    <a href="/" class="footer-link">Trang Chủ</a>
+                    <a href="/hoc-vien-moi/" class="footer-link">Bản Đồ</a>
+                    <a href="/quan-ly/" class="footer-link">Đăng Ký</a>
+                    <a href="/thong-ke/" class="footer-link">Báo Cáo</a>
+                </div>
+                <div class="col-lg-2 col-6">
+                    <h5 class="text-white mb-4">Hỗ Trợ</h5>
+                    <a href="#" class="footer-link">Tài liệu HDSD</a>
+                    <a href="#" class="footer-link">Bảo mật</a>
+                    <a href="#" class="footer-link">Điều khoản</a>
+                </div>
+                <div class="col-lg-4">
+                    <h5 class="text-white mb-4">Liên Hệ</h5>
+                    <p><i class="bi bi-geo-alt me-2 text-warning"></i>TP. Hồ Chí Minh, Việt Nam</p>
+                    <p><i class="bi bi-envelope me-2 text-warning"></i>contact@toangis.edu.vn</p>
+                    <p><i class="bi bi-telephone me-2 text-warning"></i>(028) 3838 8888</p>
+                </div>
+            </div>
+            <div class="text-center pt-5 pb-4 mt-5 border-top border-secondary border-opacity-25">
+                <p class="mb-0 small">© 2026 Bản quyền thuộc về Hệ thống Toán GIS. Developed with ❤️ & Django.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="scrollTop" onclick="scrollToTop()">
+        <i class="bi bi-arrow-up"></i>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        AOS.init({
+            once: true,
+            offset: 100,
+            duration: 800,
+        });
+
+        window.addEventListener('load', function() {
+            var preloader = document.getElementById('preloader');
+            preloader.style.opacity = '0';
+            setTimeout(function() {
+                preloader.style.display = 'none';
+            }, 500);
+        });
+
+        window.addEventListener('scroll', function() {
+            var navbar = document.querySelector('.navbar');
+            var scrollTopBtn = document.getElementById('scrollTop');
+            
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+                scrollTopBtn.classList.add('active');
+            } else {
+                navbar.classList.remove('scrolled');
+                scrollTopBtn.classList.remove('active');
+            }
+        });
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        const counters = document.querySelectorAll('.counter');
+        const speed = 200;
+
+        const animateCounters = () => {
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    const target = +counter.getAttribute('data-target');
+                    const count = +counter.innerText;
+                    const inc = target / speed;
+
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + inc);
+                        setTimeout(updateCount, 20);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                updateCount();
+            });
+        };
+
+        let counted = false;
+        const statsSection = document.querySelector('.stats-wrapper');
+        
+        window.addEventListener('scroll', () => {
+            if(!counted && window.scrollY > (statsSection.offsetTop - 500)) {
+                animateCounters();
+                counted = true;
+            }
+        });
+    </script>
+</body>
+</html>

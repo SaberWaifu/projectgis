@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Học Vụ - Toán GIS Pro</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        /* --- 1. CORE THEME --- */
+        :root {
+            --primary: #0f172a;       /* Deep Navy */
+            --primary-light: #334155;
+            --accent: #2563eb;        /* Royal Blue */
+            --accent-hover: #1d4ed8;
+            --bg-body: #f1f5f9;       /* Light Gray */
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 10px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        a { text-decoration: none; }
+
+        /* --- 2. LAYOUT STRUCTURE --- */
+        .wrapper { display: flex; min-height: 100vh; }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: var(--primary);
+            color: white;
+            flex-shrink: 0;
+            display: flex; flex-direction: column;
+            position: sticky; top: 0; height: 100vh;
+            transition: all 0.3s;
+        }
+        .sidebar-brand {
+            height: 64px; display: flex; align-items: center; padding: 0 24px;
+            font-weight: 800; font-size: 1.25rem; letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar-brand span { color: #60a5fa; margin-left: 5px; }
+        
+        .sidebar-menu { padding: 20px 10px; flex: 1; }
+        .menu-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; margin-bottom: 4px;
+            color: #cbd5e1; border-radius: var(--radius);
+            transition: 0.2s; font-weight: 500; font-size: 0.95rem;
+        }
+        .menu-item:hover, .menu-item.active {
+            background: rgba(255,255,255,0.1); color: white;
+            transform: translateX(5px);
+        }
+        .menu-item i { font-size: 1.1rem; }
+
+        .sidebar-footer {
+            padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem; color: #94a3b8; text-align: center;
+        }
+
+        /* MAIN CONTENT */
+        .main-content { flex: 1; padding: 0; display: flex; flex-direction: column; }
+
+        /* TOP HEADER */
+        .top-header {
+            height: 64px; background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 30px; position: sticky; top: 0; z-index: 100;
+        }
+        .page-title { font-weight: 700; font-size: 1.1rem; color: var(--text-main); }
+        
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .btn-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            border: 1px solid var(--border); background: white;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); cursor: pointer; transition: 0.2s;
+        }
+        .btn-icon:hover { background: #f8fafc; color: var(--accent); }
+        
+        .user-profile { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .avatar {
+            width: 36px; height: 36px; background: var(--accent); color: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.9rem;
+        }
+
+        /* --- 3. DASHBOARD STATS --- */
+        .stats-container { padding: 30px 30px 0 30px; }
+        .stat-card {
+            background: var(--bg-card); padding: 20px;
+            border-radius: var(--radius); border: 1px solid var(--border);
+            box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between;
+        }
+        .stat-info h3 { margin: 0; font-weight: 700; font-size: 1.8rem; color: var(--text-main); }
+        .stat-info p { margin: 0; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+        .stat-icon-wrapper {
+            width: 50px; height: 50px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+        }
+        .bg-blue-light { background: #eff6ff; color: var(--accent); }
+        .bg-green-light { background: #f0fdf4; color: var(--success); }
+        .bg-orange-light { background: #fff7ed; color: var(--warning); }
+
+        /* --- 4. CONTENT GRID --- */
+        .content-grid {
+            padding: 30px; display: grid; grid-template-columns: 350px 1fr; gap: 25px;
+        }
+
+        /* LEFT COLUMN: FORM */
+        .form-panel {
+            background: var(--bg-card); border-radius: var(--radius);
+            border: 1px solid var(--border); box-shadow: var(--shadow);
+            position: sticky; top: 90px;
+        }
+        .panel-header {
+            padding: 20px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .panel-header h5 { margin: 0; font-weight: 700; color: var(--text-main); font-size: 1rem; }
+        .panel-body { padding: 20px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label {
+            font-size: 0.85rem; font-weight: 600; color: var(--text-main);
+            margin-bottom: 8px; display: block;
+        }
+        .form-control, .form-select {
+            padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border);
+            font-size: 0.9rem; transition: 0.2s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        .input-group-text { background: #f8fafc; border-color: var(--border); color: var(--text-muted); }
+
+        .btn-submit {
+            width: 100%; padding: 12px; border-radius: 8px; font-weight: 600;
+            background: var(--accent); border: none; color: white;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .btn-submit:hover { background: var(--accent-hover); transform: translateY(-2px); }
+
+        /* RIGHT COLUMN: TABLE */
+        .table-panel {
+            background: var(--bg-card); border-radius: var(--radius);
+            border: 1px solid var(--border); box-shadow: var(--shadow);
+            display: flex; flex-direction: column;
+        }
+        .table-header {
+            padding: 20px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .search-bar { position: relative; width: 300px; }
+        .search-bar input {
+            width: 100%; padding: 8px 12px 8px 35px; border-radius: 20px;
+            border: 1px solid var(--border); font-size: 0.9rem; background: #f8fafc;
+        }
+        .search-bar i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+        .table-custom { margin: 0; width: 100%; }
+        .table-custom thead th {
+            background: #f8fafc; color: var(--text-muted); font-weight: 600;
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 15px 20px; border-bottom: 1px solid var(--border);
+        }
+        .table-custom tbody td {
+            padding: 16px 20px; vertical-align: middle; border-bottom: 1px solid var(--border);
+            font-size: 0.9rem; color: var(--text-main);
+        }
+        .table-custom tr:last-child td { border-bottom: none; }
+        .table-custom tr:hover { background: #f8fafc; }
+
+        /* User Info in Table */
+        .user-cell { display: flex; align-items: center; gap: 12px; }
+        .user-avatar-sm {
+            width: 40px; height: 40px; border-radius: 10px;
+            background: #e2e8f0; color: var(--text-muted);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1rem;
+        }
+        .user-meta div { line-height: 1.3; }
+        .user-name { font-weight: 600; color: var(--text-main); }
+        .user-sub { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Badges */
+        .status-badge {
+            padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .badge-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        /* Actions */
+        .action-btns { display: flex; gap: 8px; }
+        .btn-action {
+            width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); transition: 0.2s; background: white;
+        }
+        .btn-action:hover { background: #f1f5f9; color: var(--text-main); }
+        .btn-delete:hover { background: #fee2e2; color: var(--danger); border-color: #fecaca; }
+        .btn-gis:hover { background: #eff6ff; color: var(--accent); border-color: #bfdbfe; }
+
+        /* --- 5. RESPONSIVE --- */
+        @media (max-width: 992px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .form-panel { position: static; margin-bottom: 20px; }
+            .sidebar { display: none; } /* Hide sidebar on small screens for simplicity */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        
+        <aside class="sidebar">
+            <a href="/" class="sidebar-brand text-decoration-none text-white">
+                <i class="bi bi-grid-3x3-gap-fill"></i>
+                <span>TOÁN GIS PRO</span>
+            </a>
+            
+            <nav class="sidebar-menu">
+                <a href="/" class="menu-item">
+                    <i class="bi bi-speedometer2"></i> Tổng Quan
+                </a>
+                <a href="/quan-ly/" class="menu-item active">
+                    <i class="bi bi-people-fill"></i> Quản Lý Học Vụ
+                </a>
+                <a href="/hoc-vien-moi/" class="menu-item">
+                    <i class="bi bi-map-fill"></i> Bản Đồ GIS
+                </a>
+                <a href="/xep-lich/" class="menu-item">
+                    <i class="bi bi-calendar-week"></i> Xếp Lịch AI
+                </a>
+                <a href="/admin/" class="menu-item">
+                    <i class="bi bi-gear-fill"></i> Cấu Hình Hệ Thống
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                Version 2.5.0 (Build 2026)<br>Designed for Education
+            </div>
+        </aside>
+
+        <div class="main-content">
+            
+            <header class="top-header">
+                <div class="page-title">Hồ Sơ Học Viên</div>
+                <div class="header-actions">
+                    <div class="btn-icon" title="Thông báo">
+                        <i class="bi bi-bell"></i>
+                    </div>
+                    <div class="user-profile">
+                        <div class="text-end d-none d-sm-block">
+                            <div style="font-weight: 600; font-size: 0.9rem;">Quản Trị Viên</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Admin</div>
+                        </div>
+                        <div class="avatar">AD</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="stats-container">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>{{ danh_sach.count }}</h3>
+                                <p>Tổng số học viên</p>
+                            </div>
+                            <div class="stat-icon-wrapper bg-blue-light">
+                                <i class="bi bi-mortarboard-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>98%</h3>
+                                <p>Tỷ lệ phân tuyến thành công</p>
+                            </div>
+                            <div class="stat-icon-wrapper bg-green-light">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>3</h3>
+                                <p>Cơ sở đào tạo hoạt động</p>
+                            </div>
+                            <div class="stat-icon-wrapper bg-orange-light">
+                                <i class="bi bi-building-fill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                
+                <div class="form-column">
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} shadow-sm border-0 rounded-3 mb-3 d-flex align-items-center">
+                                <i class="bi bi-info-circle-fill me-2 fs-5"></i> {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="form-panel">
+                        <div class="panel-header">
+                            <i class="bi bi-person-plus-fill text-primary"></i>
+                            <h5>Thêm Học Viên Mới</h5>
+                        </div>
+                        <div class="panel-body">
+                            <form method="POST">
+                                {% csrf_token %}
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Họ và Tên</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                        <input type="text" name="ten" class="form-control" placeholder="Ví dụ: Nguyễn Văn A" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Khối Lớp</label>
+                                    <select name="khoi_lop" class="form-select">
+                                        <option value="9" selected>Lớp 9 (Luyện thi)</option>
+                                        <option value="8">Lớp 8 (Cơ bản)</option>
+                                        <option value="6">Lớp 6 (Đầu cấp)</option>
+                                    </select>
+                                </div>
+
+                                <div class="row g-2 form-group">
+                                    <label class="form-label">Tọa Độ (Lat / Lon)</label>
+                                    <div class="col-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text text-xs">Lat</span>
+                                            <input type="number" step="any" name="lat" class="form-control" value="10.77" placeholder="10.xxx">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text text-xs">Lon</span>
+                                            <input type="number" step="any" name="lon" class="form-control" value="106.69" placeholder="106.xxx">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted mt-1" style="font-size: 0.75rem">
+                                        <i class="bi bi-info-circle me-1"></i>Lấy từ Google Maps hoặc GPS
+                                    </small>
+                                </div>
+
+                                <button type="submit" class="btn-submit">
+                                    <i class="bi bi-send-fill"></i> Lưu & Phân Tuyến
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-column">
+                    <div class="table-panel">
+                        <div class="table-header">
+                            <h5 class="m-0 fw-bold fs-6">Dữ Liệu Hệ Thống</h5>
+                            <div class="search-bar">
+                                <i class="bi bi-search"></i>
+                                <input type="text" id="searchInput" placeholder="Tìm kiếm học viên..." onkeyup="filterTable()">
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-custom" id="studentTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">#</th>
+                                        <th>Thông Tin Học Viên</th>
+                                        <th>Tọa Độ GPS</th>
+                                        <th>Trạng Thái Phân Tuyến</th>
+                                        <th class="text-end">Hành Động</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for hv in danh_sach %}
+                                    <tr>
+                                        <td class="text-muted fw-bold">{{ hv.id }}</td>
+                                        <td>
+                                            <div class="user-cell">
+                                                <div class="user-avatar-sm">{{ hv.ten|slice:":1" }}</div>
+                                                <div class="user-meta">
+                                                    <div class="user-name">{{ hv.ten }}</div>
+                                                    <div class="user-sub">Khối {{ hv.khoi_lop }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="font-family: monospace; color: var(--text-muted);">
+                                            {{ hv.lat|stringformat:".4f" }} <br>
+                                            {{ hv.lon|stringformat:".4f" }}
+                                        </td>
+                                        <td>
+                                            {% if hv.co_so_gan_nhat %}
+                                                <div class="status-badge badge-success">
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                    {{ hv.co_so_gan_nhat.ten }}
+                                                </div>
+                                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; margin-left: 5px;">
+                                                    Đã tối ưu hóa
+                                                </div>
+                                            {% else %}
+                                                <div class="status-badge badge-danger">
+                                                    <i class="bi bi-exclamation-circle-fill"></i>
+                                                    Chưa xếp lớp
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="action-btns justify-content-end">
+                                                <a href="/chay-gis/{{ hv.id }}/" class="btn-action btn-gis" title="Chạy lại thuật toán GIS">
+                                                    <i class="bi bi-magic"></i>
+                                                </a>
+                                                <a href="/xoa-hoc-vien/{{ hv.id }}/" class="btn-action btn-delete" onclick="return confirm('Xóa dữ liệu này? Hành động không thể hoàn tác.')" title="Xóa hồ sơ">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-muted">
+                                            <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+                                            Chưa có dữ liệu học viên. Hãy thêm mới ở cột bên trái.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="p-3 border-top d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Hiển thị 1-10 trong số {{ danh_sach.count }} bản ghi</span>
+                            <nav>
+                                <ul class="pagination pagination-sm m-0">
+                                    <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                    <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple Client-side Search Function
+        function filterTable() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("studentTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 1; i < tr.length; i++) { // Start from 1 to skip header
+                // Search by Name (Column 1)
+                td = tr[i].getElementsByTagName("td")[1];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }       
+            }
+        }
+    </script>
+</body>
+</html>
