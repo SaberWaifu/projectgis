@@ -1,0 +1,668 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Quản lý lớp học và lịch giảng dạy - Hệ thống Toán GIS Enterprise">
+    <title>Quản Lý Lớp Học - Toán GIS Pro</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
+
+    <style>
+        /* =========================================
+           1. CORE VARIABLES & RESET
+           ========================================= */
+        :root {
+            /* Brand Colors */
+            --primary: #0d6efd;
+            --primary-dark: #0a58ca;
+            --primary-soft: #eff6ff;
+            
+            --secondary: #64748b;
+            --secondary-light: #f1f5f9;
+            
+            --accent: #ffc107;
+            --success: #10b981;
+            --danger: #ef4444;
+            --info: #0ea5e9;
+            --warning: #f59e0b;
+            
+            /* Backgrounds */
+            --dark-bg: #0f172a;
+            --body-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            
+            /* Gradients */
+            --gradient-main: linear-gradient(135deg, #0d6efd 0%, #00d2ff 100%);
+            --gradient-math: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --gradient-physics: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            --gradient-chem: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-english: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-card: 0 0 0 1px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.04);
+            --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            /* Typography */
+            --font-head: 'Montserrat', sans-serif;
+            --font-body: 'Open Sans', sans-serif;
+            
+            --navbar-height: 76px;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--body-bg);
+            color: #334155;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
+            font-family: var(--font-head);
+        }
+
+        a { text-decoration: none; transition: 0.3s; }
+
+        /* =========================================
+           2. NAVIGATION BAR (ENTERPRISE STYLE)
+           ========================================= */
+        .navbar-custom {
+            height: var(--navbar-height);
+            background: var(--dark-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: sticky; top: 0; z-index: 1000;
+            padding: 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 800; font-size: 1.4rem; color: #fff !important;
+            letter-spacing: 1px; display: flex; align-items: center; gap: 10px;
+        }
+        .brand-icon {
+            width: 36px; height: 36px; background: var(--gradient-main);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; color: white;
+        }
+        .navbar-brand span { color: var(--accent); }
+
+        /* Nav Links */
+        .nav-link {
+            color: rgba(255,255,255,0.7) !important;
+            font-weight: 600; padding: 8px 16px !important; margin: 0 2px;
+            border-radius: 50px; transition: 0.3s; font-size: 0.9rem;
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: white !important; }
+        .nav-link.active { background: var(--primary); color: white !important; box-shadow: 0 4px 10px rgba(13,110,253,0.3); }
+
+        /* Auth Buttons & User Profile */
+        .user-avatar-sm {
+            width: 34px; height: 34px; background: var(--accent); color: var(--dark-bg);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.85rem; border: 2px solid rgba(255,255,255,0.2);
+        }
+        .btn-login-nav {
+            border: 1px solid rgba(255,255,255,0.3); color: white;
+            border-radius: 30px; padding: 6px 20px; font-weight: 600; font-size: 0.9rem;
+            text-decoration: none; transition: 0.3s; display: flex; align-items: center; gap: 8px;
+        }
+        .btn-login-nav:hover { background: white; color: var(--dark-bg); }
+        
+        .dropdown-menu-dark-custom {
+            background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: var(--shadow-lg); margin-top: 10px; border-radius: 12px;
+        }
+        .dropdown-item { color: #cbd5e1; padding: 8px 20px; font-weight: 500; font-size: 0.9rem; }
+        .dropdown-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .dropdown-divider { border-color: rgba(255,255,255,0.1); }
+
+        /* =========================================
+           3. HEADER & STATISTICS
+           ========================================= */
+        .main-container { padding: 40px 0 80px; }
+        
+        .page-header {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-bottom: 30px;
+        }
+        .page-title h2 { font-weight: 800; color: var(--dark-bg); margin: 0; display: flex; align-items: center; gap: 10px; }
+        .page-title p { color: var(--secondary); margin: 5px 0 0; font-size: 1.1rem; }
+
+        .stats-row { margin-bottom: 40px; }
+        .stat-card {
+            background: var(--card-bg); border-radius: 16px;
+            padding: 24px; border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 20px;
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+        
+        /* Stat Decoration Line */
+        .stat-card::after {
+            content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 4px;
+            background: var(--primary);
+        }
+        .stat-card.purple::after { background: #8b5cf6; }
+        .stat-card.green::after { background: var(--success); }
+        .stat-card.orange::after { background: var(--warning); }
+
+        .stat-icon {
+            width: 60px; height: 60px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.75rem; flex-shrink: 0;
+        }
+        .icon-blue { background: var(--primary-soft); color: var(--primary); }
+        .icon-purple { background: #f3e8ff; color: #8b5cf6; }
+        .icon-green { background: #ecfdf5; color: var(--success); }
+        .icon-orange { background: #fffbeb; color: var(--warning); }
+        
+        .stat-info h3 { margin: 0; font-weight: 800; font-size: 2rem; color: var(--dark-bg); line-height: 1.1; }
+        .stat-info p { margin: 0; font-size: 0.85rem; color: var(--secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* =========================================
+           4. TOOLBAR & CONTROLS
+           ========================================= */
+        .control-bar {
+            background: var(--card-bg); padding: 20px; border-radius: 16px;
+            border: 1px solid var(--border-color); margin-bottom: 40px;
+            display: flex; flex-wrap: wrap; gap: 15px; align-items: center;
+            justify-content: space-between; box-shadow: var(--shadow-sm);
+        }
+
+        .search-group { position: relative; flex: 1; max-width: 400px; }
+        .search-input {
+            width: 100%; padding: 12px 15px 12px 45px;
+            border: 1px solid var(--border-color); border-radius: 12px;
+            font-size: 0.95rem; transition: 0.3s; background: #f8fafc;
+        }
+        .search-input:focus {
+            background: var(--white); border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-soft); outline: none;
+        }
+        .search-icon {
+            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            color: var(--secondary); pointer-events: none;
+        }
+
+        .actions-group { display: flex; gap: 12px; align-items: center; }
+        
+        .btn-add {
+            background: var(--primary); color: var(--white); border: none;
+            padding: 12px 24px; border-radius: 12px; font-weight: 700;
+            display: flex; align-items: center; gap: 8px; text-decoration: none;
+            transition: 0.3s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+        .btn-add:hover {
+            background: var(--primary-dark); transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(37, 99, 235, 0.35); color: white;
+        }
+
+        /* =========================================
+           5. CLASS CARD DESIGN (THE CORE)
+           ========================================= */
+        .class-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .class-card {
+            background: var(--card-bg); border-radius: 20px;
+            border: 1px solid var(--border-color); overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; display: flex; flex-direction: column;
+        }
+        .class-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-hover);
+            border-color: #cbd5e1;
+        }
+
+        /* Card Header Image */
+        .card-header-img {
+            height: 140px; position: relative; overflow: hidden;
+        }
+        .card-img-bg {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+        .class-card:hover .card-img-bg { transform: scale(1.1); }
+        .card-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.3) 0%, rgba(15, 23, 42, 0.9) 100%);
+        }
+
+        /* Header Content (Over Image) */
+        .header-content {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 20px; z-index: 2;
+        }
+        
+        .subject-badge {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(255,255,255,0.95); padding: 5px 12px;
+            border-radius: 30px; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; color: var(--dark-bg);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .class-title {
+            color: white; margin: 0; font-weight: 800; font-size: 1.35rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .class-code { color: rgba(255,255,255,0.8); font-size: 0.85rem; font-family: monospace; }
+
+        /* Card Body */
+        .card-body-content { padding: 24px; flex: 1; }
+
+        /* Teacher Info */
+        .teacher-box {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; background: #f8fafc; border-radius: 12px;
+            border: 1px solid var(--border-color); margin-bottom: 20px;
+        }
+        .teacher-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: #cbd5e1; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: #475569; font-size: 0.9rem;
+        }
+        .teacher-details h6 { margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--dark-bg); }
+        .teacher-details span { font-size: 0.8rem; color: var(--secondary); }
+
+        /* Info List */
+        .info-row {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.9rem; color: var(--secondary); margin-bottom: 12px;
+        }
+        .info-row i { color: var(--primary); width: 20px; text-align: center; }
+
+        /* Progress Bar */
+        .progress-wrapper { margin-top: 20px; }
+        .progress-label {
+            display: flex; justify-content: space-between; font-size: 0.8rem;
+            font-weight: 700; color: var(--secondary); margin-bottom: 6px;
+        }
+        .progress { height: 8px; border-radius: 4px; background: #e2e8f0; overflow: hidden; }
+        .progress-bar { border-radius: 4px; transition: width 1s ease; }
+        
+        /* Different Colors for Progress */
+        .bar-math { background: var(--gradient-math); }
+        .bar-phys { background: var(--gradient-physics); }
+        .bar-chem { background: var(--gradient-chem); }
+        .bar-eng { background: var(--gradient-english); }
+
+        /* Card Footer */
+        .card-footer-custom {
+            padding: 15px 24px; border-top: 1px solid var(--border-color);
+            background: white; display: flex; justify-content: space-between; align-items: center;
+        }
+        .btn-map-link {
+            font-size: 0.85rem; font-weight: 700; color: var(--primary);
+            text-decoration: none; display: flex; align-items: center; gap: 6px;
+            background: var(--primary-soft); padding: 6px 12px; border-radius: 8px;
+            transition: 0.2s;
+        }
+        .btn-map-link:hover { background: #dbeafe; color: var(--primary-dark); }
+
+        .btn-actions { display: flex; gap: 8px; }
+        .btn-icon-sm {
+            width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-color);
+            background: white; color: var(--secondary); display: flex; align-items: center;
+            justify-content: center; transition: 0.2s; cursor: pointer; text-decoration: none;
+        }
+        .btn-icon-sm:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-icon-sm.delete:hover { border-color: var(--danger); color: var(--danger); background: #fef2f2; }
+
+        /* =========================================
+           6. MODAL & EMPTY STATE
+           ========================================= */
+        .modal-content { border: none; border-radius: 20px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .modal-header { border-bottom: 1px solid var(--border-color); padding: 24px; background: #f9fafb; border-radius: 20px 20px 0 0; }
+        .modal-body { padding: 30px; }
+        .modal-footer { border-top: 1px solid var(--border-color); padding: 20px 24px; background: #f9fafb; border-radius: 0 0 20px 20px; }
+        .form-label { font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: var(--secondary); letter-spacing: 0.5px; }
+        
+        .empty-state { text-align: center; padding: 80px 20px; background: var(--white); border-radius: 24px; border: 2px dashed var(--border-color); }
+        .empty-icon { font-size: 4rem; color: #cbd5e1; margin-bottom: 20px; display: block; }
+
+        footer { text-align: center; padding: 40px 0; color: var(--secondary); border-top: 1px solid var(--border-color); margin-top: 60px; }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <div class="brand-icon"><i class="bi bi-mortarboard-fill"></i></div>
+                <div>TOÁN <span>GIS</span> <small class="d-block fw-normal text-muted" style="font-size: 0.7rem;">Education Module</small></div>
+            </a>
+            
+            <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="/">Trang Chủ</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#">Lớp Học</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/quan-ly/">Học Viên</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/hoc-phi/">Học Phí</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/xep-lich/">Xếp Lịch</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/hoc-vien-moi/">Bản Đồ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/danh-sach-chi-nhanh/">Chi Nhánh</a></li>
+                </ul>
+                
+                <div class="d-flex align-items-center gap-3 ms-lg-3">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-white" data-bs-toggle="dropdown">
+                                <div class="user-avatar-sm me-2">{{ user.username|slice:":1"|upper }}</div>
+                                <span class="d-none d-md-inline fw-bold" style="font-size: 0.9rem;">{{ user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom">
+                                <li><a class="dropdown-item" href="/admin/"><i class="bi bi-speedometer2 me-2"></i>Admin Panel</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="/logout/"><i class="bi bi-box-arrow-right me-2"></i>Đăng Xuất</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="/login/" class="btn-login-nav">
+                            <i class="bi bi-box-arrow-in-right"></i> Đăng Nhập
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        
+        <div class="page-header animate__animated animate__fadeInDown">
+            <div class="page-title">
+                <h2>Quản Lý Lớp Học & Đào Tạo</h2>
+                <p>Theo dõi tiến độ, sĩ số và lịch giảng dạy của từng lớp.</p>
+            </div>
+        </div>
+
+        <div class="row stats-row g-4 animate__animated animate__fadeInUp">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon icon-blue"><i class="bi bi-easel2-fill"></i></div>
+                    <div class="stat-info">
+                        <h3>{{ stats.active_class }}</h3>
+                        <p>Lớp Đang Mở</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card green">
+                    <div class="stat-icon icon-green"><i class="bi bi-person-video3"></i></div>
+                    <div class="stat-info">
+                        <h3>{{ stats.total_student }}</h3>
+                        <p>Tổng Học Viên</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card purple">
+                    <div class="stat-icon icon-purple"><i class="bi bi-layers-fill"></i></div>
+                    <div class="stat-info">
+                        <h3>{{ stats.total_class }}</h3>
+                        <p>Tổng Số Lớp</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show shadow-sm border-0 mb-4 animate__animated animate__fadeIn" role="alert" style="border-radius: 12px;">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill me-3 fs-4"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="control-bar animate__animated animate__fadeInUp">
+            <div class="search-group">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" id="classSearch" class="search-input" placeholder="Tìm kiếm lớp, môn học, giáo viên..." onkeyup="filterClasses()">
+            </div>
+            
+            <div class="actions-group">
+                <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addClassModal">
+                    <i class="bi bi-plus-circle-fill"></i> Mở Lớp Mới
+                </button>
+            </div>
+        </div>
+
+        <div class="class-grid" id="classGrid">
+            {% for lop in ds_lop %}
+            <div class="class-card animate__animated animate__fadeInUp">
+                
+                <div class="card-header-img">
+                    {% if 'Toán' in lop.ten_lop %}
+                        <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=600&q=80" class="card-img-bg" alt="Math">
+                    {% elif 'Lý' in lop.ten_lop %}
+                        <img src="https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?w=600&q=80" class="card-img-bg" alt="Physics">
+                    {% elif 'Hóa' in lop.ten_lop %}
+                        <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600&q=80" class="card-img-bg" alt="Chemistry">
+                    {% else %}
+                        <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&q=80" class="card-img-bg" alt="General">
+                    {% endif %}
+                    
+                    <div class="card-overlay"></div>
+                    
+                    <div class="header-content">
+                        <span class="subject-badge">
+                            {% if 'Toán' in lop.ten_lop %}Toán Học
+                            {% elif 'Lý' in lop.ten_lop %}Vật Lý
+                            {% elif 'Hóa' in lop.ten_lop %}Hóa Học
+                            {% elif 'Anh' in lop.ten_lop %}Tiếng Anh
+                            {% else %}Khác{% endif %}
+                        </span>
+                        <h5 class="class-title">{{ lop.ten_lop }}</h5>
+                        <div class="class-code"><i class="bi bi-upc-scan me-1"></i>ID: {{ lop.id }}</div>
+                    </div>
+                </div>
+
+                <div class="card-body-content">
+                    <div class="teacher-box">
+                        <div class="teacher-avatar">
+                            {% if lop.giao_vien.ten %}{{ lop.giao_vien.ten|slice:":1" }}{% else %}?{% endif %}
+                        </div>
+                        <div class="teacher-details">
+                            <h6>{{ lop.giao_vien.ten|default:"Chưa phân công" }}</h6>
+                            <span>{{ lop.giao_vien.mon_day|default:"Giảng viên" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <i class="bi bi-calendar4-week"></i>
+                        <span>
+                            {% for lh in lop.lich_hoc.all %}
+                                T{{ lh.thu }} (Ca {{ lh.ca }}){% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                Chưa xếp lịch
+                            {% endfor %}
+                        </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <i class="bi bi-people"></i>
+                        <span>Sĩ số: <b>{{ lop.si_so_hien_tai }}</b> / {{ lop.si_so_toi_da }}</span>
+                    </div>
+
+                    <div class="progress-wrapper">
+                        <div class="progress-label">
+                            <span>Lấp đầy</span>
+                            <span>{{ lop.phan_tram_lap_day }}%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar 
+                                {% if 'Toán' in lop.ten_lop %}bar-math
+                                {% elif 'Lý' in lop.ten_lop %}bar-phys
+                                {% elif 'Hóa' in lop.ten_lop %}bar-chem
+                                {% else %}bar-eng{% endif %}" 
+                                role="progressbar" style="width: {{ lop.phan_tram_lap_day }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer-custom">
+                    <a href="/hoc-vien-moi/" class="btn-map-link">
+                        <i class="bi bi-geo-alt-fill"></i> Bản đồ
+                    </a>
+                    
+                    <div class="btn-actions">
+                        <a href="#" class="btn-icon-sm" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></a>
+                        <a href="/xoa-lop/{{ lop.id }}/" 
+                           class="btn-icon-sm delete" 
+                           title="Xóa lớp"
+                           onclick="return confirm('CẢNH BÁO: Xóa lớp {{ lop.ten_lop }}? Dữ liệu không thể phục hồi!');">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+                    <h3>Chưa có lớp học nào</h3>
+                    <p class="text-secondary mb-4">Hãy tạo lớp học mới để bắt đầu quản lý.</p>
+                    <button class="btn-add d-inline-flex" data-bs-toggle="modal" data-bs-target="#addClassModal">
+                        Tạo Lớp Ngay
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 Hệ thống Toán GIS Enterprise. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="addClassModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold text-primary">
+                            <i class="bi bi-plus-square-dotted me-2"></i>Thêm Lớp Học Mới
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <label class="form-label">Tên Lớp <span class="text-danger">*</span></label>
+                            <input type="text" name="ten_lop" class="form-control form-control-lg bg-light" placeholder="VD: Toán 9A Nâng Cao" required>
+                        </div>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Môn Học</label>
+                                <select name="mon_hoc" class="form-select bg-light">
+                                    <option value="Toán">Toán Học</option>
+                                    <option value="Lý">Vật Lý</option>
+                                    <option value="Hóa">Hóa Học</option>
+                                    <option value="Anh">Tiếng Anh</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Khối Lớp</label>
+                                <select name="khoi" class="form-select bg-light">
+                                    <option value="Khối 6">Khối 6</option>
+                                    <option value="Khối 7">Khối 7</option>
+                                    <option value="Khối 8">Khối 8</option>
+                                    <option value="Khối 9">Khối 9</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label">Sĩ Số Tối Đa</label>
+                                <input type="number" name="si_so_max" class="form-control bg-light" value="30">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Giáo Viên <span class="text-danger">*</span></label>
+                                <select name="giao_vien" class="form-select bg-light" required>
+                                    <option value="">-- Chọn --</option>
+                                    {% for gv in ds_giao_vien %}
+                                        <option value="{{ gv.id }}">{{ gv.ten }} ({{ gv.mon_day }})</option>
+                                    {% empty %}
+                                        <option disabled>Chưa có GV</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-light text-secondary fw-bold" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm">
+                            <i class="bi bi-save me-1"></i> Lưu Lớp Học
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Client-side Search Function
+        function filterClasses() {
+            let input = document.getElementById('classSearch');
+            let filter = input.value.toUpperCase();
+            let container = document.getElementById('classGrid');
+            let cards = container.getElementsByClassName('class-card');
+
+            for (let i = 0; i < cards.length; i++) {
+                let title = cards[i].querySelector(".class-title");
+                let teacher = cards[i].querySelector(".teacher-details h6");
+                
+                let txtTitle = title.textContent || title.innerText;
+                let txtTeacher = teacher.textContent || teacher.innerText;
+
+                if (txtTitle.toUpperCase().indexOf(filter) > -1 || txtTeacher.toUpperCase().indexOf(filter) > -1) {
+                    cards[i].style.display = "";
+                } else {
+                    cards[i].style.display = "none";
+                }
+            }
+        }
+
+        // Animation helper
+        document.addEventListener("DOMContentLoaded", function() {
+            const inputs = document.querySelectorAll('.form-control, .form-select');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => input.style.backgroundColor = "#fff");
+                input.addEventListener('blur', () => input.style.backgroundColor = "#f8fafc");
+            });
+        });
+    </script>
+</body>
+</html>

@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'quan_ly_hoc_vu', # App quản lý học vụ của bạn
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [
