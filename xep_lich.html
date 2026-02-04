@@ -1,239 +1,353 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Thời Khóa Biểu - Toán GIS Pro</title>
+    <meta name="description" content="Hệ thống xếp lịch học tự động bằng AI Genetic Algorithm - Toán GIS Enterprise">
+    <title>Xếp Lịch AI - Toán GIS Pro</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
+
     <style>
-        /* --- 1. CORE VARIABLES & RESET --- */
+        /* =========================================
+           1. CORE VARIABLES & RESET
+           ========================================= */
         :root {
-            --bg-body: #f1f5f9;
-            --bg-card: #ffffff;
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
+            /* Brand Colors */
+            --primary: #0d6efd;
+            --primary-dark: #0a58ca;
+            --primary-soft: #eff6ff;
+            
             --secondary: #64748b;
+            --secondary-light: #f1f5f9;
+            
+            --accent: #ffc107;
             --success: #10b981;
-            --warning: #f59e0b;
             --danger: #ef4444;
+            --info: #0ea5e9;
+            --warning: #f59e0b;
+            
+            /* Backgrounds */
+            --dark-bg: #0f172a;
+            --body-bg: #f8fafc;
+            --card-bg: #ffffff;
             --border-color: #e2e8f0;
-            --text-main: #0f172a;
-            --text-light: #64748b;
-            --radius-md: 12px;
-            --radius-lg: 16px;
+            
+            /* Gradients */
+            --gradient-main: linear-gradient(135deg, #0d6efd 0%, #00d2ff 100%);
+            
+            /* Shadows */
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-card: 0 0 0 1px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.04);
+            
+            /* Dimensions */
+            --navbar-height: 76px;
+            
+            /* Typography */
+            --font-head: 'Montserrat', sans-serif;
+            --font-body: 'Open Sans', sans-serif;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            padding-bottom: 60px;
+            font-family: var(--font-body);
+            background-color: var(--body-bg);
+            color: #334155;
+            line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        a { text-decoration: none; }
-
-        /* --- 2. NAVBAR PRO --- */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 0.75rem 0;
-            box-shadow: var(--shadow-sm);
+        h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
+            font-family: var(--font-head);
         }
-        .navbar-brand { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.5px; color: var(--text-main); }
-        .navbar-brand span { color: var(--primary); }
-        .nav-link { font-weight: 600; font-size: 0.9rem; color: var(--text-light); padding: 0.5rem 1rem; border-radius: 8px; transition: 0.2s; }
-        .nav-link:hover, .nav-link.active { background: #eff6ff; color: var(--primary); }
 
-        /* --- 3. STATS CARDS (THỐNG KÊ) --- */
+        a { text-decoration: none; transition: 0.3s; }
+
+        /* =========================================
+           2. NAVIGATION BAR (FIXED TOP)
+           ========================================= */
+        .navbar-custom {
+            height: var(--navbar-height);
+            background: var(--dark-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: sticky; top: 0; z-index: 1000;
+            padding: 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 800; font-size: 1.4rem; color: #fff !important;
+            letter-spacing: 1px; display: flex; align-items: center; gap: 10px;
+        }
+        .brand-icon {
+            width: 36px; height: 36px; background: var(--gradient-main);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; color: white;
+        }
+        .navbar-brand span { color: var(--accent); }
+
+        .nav-link {
+            color: rgba(255,255,255,0.7) !important;
+            font-weight: 600; padding: 8px 16px !important; margin: 0 2px;
+            border-radius: 50px; transition: 0.3s; font-size: 0.9rem;
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: white !important; }
+        .nav-link.active { background: var(--primary); color: white !important; box-shadow: 0 4px 10px rgba(13,110,253,0.3); }
+
+        /* Auth Buttons & User Profile */
+        .user-avatar-sm {
+            width: 34px; height: 34px; background: var(--accent); color: var(--dark-bg);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 0.85rem; border: 2px solid rgba(255,255,255,0.2);
+        }
+        .btn-login-nav {
+            border: 1px solid rgba(255,255,255,0.3); color: white;
+            border-radius: 30px; padding: 6px 20px; font-weight: 600; font-size: 0.9rem;
+            text-decoration: none; transition: 0.3s; display: flex; align-items: center; gap: 8px;
+        }
+        .btn-login-nav:hover { background: white; color: var(--dark-bg); }
+        
+        .dropdown-menu-dark-custom {
+            background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: var(--shadow-lg); margin-top: 10px; border-radius: 12px;
+        }
+        .dropdown-item { color: #cbd5e1; padding: 8px 20px; font-weight: 500; font-size: 0.9rem; }
+        .dropdown-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .dropdown-divider { border-color: rgba(255,255,255,0.1); }
+
+        /* =========================================
+           3. MAIN LAYOUT & STATS
+           ========================================= */
+        .main-container { padding: 40px 0 80px; }
+        
+        /* Stats Cards */
         .stat-card {
-            background: var(--bg-card);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: 0.3s;
+            background: var(--card-bg); border-radius: 16px;
+            padding: 24px; border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between;
+            transition: all 0.3s ease; position: relative; overflow: hidden;
         }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: #cbd5e1; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+        
+        .stat-info h3 { margin: 0; font-weight: 800; font-size: 2rem; color: var(--dark-bg); line-height: 1.1; }
+        .stat-info p { margin: 0; font-size: 0.85rem; color: var(--secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        
         .stat-icon {
-            width: 48px; height: 48px;
-            border-radius: 12px;
+            width: 60px; height: 60px; border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.75rem; flex-shrink: 0;
         }
-        .stat-info h3 { font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--text-main); }
-        .stat-info p { margin: 0; font-size: 0.85rem; color: var(--text-light); font-weight: 500; }
-
-        .icon-primary { background: #eff6ff; color: var(--primary); }
-        .icon-success { background: #f0fdf4; color: var(--success); }
+        .icon-blue { background: var(--primary-soft); color: var(--primary); }
+        .icon-success { background: #ecfdf5; color: var(--success); }
         .icon-warning { background: #fffbeb; color: var(--warning); }
         .icon-danger { background: #fef2f2; color: var(--danger); }
 
-        /* --- 4. TOOLBAR & FILTERS --- */
+        /* =========================================
+           4. TOOLBAR & CONTROLS
+           ========================================= */
         .toolbar-section {
-            background: var(--bg-card);
-            border-radius: var(--radius-lg);
-            padding: 20px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border-color);
+            background: var(--card-bg); padding: 24px; border-radius: 20px;
+            border: 1px solid var(--border-color); margin-bottom: 40px;
+            display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between;
             box-shadow: var(--shadow-sm);
-            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;
         }
-        .page-title h4 { font-weight: 800; margin: 0; letter-spacing: -0.5px; }
-        .page-title p { margin: 0; color: var(--text-light); font-size: 0.9rem; }
+        
+        .page-title h4 { font-weight: 800; color: var(--dark-bg); margin: 0 0 5px 0; display: flex; align-items: center; gap: 10px; }
+        .page-title p { margin: 0; color: var(--secondary); font-size: 0.95rem; }
 
         .btn-custom {
-            font-weight: 600; padding: 10px 20px; border-radius: 10px; border: none;
-            display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; font-size: 0.9rem;
+            padding: 12px 24px; border-radius: 12px; font-weight: 700; border: none;
+            display: flex; align-items: center; gap: 8px; transition: 0.3s; text-decoration: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 0.9rem;
         }
-        .btn-reset { background: #f1f5f9; color: var(--text-light); }
-        .btn-reset:hover { background: #e2e8f0; color: var(--text-main); }
+        .btn-reset { background: #f1f5f9; color: var(--secondary); border: 1px solid var(--border-color); }
+        .btn-reset:hover { background: #e2e8f0; color: var(--dark-bg); transform: translateY(-2px); }
+        
+        .btn-print { background: var(--dark-bg); color: white; }
+        .btn-print:hover { background: #1e293b; color: white; transform: translateY(-2px); }
         
         .btn-ai {
-            background: linear-gradient(135deg, #2563eb, #4f46e5);
-            color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: white; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
         }
-        .btn-ai:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4); }
+        .btn-ai:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5); color: white; }
 
-        .btn-print { background: var(--text-main); color: white; }
-        .btn-print:hover { background: #334155; }
-
-        /* --- 5. SCHEDULE TABLE (THỜI KHÓA BIỂU) --- */
+        /* =========================================
+           5. SCHEDULE TABLE (THE CORE UI)
+           ========================================= */
         .schedule-wrapper {
-            background: var(--bg-card);
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-md);
+            background: var(--card-bg); border-radius: 20px;
+            border: 1px solid var(--border-color); overflow: hidden;
+            box-shadow: var(--shadow-card);
         }
+        
         .table-schedule { width: 100%; border-collapse: separate; border-spacing: 0; }
         
         .table-schedule thead th {
-            background: #f8fafc; color: var(--text-light);
-            text-transform: uppercase; font-size: 0.75rem; font-weight: 700;
-            padding: 16px; text-align: center;
-            border-bottom: 1px solid var(--border-color);
+            background: #f8fafc; padding: 16px; text-align: center;
+            font-size: 0.8rem; font-weight: 800; text-transform: uppercase;
+            color: var(--secondary); letter-spacing: 1px;
+            border-bottom: 2px solid var(--border-color);
             border-right: 1px solid var(--border-color);
         }
+        .table-schedule thead th:first-child { width: 100px; background: #f1f5f9; }
+        .table-schedule thead th:last-child { border-right: none; }
 
         .table-schedule tbody td {
-            vertical-align: top; padding: 10px;
+            vertical-align: top; padding: 10px; height: 160px; /* Fixed height for uniformity */
             border-bottom: 1px solid var(--border-color);
             border-right: 1px solid var(--border-color);
-            width: 13.5%; height: 160px; /* Chiều cao cố định ô */
-            background: white; transition: 0.2s;
+            background: white; transition: 0.2s; width: 12.8%;
         }
         .table-schedule tbody td:first-child {
-            width: 80px; background: #f8fafc;
-            text-align: center; vertical-align: middle;
-            font-weight: 700; color: var(--primary);
+            background: #fcfcfc; text-align: center; vertical-align: middle;
+            font-weight: 700; color: var(--dark-bg);
             border-right: 2px solid var(--border-color);
         }
         .table-schedule tbody td:last-child { border-right: none; }
         .table-schedule tbody tr:last-child td { border-bottom: none; }
+        .table-schedule tbody td:hover:not(:first-child) { background: #f8fafc; }
 
-        /* --- 6. CLASS CARD (THẺ LỚP HỌC) --- */
+        /* Class Card inside Table */
         .class-card {
-            background: #ffffff;
-            border-left: 4px solid var(--primary);
-            padding: 10px; margin-bottom: 8px;
-            border-radius: 6px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border: 1px solid #f1f5f9;
+            background: white; border-radius: 8px; padding: 10px; margin-bottom: 8px;
+            border-left: 4px solid var(--secondary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;
             cursor: pointer; position: relative; overflow: hidden;
             transition: all 0.2s ease;
         }
-        .class-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            background: #f8fafc;
-        }
+        .class-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 10; }
         
-        /* Màu sắc theo môn */
+        /* Subject Colors */
         .mon-toan { border-left-color: #2563eb; background: #eff6ff; }
         .mon-toan .subject-badge { color: #2563eb; background: rgba(37, 99, 235, 0.1); }
         
         .mon-ly { border-left-color: #d946ef; background: #fdf4ff; }
         .mon-ly .subject-badge { color: #d946ef; background: rgba(217, 70, 239, 0.1); }
         
+        .mon-hoa { border-left-color: #10b981; background: #ecfdf5; }
+        .mon-hoa .subject-badge { color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        
         .mon-anh { border-left-color: #f97316; background: #fff7ed; }
         .mon-anh .subject-badge { color: #f97316; background: rgba(249, 115, 22, 0.1); }
 
         .subject-badge {
-            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-            padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px;
+            font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+            padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 5px;
         }
-        .class-title { font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; line-height: 1.3; }
-        .class-meta { font-size: 0.75rem; color: var(--text-light); display: flex; align-items: center; gap: 5px; margin-top: 2px; }
+        .class-title { font-size: 0.85rem; font-weight: 700; color: var(--dark-bg); margin-bottom: 4px; line-height: 1.3; }
+        .class-meta { font-size: 0.75rem; color: var(--secondary); display: flex; align-items: center; gap: 5px; }
 
-        /* --- 7. LOADING OVERLAY --- */
+        /* =========================================
+           6. LOADING OVERLAY
+           ========================================= */
         #loadingOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.9); z-index: 9999;
+            background: rgba(255, 255, 255, 0.95); z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; visibility: hidden; transition: 0.3s; backdrop-filter: blur(5px);
+            opacity: 0; visibility: hidden; transition: 0.3s;
         }
         #loadingOverlay.active { opacity: 1; visibility: visible; }
+        
+        .spinner-box {
+            width: 80px; height: 80px; position: relative; margin-bottom: 30px;
+        }
         .spinner-custom {
-            width: 60px; height: 60px; border: 5px solid #e2e8f0;
-            border-top: 5px solid var(--primary); border-radius: 50%;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
+            width: 100%; height: 100%; border: 6px solid #e2e8f0;
+            border-top: 6px solid var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- 8. PRINT STYLES (CHẾ ĐỘ IN) --- */
+        /* =========================================
+           7. MODAL CUSTOMIZATION
+           ========================================= */
+        .modal-content { border: none; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .modal-header { border-bottom: none; padding: 24px 24px 0; }
+        .modal-body { padding: 30px; }
+        .modal-footer { border-top: none; padding: 0 24px 24px; }
+        
+        .avatar-lg { width: 80px; height: 80px; font-size: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 0 auto 20px; }
+        
+        /* =========================================
+           8. PRINT STYLES
+           ========================================= */
         @media print {
-            .navbar, .toolbar-section, footer, .alert, .btn { display: none !important; }
+            .navbar-custom, .toolbar-section, footer, .alert, .btn { display: none !important; }
             body { background: white; padding: 0; }
-            .schedule-wrapper { box-shadow: none; border: 1px solid #000; }
+            .main-container { padding: 0; }
+            .schedule-wrapper { box-shadow: none; border: 2px solid #000; }
             .table-schedule th, .table-schedule td { border: 1px solid #000 !important; height: auto !important; }
             .class-card { border: 1px solid #000 !important; box-shadow: none !important; background: white !important; page-break-inside: avoid; }
-            .container-fluid { width: 100%; padding: 0; margin: 0; }
+            .row { display: none; } /* Hide stats */
         }
+
     </style>
 </head>
 <body>
 
     <div id="loadingOverlay">
-        <div class="spinner-custom"></div>
-        <h4 class="fw-bold text-primary">Đang kích hoạt AI Genetic...</h4>
-        <p class="text-muted">Vui lòng đợi trong giây lát, hệ thống đang tối ưu hóa lịch học.</p>
+        <div class="spinner-box">
+            <div class="spinner-custom"></div>
+        </div>
+        <h3 class="fw-bold text-dark mb-2">Đang Kích Hoạt AI Genetic...</h3>
+        <p class="text-secondary">Hệ thống đang tính toán hàng nghìn phương án tối ưu. Vui lòng đợi.</p>
     </div>
 
-    <nav class="navbar navbar-expand-lg sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container-fluid px-4">
-            <a class="navbar-brand" href="/">TOÁN <span>GIS</span></a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <a class="navbar-brand" href="/">
+                <div class="brand-icon"><i class="bi bi-calendar-week-fill"></i></div>
+                <div>TOÁN <span>GIS</span> <small class="d-block fw-normal text-muted" style="font-size: 0.7rem;">Scheduler Module</small></div>
+            </a>
+            
+            <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="/">Bản Đồ</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/xep-lich/">Xếp Lịch</a></li>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="/">Trang Chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/quan-ly-lop/">Lớp Học</a></li>
                     <li class="nav-item"><a class="nav-link" href="/quan-ly/">Học Viên</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/admin/">Admin</a></li>
-                    <li class="nav-item ms-3">
-                        <div class="d-flex align-items-center gap-2">
-                            <img src="https://ui-avatars.com/api/?name=Admin&background=random" class="rounded-circle" width="32">
-                        </div>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="/hoc-phi/">Học Phí</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#">Xếp Lịch</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/hoc-vien-moi/">Bản Đồ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/danh-sach-chi-nhanh/">Chi Nhánh</a></li>
                 </ul>
+                
+                <div class="d-flex align-items-center gap-3 ms-lg-3">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-white" data-bs-toggle="dropdown">
+                                <div class="user-avatar-sm me-2">{{ user.username|slice:":1"|upper }}</div>
+                                <span class="d-none d-md-inline fw-bold" style="font-size: 0.9rem;">{{ user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom">
+                                <li><a class="dropdown-item" href="/admin/"><i class="bi bi-speedometer2 me-2"></i>Admin Panel</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="/logout/"><i class="bi bi-box-arrow-right me-2"></i>Đăng Xuất</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="/login/" class="btn-login-nav">
+                            <i class="bi bi-box-arrow-in-right"></i> Đăng Nhập
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid px-4 py-4">
-
+    <div class="container-fluid px-4 main-container">
+        
         <div class="row g-4 mb-4">
             <div class="col-md-3">
                 <div class="stat-card">
@@ -241,7 +355,7 @@
                         <h3>{{ lich_hoc.count }}</h3>
                         <p>Tổng Lớp Đã Xếp</p>
                     </div>
-                    <div class="stat-icon icon-primary"><i class="bi bi-calendar-check"></i></div>
+                    <div class="stat-icon icon-blue"><i class="bi bi-calendar-check-fill"></i></div>
                 </div>
             </div>
             <div class="col-md-3">
@@ -259,7 +373,7 @@
                         <h3>6</h3>
                         <p>Phòng Học</p>
                     </div>
-                    <div class="stat-icon icon-warning"><i class="bi bi-door-open"></i></div>
+                    <div class="stat-icon icon-warning"><i class="bi bi-door-open-fill"></i></div>
                 </div>
             </div>
             <div class="col-md-3">
@@ -268,20 +382,20 @@
                         <h3>100%</h3>
                         <p>Độ Tối Ưu</p>
                     </div>
-                    <div class="stat-icon icon-danger"><i class="bi bi-cpu"></i></div>
+                    <div class="stat-icon icon-danger"><i class="bi bi-cpu-fill"></i></div>
                 </div>
             </div>
         </div>
 
-        <div class="toolbar-section">
+        <div class="toolbar-section animate__animated animate__fadeInDown">
             <div class="page-title">
-                <h4>Thời Khóa Biểu Tổng</h4>
-                <p>Quản lý lịch dạy học kỳ 1 - Năm học 2025-2026</p>
+                <h4><i class="bi bi-grid-1x2-fill text-primary"></i> Thời Khóa Biểu Tổng</h4>
+                <p>Quản lý lịch giảng dạy học kỳ 1 - Năm học 2025-2026</p>
             </div>
             
             <div class="d-flex gap-2 flex-wrap">
                 <a href="/tao-du-lieu-mau/" class="btn-custom btn-reset" onclick="showLoading()">
-                    <i class="bi bi-database-fill-gear"></i> Tạo Dữ Liệu Mẫu
+                    <i class="bi bi-database-fill-gear"></i> Reset Data Mẫu
                 </a>
                 
                 <button class="btn-custom btn-print" onclick="window.print()">
@@ -291,7 +405,7 @@
                 <form method="POST" class="d-inline" onsubmit="showLoading()">
                     {% csrf_token %}
                     <button type="submit" class="btn-custom btn-ai">
-                        <i class="bi bi-magic"></i> Chạy AI Xếp Lịch
+                        <i class="bi bi-stars"></i> Chạy AI Xếp Lịch
                     </button>
                 </form>
             </div>
@@ -299,7 +413,7 @@
 
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center fade show">
+                <div class="alert alert-{{ message.tags }} border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center fade show animate__animated animate__fadeIn">
                     <i class="bi bi-info-circle-fill me-3 fs-4"></i>
                     <div>{{ message }}</div>
                     <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
@@ -307,7 +421,7 @@
             {% endfor %}
         {% endif %}
 
-        <div class="schedule-wrapper">
+        <div class="schedule-wrapper animate__animated animate__fadeInUp">
             <div class="table-responsive">
                 <table class="table-schedule">
                     <thead>
@@ -326,11 +440,11 @@
                         {% for ca in "123456" %}
                         <tr>
                             <td>
-                                <div class="text-secondary small text-uppercase mb-1">Ca {{ ca }}</div>
-                                <div class="fs-5">
+                                <div class="text-secondary small text-uppercase mb-1 fw-bold">Ca {{ ca }}</div>
+                                <div class="fs-5 fw-bold text-dark">
                                     {% if ca == '1' %}07:30{% elif ca == '2' %}09:30{% elif ca == '3' %}13:30{% elif ca == '4' %}15:30{% elif ca == '5' %}17:30{% else %}19:30{% endif %}
                                 </div>
-                                <div class="text-muted small mt-1">90 phút</div>
+                                <div class="text-muted small mt-1 badge bg-light text-secondary border">90 phút</div>
                             </td>
                             
                             {% for thu in "2345678" %}
@@ -342,6 +456,7 @@
                                             {% if 'Toán' in lh.lop_hoc.ten_lop %}mon-toan
                                             {% elif 'Lý' in lh.lop_hoc.ten_lop %}mon-ly
                                             {% elif 'Anh' in lh.lop_hoc.ten_lop %}mon-anh
+                                            {% elif 'Hóa' in lh.lop_hoc.ten_lop %}mon-hoa
                                             {% endif %}"
                                             onclick="openDetailModal('{{ lh.lop_hoc.ten_lop }}', '{{ lh.lop_hoc.giao_vien.ten }}', '{{ lh.phong.ten }}', '{{ lh.lop_hoc.hoc_viens.count }}', 'Thứ {{ thu }} - Ca {{ ca }}')">
                                             
@@ -349,6 +464,7 @@
                                                 {% if 'Toán' in lh.lop_hoc.ten_lop %}TOÁN
                                                 {% elif 'Lý' in lh.lop_hoc.ten_lop %}VẬT LÝ
                                                 {% elif 'Anh' in lh.lop_hoc.ten_lop %}TIẾNG ANH
+                                                {% elif 'Hóa' in lh.lop_hoc.ten_lop %}HÓA HỌC
                                                 {% else %}KHÁC{% endif %}
                                             </div>
                                             
@@ -357,10 +473,10 @@
                                             </div>
                                             
                                             <div class="class-meta mt-2 pt-2 border-top border-secondary border-opacity-10">
-                                                <i class="bi bi-person-circle"></i> {{ lh.lop_hoc.giao_vien.ten }}
+                                                <i class="bi bi-person-circle text-primary"></i> {{ lh.lop_hoc.giao_vien.ten }}
                                             </div>
                                             <div class="class-meta">
-                                                <i class="bi bi-geo-alt-fill"></i> {{ lh.phong.ten }}
+                                                <i class="bi bi-geo-alt-fill text-danger"></i> {{ lh.phong.ten }}
                                             </div>
                                         </div>
 
@@ -380,65 +496,62 @@
                     <i class="bi bi-calendar-x fs-1 text-secondary opacity-50"></i>
                 </div>
                 <h5 class="fw-bold text-dark">Chưa có thời khóa biểu</h5>
-                <p class="text-muted">Vui lòng nhấn nút <b>"Chạy AI Xếp Lịch"</b> để hệ thống tự động tính toán.</p>
+                <p class="text-muted">Vui lòng nhấn nút <b class="text-primary">"Chạy AI Xếp Lịch"</b> để hệ thống tự động tính toán.</p>
             </div>
             {% endif %}
         </div>
 
-        <div class="mt-4 text-center text-muted small">
-            © 2026 Hệ thống Quản lý Đào tạo Toán GIS Pro Version 2.0
-        </div>
-
     </div>
+
+    <footer class="text-center py-4 text-secondary mt-5 border-top">
+        <small>© 2026 Toán GIS Enterprise System. All rights reserved.</small>
+    </footer>
 
     <div class="modal fade" id="classDetailModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header bg-primary text-white border-0 rounded-top-4">
-                    <h5 class="modal-title fw-bold"><i class="bi bi-info-circle me-2"></i>Chi Tiết Lớp Học</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body p-4">
-                    <div class="text-center mb-4">
-                        <div class="avatar-lg bg-light text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                            <i class="bi bi-book fs-1"></i>
-                        </div>
-                        <h4 class="fw-bold text-dark mb-1" id="modalClassName">Lớp Toán 9A</h4>
-                        <span class="badge bg-success rounded-pill px-3">Đang hoạt động</span>
+                <div class="modal-body text-center p-4 pt-0">
+                    <div class="avatar-lg bg-primary-soft text-primary">
+                        <i class="bi bi-book-fill"></i>
                     </div>
+                    <h4 class="fw-bold text-dark mb-1" id="modalClassName">Lớp Toán 9A</h4>
+                    <span class="badge bg-success rounded-pill px-3 mb-4">Đang hoạt động</span>
                     
-                    <div class="row g-3">
+                    <div class="row g-3 text-start">
                         <div class="col-6">
-                            <div class="p-3 bg-light rounded-3 h-100">
-                                <small class="text-muted d-block mb-1">Giáo viên phụ trách</small>
+                            <div class="p-3 bg-light rounded-3 h-100 border">
+                                <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.7rem">Giáo viên</small>
                                 <div class="fw-bold text-dark" id="modalTeacher">Thầy Nguyễn Văn A</div>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-3 bg-light rounded-3 h-100">
-                                <small class="text-muted d-block mb-1">Phòng học</small>
+                            <div class="p-3 bg-light rounded-3 h-100 border">
+                                <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.7rem">Phòng học</small>
                                 <div class="fw-bold text-dark" id="modalRoom">P.101</div>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-3 bg-light rounded-3 h-100">
-                                <small class="text-muted d-block mb-1">Sĩ số hiện tại</small>
+                            <div class="p-3 bg-light rounded-3 h-100 border">
+                                <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.7rem">Sĩ số</small>
                                 <div class="fw-bold text-dark"><span id="modalStudents">30</span> học viên</div>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-3 bg-light rounded-3 h-100">
-                                <small class="text-muted d-block mb-1">Thời gian</small>
+                            <div class="p-3 bg-light rounded-3 h-100 border">
+                                <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.7rem">Thời gian</small>
                                 <div class="fw-bold text-primary" id="modalTime">Thứ 2 - Ca 1</div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 p-3 bg-light rounded-bottom-4">
-                    <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary rounded-pill px-4">
-                        <i class="bi bi-pencil-square me-2"></i>Chỉnh sửa
-                    </button>
+                <div class="modal-footer justify-content-center border-0 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                    <a href="/quan-ly-lop/" class="btn btn-primary rounded-pill px-4">
+                        <i class="bi bi-pencil-square me-2"></i>Quản Lý Lớp
+                    </a>
                 </div>
             </div>
         </div>
@@ -446,12 +559,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // 1. Hàm hiển thị Loading khi chạy AI
+        // 1. Loading Function
         function showLoading() {
             document.getElementById('loadingOverlay').classList.add('active');
         }
 
-        // 2. Hàm mở Modal Chi Tiết
+        // 2. Open Modal Function
         function openDetailModal(name, teacher, room, students, time) {
             document.getElementById('modalClassName').innerText = name;
             document.getElementById('modalTeacher').innerText = teacher;

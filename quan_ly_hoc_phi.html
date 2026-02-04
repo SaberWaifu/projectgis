@@ -5,11 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Quản lý tài chính và học phí - Hệ thống Toán GIS Enterprise">
     <title>Quản Lý Tài Chính - Toán GIS Pro</title>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -23,18 +20,19 @@
         :root {
             /* Main Colors */
             --primary: #0d6efd;
+            --primary-soft: #eff6ff;
+            
             --secondary: #64748b;
             
             /* Finance Colors */
             --money-main: #059669;      /* Emerald 600 */
             --money-light: #d1fae5;     /* Emerald 100 */
-            --money-dark: #064e3b;      /* Emerald 900 */
-            
-            --expense-main: #dc2626;    /* Red 600 */
-            --expense-light: #fee2e2;   /* Red 100 */
             
             --pending-main: #d97706;    /* Amber 600 */
             --pending-light: #fef3c7;   /* Amber 100 */
+            
+            --expense-main: #dc2626;    /* Red 600 */
+            --expense-light: #fee2e2;   /* Red 100 */
 
             /* Neutral Colors */
             --dark-bg: #0f172a;         /* Slate 900 */
@@ -42,22 +40,9 @@
             --card-bg: #ffffff;
             --border-color: #e2e8f0;
             
-            /* Gradients */
-            --grad-header: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --grad-success: linear-gradient(135deg, #059669 0%, #10b981 100%);
-            --grad-primary: linear-gradient(135deg, #0d6efd 0%, #3b82f6 100%);
-
-            /* Shadows */
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --shadow-card: 0 0 0 1px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.05);
-
-            /* Typography */
+            --navbar-height: 76px;
             --font-head: 'Montserrat', sans-serif;
             --font-body: 'Open Sans', sans-serif;
-            
-            --navbar-height: 76px;
         }
 
         body {
@@ -67,12 +52,10 @@
             line-height: 1.6;
         }
 
-        h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
-            font-family: var(--font-head);
-        }
+        h1, h2, h3, h4, h5, h6, .navbar-brand, .btn { font-family: var(--font-head); }
 
         /* =========================================
-           2. NAVIGATION BAR (FIXED TOP)
+           2. NAVIGATION BAR
            ========================================= */
         .navbar-custom {
             height: var(--navbar-height);
@@ -87,7 +70,7 @@
             letter-spacing: 1px; display: flex; align-items: center; gap: 10px;
         }
         .brand-icon {
-            width: 36px; height: 36px; background: var(--grad-primary);
+            width: 36px; height: 36px; background: linear-gradient(135deg, #0d6efd 0%, #00d2ff 100%);
             border-radius: 8px; display: flex; align-items: center; justify-content: center;
             font-size: 1.1rem; color: white;
         }
@@ -116,7 +99,7 @@
         
         .dropdown-menu-dark-custom {
             background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: var(--shadow-lg); margin-top: 10px; border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); margin-top: 10px; border-radius: 12px;
         }
         .dropdown-item { color: #cbd5e1; padding: 8px 20px; font-weight: 500; font-size: 0.9rem; }
         .dropdown-item:hover { background: rgba(255,255,255,0.05); color: white; }
@@ -145,10 +128,10 @@
 
         .stat-card {
             background: var(--card-bg); border-radius: 16px; padding: 24px;
-            border: 1px solid var(--border-color); box-shadow: var(--shadow-card);
+            border: 1px solid var(--border-color); box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             transition: 0.3s; position: relative; overflow: hidden;
         }
-        .stat-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
         
         .stat-icon {
             width: 50px; height: 50px; border-radius: 12px;
@@ -162,15 +145,14 @@
         .stat-value { font-size: 2rem; font-weight: 800; color: var(--dark-bg); line-height: 1.1; margin-bottom: 5px; }
         .stat-label { font-size: 0.9rem; color: var(--secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* Trend Indicator */
         .stat-trend {
             position: absolute; top: 24px; right: 24px;
             font-size: 0.8rem; font-weight: 700;
             display: flex; align-items: center; gap: 4px;
             padding: 4px 8px; border-radius: 6px;
         }
-        .trend-up { background: var(--success-soft); color: var(--money-main); }
-        .trend-neutral { background: #f1f5f9; color: var(--secondary); }
+        .trend-up { background: #ecfdf5; color: var(--money-main); }
+        .trend-down { background: #fff7ed; color: var(--pending-main); }
 
         /* =========================================
            4. TOOLBAR & CONTROLS
@@ -179,7 +161,7 @@
             background: var(--card-bg); padding: 20px; border-radius: 16px;
             border: 1px solid var(--border-color); margin-bottom: 30px;
             display: flex; flex-wrap: wrap; gap: 15px; align-items: center;
-            justify-content: space-between; box-shadow: var(--shadow-sm);
+            justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .search-wrapper { position: relative; flex: 1; max-width: 400px; }
@@ -197,18 +179,8 @@
             color: var(--secondary);
         }
 
-        .filter-group { display: flex; gap: 10px; }
-        .btn-filter {
-            padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 0.9rem;
-            border: 1px solid var(--border-color); background: white; color: var(--secondary);
-            transition: 0.2s; cursor: pointer;
-        }
-        .btn-filter:hover, .btn-filter.active {
-            border-color: var(--primary); color: var(--primary); background: var(--primary-soft);
-        }
-
         .btn-create {
-            background: var(--grad-success); color: white; border: none;
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; border: none;
             padding: 12px 24px; border-radius: 12px; font-weight: 700;
             display: flex; align-items: center; gap: 8px;
             box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3); transition: 0.3s;
@@ -216,12 +188,12 @@
         .btn-create:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4); color: white; }
 
         /* =========================================
-           5. DATA TABLE DESIGN
+           5. DATA TABLE
            ========================================= */
         .table-container {
             background: var(--card-bg); border-radius: 16px;
             border: 1px solid var(--border-color); overflow: hidden;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
         .custom-table { width: 100%; border-collapse: collapse; }
@@ -238,7 +210,6 @@
             border-bottom: 1px solid var(--border-color);
             color: var(--dark-bg); font-size: 0.95rem;
         }
-        .custom-table tr:last-child td { border-bottom: none; }
         .custom-table tr:hover { background-color: #fcfcfc; }
 
         .invoice-id { font-family: 'Consolas', monospace; font-weight: 700; color: var(--primary); background: var(--primary-soft); padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; }
@@ -253,13 +224,15 @@
         .user-detail span { font-size: 0.8rem; color: var(--secondary); }
 
         .amount-text { font-family: 'Consolas', monospace; font-weight: 700; color: var(--money-main); font-size: 1rem; }
+        .amount-pending { color: var(--pending-main); }
         
         .status-badge {
             padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
-            display: inline-flex; align-items: center; gap: 6px;
+            display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.2s;
         }
         .badge-paid { background: var(--money-light); color: var(--money-main); }
-        .badge-pending { background: var(--pending-light); color: var(--pending-main); }
+        .badge-pending { background: var(--pending-light); color: var(--pending-main); border: 1px solid #fcd34d; }
+        .badge-pending:hover { background: #fde68a; }
 
         .action-btns .btn-icon {
             width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-color);
@@ -268,6 +241,7 @@
         }
         .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
         .btn-icon.delete:hover { border-color: var(--expense-main); color: var(--expense-main); background: var(--expense-light); }
+        .btn-icon.confirm:hover { border-color: var(--money-main); color: var(--money-main); background: var(--money-light); }
 
         /* =========================================
            6. MODAL & FOOTER
@@ -306,6 +280,8 @@
                     <li class="nav-item"><a class="nav-link" href="/quan-ly-lop/">Lớp Học</a></li>
                     <li class="nav-item"><a class="nav-link" href="/quan-ly/">Học Viên</a></li>
                     <li class="nav-item"><a class="nav-link active" href="#">Học Phí</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/xep-lich/">Xếp Lịch</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/hoc-vien-moi/">Bản Đồ</a></li>
                     <li class="nav-item"><a class="nav-link" href="/danh-sach-chi-nhanh/">Chi Nhánh</a></li>
                 </ul>
                 
@@ -337,7 +313,7 @@
         <div class="section-header animate__animated animate__fadeInDown">
             <div class="page-title">
                 <h2><i class="bi bi-cash-coin text-success"></i> Quản Lý Tài Chính</h2>
-                <p>Theo dõi dòng tiền, hóa đơn học phí và báo cáo doanh thu.</p>
+                <p>Theo dõi dòng tiền, tạo công nợ và xác nhận thanh toán.</p>
             </div>
             <div class="d-none d-md-block">
                 <div class="badge-term">
@@ -350,29 +326,22 @@
             <div class="stat-card">
                 <div class="stat-icon icon-revenue"><i class="bi bi-graph-up-arrow"></i></div>
                 <div class="stat-value">{{ stats.total_revenue|intcomma }} <small class="fs-6 text-muted">đ</small></div>
-                <div class="stat-label">Tổng Doanh Thu</div>
-                <div class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i> +12%</div>
+                <div class="stat-label">Thực Thu (Đã Đóng)</div>
+                <div class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i> Tốt</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon icon-pending"><i class="bi bi-hourglass-split"></i></div>
+                <div class="stat-value text-warning">{{ stats.pending_debt|intcomma }} <small class="fs-6 text-muted">đ</small></div>
+                <div class="stat-label">Nợ Phải Thu</div>
+                <div class="stat-trend trend-down">Cần xử lý</div>
             </div>
 
             <div class="stat-card">
                 <div class="stat-icon icon-invoice"><i class="bi bi-receipt"></i></div>
                 <div class="stat-value">{{ stats.total_invoices }}</div>
-                <div class="stat-label">Tổng Hóa Đơn</div>
+                <div class="stat-label">Tổng Phiếu Thu</div>
                 <div class="stat-trend trend-neutral">Tháng này</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon icon-revenue" style="background: #dbeafe; color: #2563eb;"><i class="bi bi-check-lg"></i></div>
-                <div class="stat-value">{{ stats.recent_paid }}</div>
-                <div class="stat-label">Giao Dịch Thành Công</div>
-                <div class="stat-trend trend-up"><i class="bi bi-arrow-up-short"></i> Ổn định</div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-icon icon-pending"><i class="bi bi-hourglass-split"></i></div>
-                <div class="stat-value">0</div>
-                <div class="stat-label">Chờ Thanh Toán</div>
-                <div class="stat-trend trend-neutral">--</div>
             </div>
         </div>
 
@@ -389,19 +358,13 @@
         {% endif %}
 
         <div class="control-bar animate__animated animate__fadeInUp">
-            <div class="filter-group d-none d-md-flex">
-                <div class="btn-filter active">Tất cả</div>
-                <div class="btn-filter">Đã thu</div>
-                <div class="btn-filter">Chưa thu</div>
-            </div>
-
             <div class="search-wrapper">
                 <i class="bi bi-search search-icon"></i>
-                <input type="text" id="invoiceSearch" class="search-input" placeholder="Tìm theo tên học viên, mã hóa đơn..." onkeyup="searchTable()">
+                <input type="text" id="invoiceSearch" class="search-input" placeholder="Tìm tên học viên..." onkeyup="searchTable()">
             </div>
 
             <button class="btn-create" data-bs-toggle="modal" data-bs-target="#addInvoiceModal">
-                <i class="bi bi-plus-lg"></i> Tạo Phiếu Thu
+                <i class="bi bi-plus-lg"></i> Tạo Phiếu Mới
             </button>
         </div>
 
@@ -410,7 +373,7 @@
                 <table class="custom-table" id="invoiceTable">
                     <thead>
                         <tr>
-                            <th>Mã Hóa Đơn</th>
+                            <th>Mã Phiếu</th>
                             <th>Thông Tin Học Viên</th>
                             <th>Nội Dung</th>
                             <th>Ngày Tạo</th>
@@ -432,23 +395,36 @@
                                     </div>
                                 </div>
                             </td>
-                            <td>
-                                <span class="d-inline-block text-truncate" style="max-width: 200px;">{{ hd.noi_dung }}</span>
-                            </td>
-                            <td>{{ hd.ngay_tao|date:"d/m/Y" }} <br> <small class="text-muted">{{ hd.ngay_tao|date:"H:i" }}</small></td>
+                            <td>{{ hd.noi_dung }}</td>
+                            <td>{{ hd.ngay_tao|date:"d/m/Y" }}</td>
                             <td class="text-end">
-                                <span class="amount-text">+{{ hd.so_tien|intcomma }}</span>
-                            </td>
-                            <td>
-                                <span class="status-badge badge-paid">
-                                    <i class="bi bi-check-circle-fill"></i> Hoàn tất
+                                <span class="amount-text {% if hd.trang_thai == 'CHUA' %}amount-pending{% endif %}">
+                                    {{ hd.so_tien|intcomma }}
                                 </span>
                             </td>
+                            <td>
+                                {% if hd.trang_thai == 'ROI' %}
+                                    <span class="status-badge badge-paid">
+                                        <i class="bi bi-check-circle-fill"></i> Đã thu
+                                    </span>
+                                {% else %}
+                                    <a href="/cap-nhat-hoc-phi/{{ hd.id }}/" class="text-decoration-none" onclick="return confirm('Xác nhận đã thu tiền từ học viên {{ hd.hoc_vien.ten }}?');">
+                                        <span class="status-badge badge-pending" title="Bấm để xác nhận thu tiền">
+                                            <i class="bi bi-clock-history"></i> Chưa thu
+                                        </span>
+                                    </a>
+                                {% endif %}
+                            </td>
                             <td class="text-end action-btns">
-                                <button class="btn-icon" title="In Hóa Đơn" onclick="printInvoice('{{ hd.id }}', '{{ hd.hoc_vien.ten }}', '{{ hd.so_tien|intcomma }}')">
+                                {% if hd.trang_thai == 'CHUA' %}
+                                    <a href="/cap-nhat-hoc-phi/{{ hd.id }}/" class="btn-icon confirm" title="Xác nhận thu tiền" onclick="return confirm('Xác nhận thu tiền?');">
+                                        <i class="bi bi-cash-coin"></i>
+                                    </a>
+                                {% endif %}
+                                <button class="btn-icon" title="In Phiếu" onclick="alert('Đang in phiếu #{{ hd.id }}...')">
                                     <i class="bi bi-printer"></i>
                                 </button>
-                                <a href="/xoa-hoa-don/{{ hd.id }}/" class="btn-icon delete" title="Hủy Phiếu" onclick="return confirm('Xác nhận hủy hóa đơn #{{ hd.id }}? Hành động này không thể hoàn tác.');">
+                                <a href="/xoa-hoa-don/{{ hd.id }}/" class="btn-icon delete" title="Hủy Phiếu" onclick="return confirm('Hủy hóa đơn này?');">
                                     <i class="bi bi-trash"></i>
                                 </a>
                             </td>
@@ -458,25 +434,13 @@
                             <td colspan="7" class="text-center py-5">
                                 <div class="opacity-50">
                                     <i class="bi bi-receipt-cutoff display-1 text-secondary"></i>
-                                    <p class="mt-3 text-secondary fw-bold">Chưa có dữ liệu hóa đơn nào.</p>
+                                    <p class="mt-3 text-secondary fw-bold">Chưa có phiếu thu nào.</p>
                                 </div>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
-            
-            <div class="d-flex justify-content-between align-items-center p-3 bg-light border-top">
-                <small class="text-secondary">Hiển thị <strong>{{ ds_hoa_don.count }}</strong> bản ghi</small>
-                <nav>
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">Sau</a></li>
-                    </ul>
-                </nav>
             </div>
         </div>
     </div>
@@ -494,49 +458,54 @@
                     {% csrf_token %}
                     <div class="modal-header">
                         <h5 class="modal-title fw-bold text-success">
-                            <i class="bi bi-plus-circle-fill me-2"></i>Lập Phiếu Thu Mới
+                            <i class="bi bi-plus-circle-fill me-2"></i>Tạo Phiếu Mới
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="alert alert-light border border-success-subtle text-success small d-flex align-items-center mb-4">
-                            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
-                            <div>Hóa đơn sẽ được ghi nhận vào doanh thu ngay lập tức sau khi tạo.</div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label text-muted small">Chọn Học Viên <span class="text-danger">*</span></label>
-                            <select name="hoc_vien" class="form-select form-select-lg" required>
-                                <option value="">-- Tìm kiếm học viên --</option>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-muted small">Học Viên <span class="text-danger">*</span></label>
+                            <select name="hoc_vien" class="form-select" required>
+                                <option value="">-- Chọn học viên --</option>
                                 {% for hv in ds_hoc_vien %}
                                     <option value="{{ hv.id }}">{{ hv.ten }} (ID: {{ hv.id }})</option>
                                 {% endfor %}
                             </select>
                         </div>
                         
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label class="form-label text-muted small">Nội Dung Thu</label>
                             <select name="noi_dung" class="form-select">
                                 <option value="Học phí Tháng 2/2026">Học phí Tháng 2/2026</option>
                                 <option value="Học phí Tháng 3/2026">Học phí Tháng 3/2026</option>
-                                <option value="Phí tài liệu/Sách giáo khoa">Phí tài liệu/Sách giáo khoa</option>
+                                <option value="Phí tài liệu">Phí tài liệu</option>
                                 <option value="Đóng giữ chỗ">Đóng giữ chỗ</option>
-                                <option value="Khác">Khác</option>
                             </select>
                         </div>
 
-                        <div class="mb-2">
-                            <label class="form-label text-muted small">Số Tiền Thực Thu <span class="text-danger">*</span></label>
-                            <div class="input-group input-group-lg">
-                                <input type="number" name="so_tien" class="form-control fw-bold text-success" placeholder="VD: 1500000" required>
-                                <span class="input-group-text bg-light text-muted">VNĐ</span>
+                        <div class="row g-3 mb-3">
+                            <div class="col-7">
+                                <label class="form-label text-muted small">Số Tiền <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" name="so_tien" class="form-control fw-bold" placeholder="VD: 1500000" required>
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                            </div>
+                            <div class="col-5">
+                                <label class="form-label text-muted small">Trạng Thái</label>
+                                <select name="trang_thai" class="form-select fw-bold">
+                                    <option value="ROI" class="text-success">Đã thu ngay</option>
+                                    <option value="CHUA" class="text-warning" selected>Chưa thu (Nợ)</option>
+                                </select>
                             </div>
                         </div>
+
                     </div>
                     <div class="modal-footer justify-content-between">
                         <button type="button" class="btn btn-light fw-bold text-secondary" data-bs-dismiss="modal">Đóng</button>
                         <button type="submit" class="btn btn-success px-4 fw-bold shadow-sm">
-                            <i class="bi bi-check-lg me-1"></i> Xác Nhận Thu
+                            <i class="bi bi-save me-1"></i> Lưu Phiếu
                         </button>
                     </div>
                 </form>
@@ -547,36 +516,25 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // Simple Client-side Search
+        // Client-side Search
         function searchTable() {
-            var input, filter, table, tr, td, i, txtValue;
+            var input, filter, table, tr, td, i;
             input = document.getElementById("invoiceSearch");
             filter = input.value.toUpperCase();
             table = document.getElementById("invoiceTable");
             tr = table.getElementsByTagName("tr");
 
             for (i = 0; i < tr.length; i++) {
-                // Search in Name (col 1) and ID (col 0)
                 var tdName = tr[i].getElementsByTagName("td")[1];
-                var tdId = tr[i].getElementsByTagName("td")[0];
-                
-                if (tdName || tdId) {
-                    var txtName = tdName.textContent || tdName.innerText;
-                    var txtId = tdId.textContent || tdId.innerText;
-                    
-                    if (txtName.toUpperCase().indexOf(filter) > -1 || txtId.toUpperCase().indexOf(filter) > -1) {
+                if (tdName) {
+                    var txtValue = tdName.textContent || tdName.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
                         tr[i].style.display = "";
                     } else {
                         tr[i].style.display = "none";
                     }
                 }
             }
-        }
-
-        // Dummy Print Function
-        function printInvoice(id, name, amount) {
-            alert(`Đang chuẩn bị in hóa đơn #${id}\nKhách hàng: ${name}\nSố tiền: ${amount} VNĐ`);
-            // In real app, open a new window with print layout
         }
     </script>
 </body>
