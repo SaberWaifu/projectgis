@@ -311,17 +311,16 @@ def xoa_lop_hoc(request, lop_id):
     
     return redirect('quan_ly_lop_page')
 
-# Trong views.py
-
 def quan_ly_hoc_phi(request):
     """Trang quản lý thu chi / học phí"""
     
-    # 1. XỬ LÝ TẠO HÓA ĐƠN MỚI (POST)
+    # 1. XỬ LÝ TẠO HÓA ĐƠN (Sửa đoạn này để nhận trạng thái từ Form)
     if request.method == "POST":
         try:
             hv_id = request.POST.get('hoc_vien')
             so_tien = request.POST.get('so_tien')
             noi_dung = request.POST.get('noi_dung')
+            trang_thai = request.POST.get('trang_thai') # <--- Lấy trạng thái từ form
             
             if not hv_id or not so_tien:
                 messages.error(request, "Vui lòng chọn học viên và nhập số tiền!")
@@ -331,22 +330,25 @@ def quan_ly_hoc_phi(request):
                     hoc_vien=hv,
                     so_tien=so_tien,
                     noi_dung=noi_dung,
-                    trang_thai='ROI'
+                    trang_thai=trang_thai # <--- Lưu trạng thái (CHUA hoặc ROI)
                 )
-                messages.success(request, f"Đã lập phiếu thu cho: {hv.ten}")
+                status_text = "Đã thu tiền" if trang_thai == 'ROI' else "Đã tạo công nợ"
+                messages.success(request, f"{status_text} cho: {hv.ten}")
         except Exception as e:
             messages.error(request, f"Lỗi: {e}")
         return redirect('quan_ly_hoc_phi')
 
-    # 2. LẤY DỮ LIỆU HIỂN THỊ
+    # 2. LẤY DỮ LIỆU
     ds_hoa_don = HoaDon.objects.all().select_related('hoc_vien').order_by('-ngay_tao')
-    ds_hoc_vien = HocVien.objects.all() # Để hiện trong Modal chọn người đóng tiền
+    ds_hoc_vien = HocVien.objects.all()
 
-    # Thống kê tổng doanh thu
-    tong_doanh_thu = ds_hoa_don.aggregate(Sum('so_tien'))['so_tien__sum'] or 0
+    # Thống kê (Chỉ tính tiền những phiếu ĐÃ THU)
+    tong_doanh_thu = ds_hoa_don.filter(trang_thai='ROI').aggregate(Sum('so_tien'))['so_tien__sum'] or 0
+    no_phai_thu = ds_hoa_don.filter(trang_thai='CHUA').aggregate(Sum('so_tien'))['so_tien__sum'] or 0
     
     stats = {
         'total_revenue': tong_doanh_thu,
+        'pending_debt': no_phai_thu, # Hiển thị nợ
         'total_invoices': ds_hoa_don.count(),
         'recent_paid': ds_hoa_don.filter(trang_thai='ROI').count()
     }
@@ -357,6 +359,21 @@ def quan_ly_hoc_phi(request):
         'stats': stats
     })
 
+def cap_nhat_trang_thai(request, hd_id):
+    """Chuyển đổi trạng thái Đã thu <-> Chưa thu"""
+    try:
+        hd = get_object_or_404(HoaDon, id=hd_id)
+        if hd.trang_thai == 'CHUA':
+            hd.trang_thai = 'ROI'
+            msg = "Đã xác nhận thu tiền thành công!"
+        else:
+            hd.trang_thai = 'CHUA'
+            msg = "Đã chuyển về trạng thái chưa thanh toán."
+        hd.save()
+        messages.success(request, msg)
+    except Exception as e:
+        messages.error(request, f"Lỗi: {e}")
+    return redirect('quan_ly_hoc_phi')
 def xoa_hoa_don(request, hd_id):
     try:
         hd = get_object_or_404(HoaDon, id=hd_id)
