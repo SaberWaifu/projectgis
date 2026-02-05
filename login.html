@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
     
     <style>
         body {
@@ -24,15 +25,25 @@
 
         .login-card {
             background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
             padding: 40px;
             width: 100%;
             max-width: 420px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
         }
+
+        /* Hiệu ứng ánh sáng chạy qua card */
+        .login-card::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine { 100% { left: 100%; } }
 
         .brand-logo {
             text-align: center; margin-bottom: 30px;
@@ -44,41 +55,71 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: white; padding: 12px 15px; border-radius: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 20px; transition: 0.3s;
         }
         .form-control:focus {
             background: rgba(255, 255, 255, 0.1);
-            border-color: #3b82f6; color: white; box-shadow: none;
+            border-color: #3b82f6; color: white; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
-        .form-control::placeholder { color: rgba(255, 255, 255, 0.4); }
+        .form-control::placeholder { color: rgba(255, 255, 255, 0.3); }
 
         .btn-login {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white; width: 100%; padding: 12px; border: none;
             border-radius: 12px; font-weight: 700; font-size: 1rem;
-            transition: 0.3s; margin-top: 10px;
+            transition: 0.3s; margin-top: 5px;
         }
         .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(37, 99, 235, 0.4); }
 
-        .alert-danger {
-            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);
-            color: #fca5a5; font-size: 0.9rem; border-radius: 10px;
+        /* --- XỬ LÝ MÀU SẮC THÔNG BÁO --- */
+        .alert-custom {
+            border-radius: 12px; font-size: 0.9rem; border: 1px solid;
+            display: flex; align-items: center; padding: 12px;
+            backdrop-filter: blur(5px);
+        }
+        /* Màu đỏ cho lỗi */
+        .alert-error, .alert-danger {
+            background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;
+        }
+        /* Màu xanh cho thành công */
+        .alert-success {
+            background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.3); color: #86efac;
+        }
+        /* Màu xanh dương cho thông báo thường */
+        .alert-info {
+            background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); color: #93c5fd;
         }
         
-        .footer-text { text-align: center; color: rgba(255,255,255,0.4); margin-top: 20px; font-size: 0.85rem; }
+        .register-link {
+            text-align: center; margin-top: 25px; pt-3;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9rem; color: rgba(255,255,255,0.6);
+        }
+        .register-link a {
+            color: #60a5fa; text-decoration: none; font-weight: 700; transition: 0.2s;
+        }
+        .register-link a:hover { color: #93c5fd; text-decoration: underline; }
+
+        .footer-text { text-align: center; color: rgba(255,255,255,0.3); margin-top: 20px; font-size: 0.75rem; }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
+    <div class="login-card animate__animated animate__fadeInUp">
         <div class="brand-logo">
             <i class="bi bi-grid-3x3-gap-fill me-2"></i>TOÁN <span>GIS</span>
         </div>
 
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-danger d-flex align-items-center" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <div class="alert-custom alert-{{ message.tags }} mb-4" role="alert">
+                    {% if message.tags == 'error' or message.tags == 'danger' %}
+                        <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+                    {% elif message.tags == 'success' %}
+                        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                    {% else %}
+                        <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                    {% endif %}
                     <div>{{ message }}</div>
                 </div>
             {% endfor %}
@@ -107,6 +148,10 @@
                 Đăng Nhập Hệ Thống
             </button>
         </form>
+        
+        <div class="register-link">
+            Chưa có tài khoản? <a href="#">Đăng ký ngay</a>
+        </div>
 
         <div class="footer-text">
             &copy; 2026 Hệ thống quản lý giáo dục Toán GIS
