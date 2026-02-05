@@ -1,7 +1,6 @@
 import math
 from .models import CoSo, HocVien
 
-
 def tinh_khoang_cach_haversine(lat1, lon1, lat2, lon2):
     """
     Sử dụng công thức Haversine có ép kiểu dữ liệu để tránh lỗi so sánh chuỗi.

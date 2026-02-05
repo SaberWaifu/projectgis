@@ -49,18 +49,18 @@ class LopHoc(models.Model):
         ('HUY', 'Đã kết thúc/Hủy'),
     ]
     
-    ten_lop = models.CharField(max_length=100) # Ví dụ: Toán 9A
+    ten_lop = models.CharField(max_length=100)
     giao_vien = models.ForeignKey(GiaoVien, on_delete=models.SET_NULL, null=True)
     
-    # Sĩ số tối đa để tính % thanh Progress Bar (VD: 30 em)
+
     si_so_toi_da = models.IntegerField(default=30)
     
-    # Điều kiện mở lớp (Thầy nói > 20 mới mở)
+
     min_si_so = models.IntegerField(default=20) 
     
     trang_thai = models.CharField(max_length=10, choices=TRANG_THAI, default='CHO')
     
-    # Danh sách học viên thực tế trong lớp
+
     hoc_viens = models.ManyToManyField(HocVien, blank=True, related_name='cac_lop_tham_gia')
 
     def si_so_hien_tai(self):
@@ -89,10 +89,9 @@ class LichHoc(models.Model):
     lop_hoc = models.ForeignKey(LopHoc, on_delete=models.CASCADE, related_name='lich_hoc') 
     phong = models.ForeignKey(PhongHoc, on_delete=models.SET_NULL, null=True)
     
-    # Thứ: 2, 3, 4, 5, 6, 7, 8 (CN)
+
     thu = models.IntegerField(choices=[(i, f"Thứ {i}") for i in range(2, 9)])
-    
-    # Ca: 1 (Sáng), 2 (Chiều), 3 (Tối)... tùy quy định
+
     ca = models.IntegerField() 
 
     def __str__(self):
