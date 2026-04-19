@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Bài Tập - {{ lop.ten_lop }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { background-color: #0B1121; color: #fff; font-family: 'Segoe UI', sans-serif;
+            background-image: radial-gradient(circle at top right, rgba(16,185,129,0.08), transparent 40%); }
+        .glass-card { background: rgba(30,41,59,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .text-gradient { background: linear-gradient(to right,#34d399,#3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% for message in messages %}
+    Swal.fire({ icon:'{% if message.tags == "error" %}error{% else %}success{% endif %}', title:'Thông báo', text:'{{ message }}', toast:true, position:'top-end', showConfirmButton:false, timer:3000 });
+    {% endfor %}
+});
+</script>
+{% endif %}
+
+<nav class="px-6 py-4 glass-card flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+        <span class="text-2xl font-black text-white">TOÁN <span class="text-emerald-400">GIS</span></span>
+        <span class="text-gray-400 hidden md:inline">/ Quản Lý Bài Tập</span>
+    </div>
+    <a href="{% url 'trang_giao_vien' %}" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+</nav>
+
+<main class="flex-grow p-4 md:p-8 max-w-6xl mx-auto w-full flex flex-col gap-6">
+
+    <div class="glass-card rounded-2xl p-6 border-l-4 border-l-emerald-500">
+        <h1 class="text-2xl font-bold text-white mb-1">Bài Tập Lớp: <span class="text-gradient">{{ lop.ten_lop }}</span></h1>
+        <p class="text-gray-400 text-sm">Giao bài tập, xem danh sách bài đã giao và chấm điểm.</p>
+    </div>
+
+    <!-- Form giao bài tập -->
+    <div class="glass-card rounded-2xl p-6">
+        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="bi bi-plus-circle-fill text-emerald-400"></i> Giao Bài Tập Mới</h2>
+        <form method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="them">
+            <div class="md:col-span-2">
+                <label class="text-xs font-bold text-gray-400 mb-1 block">Tiêu đề bài tập <span class="text-red-400">*</span></label>
+                <input type="text" name="tieu_de" required class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="VD: BTVN chương 3 - Phương trình bậc 2">
+            </div>
+            <div class="md:col-span-2">
+                <label class="text-xs font-bold text-gray-400 mb-1 block">Mô tả / Yêu cầu</label>
+                <textarea name="mo_ta" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Hướng dẫn làm bài, yêu cầu cụ thể..."></textarea>
+            </div>
+            <div>
+                <label class="text-xs font-bold text-gray-400 mb-1 block">Hạn nộp</label>
+                <input type="datetime-local" name="han_nop" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-gray-400 mb-1 block">Hình thức học</label>
+                <select name="hinh_thuc" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    <option value="ONL">Online</option>
+                    <option value="OFF">Offline</option>
+                </select>
+            </div>
+            <div class="md:col-span-2">
+                <label class="text-xs font-bold text-gray-400 mb-1 block">File đề bài (tùy chọn)</label>
+                <input type="file" name="file_de" class="block w-full text-sm text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer bg-slate-800 rounded-lg border border-slate-600">
+            </div>
+            <div class="md:col-span-2 flex justify-end">
+                <button type="submit" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-8 py-2.5 rounded-lg font-bold shadow-lg transition flex items-center gap-2">
+                    <i class="bi bi-send-fill"></i> Giao Bài Tập
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Danh sách bài tập đã giao -->
+    <div>
+        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2"><i class="bi bi-list-task text-blue-400"></i> Danh Sách Bài Tập Đã Giao ({{ ds_bai_tap.count }})</h2>
+        <div class="flex flex-col gap-4">
+            {% for bt in ds_bai_tap %}
+            <div class="glass-card rounded-2xl p-5 border border-slate-700/50">
+                <div class="flex flex-col md:flex-row justify-between gap-4">
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-3 mb-2 flex-wrap">
+                            <h3 class="text-lg font-bold text-white">{{ bt.tieu_de }}</h3>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold {% if bt.hinh_thuc == 'ONL' %}bg-blue-900/50 text-blue-300 border border-blue-500/30{% else %}bg-orange-900/50 text-orange-300 border border-orange-500/30{% endif %}">
+                                {{ bt.get_hinh_thuc_display }}
+                            </span>
+                        </div>
+                        {% if bt.mo_ta %}<p class="text-gray-400 text-sm mb-2">{{ bt.mo_ta }}</p>{% endif %}
+                        <div class="flex gap-4 text-xs text-gray-500 flex-wrap">
+                            <span><i class="bi bi-calendar3 me-1"></i> Giao: {{ bt.ngay_tao|date:"d/m/Y H:i" }}</span>
+                            {% if bt.han_nop %}<span class="text-yellow-400"><i class="bi bi-clock me-1"></i> Hạn: {{ bt.han_nop|date:"d/m/Y H:i" }}</span>{% endif %}
+                            <span class="text-emerald-400"><i class="bi bi-file-earmark-check me-1"></i> Đã nộp: {{ bt.bai_nop.count }}/{{ bt.lop_hoc.hoc_viens.count }}</span>
+                            {% if bt.file_de %}<a href="{{ bt.file_de.url }}" target="_blank" class="text-blue-400 hover:underline"><i class="bi bi-paperclip me-1"></i>File đề</a>{% endif %}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a href="{% url 'cham_bai_tap' bt.id %}" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-1">
+                            <i class="bi bi-pencil-square"></i> Chấm Bài
+                        </a>
+                        <form method="POST" onsubmit="return confirm('Xóa bài tập này?')">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="bt_id" value="{{ bt.id }}">
+                            <button type="submit" class="bg-red-900/50 hover:bg-red-600 text-red-300 hover:text-white px-4 py-2 rounded-lg text-sm font-bold transition border border-red-700/50 flex items-center gap-1">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="glass-card rounded-2xl p-12 text-center border-dashed border-2 border-slate-700">
+                <i class="bi bi-inbox text-4xl text-gray-600 block mb-3"></i>
+                <p class="text-gray-400">Chưa có bài tập nào được giao cho lớp này.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</main>
+
+<footer class="mt-auto py-6 border-t border-gray-800 text-center text-sm text-gray-500">&copy; 2026 Hệ thống TOÁN GIS.</footer>
+</body>
+</html>

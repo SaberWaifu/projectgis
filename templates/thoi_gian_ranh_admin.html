@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Rảnh Giáo Viên - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color:#0B1121; color:#fff; font-family:'Segoe UI',sans-serif; }
+        .glass-card { background:rgba(30,41,59,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); }
+        .text-gradient { background:linear-gradient(to right,#34d399,#3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<nav class="px-6 py-4 glass-card flex justify-between items-center sticky top-0 z-50">
+    <span class="text-2xl font-black text-white">TOÁN <span class="text-emerald-400">GIS</span></span>
+    <div class="flex gap-3">
+        <a href="{% url 'xep_lich_page' %}" class="bg-emerald-700 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+            <i class="bi bi-calendar-check"></i> Xếp Lịch
+        </a>
+        <a href="{% url 'thong_ke_page' %}" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+            <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
+    </div>
+</nav>
+
+<main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full flex flex-col gap-6">
+
+    <div class="glass-card rounded-2xl p-6 border-l-4 border-l-emerald-500">
+        <h1 class="text-2xl font-bold text-white mb-1">Lịch Rảnh <span class="text-gradient">Tất Cả Giáo Viên</span></h1>
+        <p class="text-gray-400 text-sm">Tổng hợp thời gian rảnh để admin xếp thời khóa biểu phù hợp.</p>
+    </div>
+
+    {% for gv in ds_gv %}
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="px-5 py-4 bg-black/20 flex items-center gap-3 border-b border-slate-700/50">
+            <div class="w-9 h-9 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-300 font-bold">{{ gv.ten|first|upper }}</div>
+            <div>
+                <p class="font-bold text-white">{{ gv.ten }}</p>
+                <p class="text-xs text-gray-400">{{ gv.mon_day }} &bull; {{ gv.co_so.ten|default:"Chưa phân công" }}</p>
+            </div>
+            <span class="ml-auto text-xs text-emerald-400 bg-emerald-900/30 px-3 py-1 rounded-full border border-emerald-500/20">
+                {{ gv.thoi_gian_ranh.count }} ca rảnh
+            </span>
+        </div>
+        <div class="p-4 overflow-x-auto">
+            <table class="w-full text-xs">
+                <thead>
+                    <tr>
+                        <th class="p-2 text-gray-500 text-left">Ca</th>
+                        {% for thu in thu_range %}<th class="p-2 text-gray-400 text-center font-bold">Thứ {{ thu }}</th>{% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ca in ca_range %}
+                    <tr class="border-t border-slate-800/50">
+                        <td class="p-2 text-gray-500 font-semibold">Ca {{ ca }}</td>
+                        {% for thu in thu_range %}
+                        <td class="p-1 text-center">
+                            {% with found=False %}
+                            {% for r in gv.thoi_gian_ranh.all %}
+                            {% if r.thu == thu and r.ca == ca %}
+                            <span class="inline-block w-8 h-8 rounded-lg bg-emerald-500/30 text-emerald-300 text-base flex items-center justify-center border border-emerald-500/50">✓</span>
+                            {% endif %}
+                            {% endfor %}
+                            {% endwith %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% empty %}
+    <div class="glass-card rounded-2xl p-12 text-center">
+        <i class="bi bi-people text-4xl text-gray-600 block mb-3"></i>
+        <p class="text-gray-400">Chưa có giáo viên nào đăng ký thời gian rảnh.</p>
+    </div>
+    {% endfor %}
+</main>
+
+<footer class="mt-auto py-6 border-t border-gray-800 text-center text-sm text-gray-500">&copy; 2026 Hệ thống TOÁN GIS.</footer>
+</body>
+</html>

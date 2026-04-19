@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xin Nghỉ - {{ lop.ten_lop }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { background-color:#0B1121; color:#fff; font-family:'Segoe UI',sans-serif; }
+        .glass-card { background:rgba(30,41,59,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    {% for message in messages %}
+    Swal.fire({
+        icon: '{% if message.tags == "error" %}error{% else %}success{% endif %}',
+        title: 'Thông báo',
+        text: '{{ message }}',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000
+    });
+    {% endfor %}
+});
+</script>
+{% endif %}
+
+<nav class="px-6 py-4 glass-card flex justify-between items-center sticky top-0 z-50">
+    <span class="text-2xl font-black text-white">TOÁN <span class="text-blue-400">GIS</span></span>
+    {% if giao_vien %}
+    <a href="{% url 'trang_giao_vien' %}" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+    {% else %}
+    <a href="{% url 'trang_nguoi_dung' %}" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+    {% endif %}
+</nav>
+
+<main class="flex-grow flex items-center justify-center p-4 md:p-8">
+    <div class="w-full max-w-lg">
+
+        <div class="glass-card rounded-2xl p-6 mb-5 border-l-4 border-l-yellow-500">
+            <h1 class="text-xl font-bold text-white mb-1"><i class="bi bi-calendar-x text-yellow-400 me-2"></i>Đơn Xin Nghỉ</h1>
+            <p class="text-gray-400 text-sm">Lớp: <span class="text-white font-bold">{{ lop.ten_lop }}</span></p>
+            {% if giao_vien %}
+            <p class="text-gray-400 text-sm mt-1">Giáo viên: <span class="text-emerald-300 font-bold">{{ giao_vien.ten }}</span></p>
+            {% elif hoc_vien %}
+            <p class="text-gray-400 text-sm mt-1">Học viên: <span class="text-blue-300 font-bold">{{ hoc_vien.ten }}</span></p>
+            {% endif %}
+        </div>
+
+        <div class="glass-card rounded-2xl p-6">
+            <form method="POST" class="flex flex-col gap-4">
+                {% csrf_token %}
+                <div>
+                    <label class="text-xs font-bold text-gray-400 mb-1 block">Ngày xin nghỉ <span class="text-red-400">*</span></label>
+                    <input type="date" name="ngay_nghi" required
+                        class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-yellow-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-400 mb-1 block">Lý do xin nghỉ <span class="text-red-400">*</span></label>
+                    <textarea name="ly_do" rows="4" required
+                        class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                        placeholder="Mô tả lý do nghỉ học (ốm, bận công việc, gia đình...)"></textarea>
+                </div>
+                <div class="bg-yellow-900/20 border border-yellow-500/30 rounded-xl p-4 text-sm text-yellow-300">
+                    <i class="bi bi-info-circle me-2"></i> Đơn sẽ được gửi đến Admin để duyệt. Sau khi duyệt, hệ thống sẽ thông báo lịch học bù (nếu có).
+                </div>
+                <button type="submit" class="w-full bg-yellow-600 hover:bg-yellow-500 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="bi bi-send-fill"></i> Gửi Đơn Xin Nghỉ
+                </button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer class="mt-auto py-6 border-t border-gray-800 text-center text-sm text-gray-500">&copy; 2026 Hệ thống TOÁN GIS.</footer>
+</body>
+</html>

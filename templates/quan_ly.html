@@ -1,0 +1,788 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Quản lý hồ sơ học viên và tọa độ GIS - Toán GIS Enterprise">
+    <meta name="author" content="Toán GIS Team">
+    <title>Hồ Sơ Học Viên - Toán GIS Pro</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        /* ==================================================
+           1. CẤU HÌNH BIẾN MÀU SẮC (CSS VARIABLES)
+        ================================================== */
+        :root {
+            --primary: #0d6efd;
+            --primary-dark: #0a58ca;
+            --primary-soft: #eff6ff;
+            --secondary: #64748b;
+            --secondary-light: #94a3b8;
+            --accent: #ffc107;
+            --success: #10b981;
+            --success-soft: #ecfdf5;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --warning-soft: #fffbeb;
+            --dark-bg: #0f172a;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+            --border-color: #e2e8f0;
+            --gradient-main: linear-gradient(135deg, #0d6efd 0%, #00d2ff 100%);
+            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --navbar-height: 76px;
+            --sidebar-width: 380px;
+            --font-head: 'Montserrat', sans-serif;
+            --font-body: 'Open Sans', sans-serif;
+        }
+
+        /* ==================================================
+           2. CÀI ĐẶT CHUNG
+        ================================================== */
+        body {
+    font-family: var(--font-body);
+    background-color: var(--light-bg);
+    color: #334155;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    
+    /* 1. Đổi height thành min-height để trang có thể dài ra nếu nội dung nhiều */
+    min-height: 100vh;
+    
+    /* 2. Xóa bỏ overflow: hidden (vì nó khóa luôn cuộn dọc) và thay bằng 2 dòng này */
+    overflow-x: hidden !important; 
+    width: 100% !important;
+}
+
+        h1, h2, h3, h4, h5, h6, .btn, .navbar-brand { font-family: var(--font-head); }
+        a { text-decoration: none; transition: 0.3s; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* ==================================================
+           3. THANH ĐIỀU HƯỚNG (NAVBAR)
+        ================================================== */
+        .navbar-custom { height: var(--navbar-height); background: var(--dark-bg); border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 2000; padding: 0; box-shadow: var(--shadow-md); }
+        .navbar-brand { font-weight: 800; font-size: 1.4rem; color: #fff !important; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        .brand-icon { width: 36px; height: 36px; background: var(--gradient-main); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: white; box-shadow: 0 0 15px rgba(13, 110, 253, 0.4); }
+        .navbar-brand span { color: var(--accent); }
+
+        .nav-link { color: rgba(255,255,255,0.7) !important; font-weight: 600; padding: 8px 16px !important; margin: 0 2px; border-radius: 50px; transition: 0.3s; font-size: 0.9rem; }
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: white !important; transform: translateY(-1px); }
+        .nav-link.active { background: var(--primary); color: white !important; box-shadow: 0 4px 10px rgba(13,110,253,0.3); }
+
+        .user-avatar-sm { width: 34px; height: 34px; background: var(--accent); color: var(--dark-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; border: 2px solid rgba(255,255,255,0.2); }
+        .btn-login-nav { border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 30px; padding: 6px 20px; font-weight: 600; font-size: 0.9rem; text-decoration: none; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .btn-login-nav:hover { background: white; color: var(--dark-bg); }
+        
+        .dropdown-menu-dark-custom { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); box-shadow: var(--shadow-lg); margin-top: 10px; border-radius: 12px; }
+        .dropdown-item { color: #cbd5e1; padding: 8px 20px; font-weight: 500; font-size: 0.9rem; transition: 0.2s; }
+        .dropdown-item:hover { background: rgba(255,255,255,0.05); color: white; padding-left: 25px; }
+
+        /* ==================================================
+           4. BỐ CỤC CHÍNH (SIDEBAR + CONTENT)
+        ================================================== */
+        .app-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - var(--navbar-height));
+            overflow: hidden;
+        }
+
+        /* --- CỘT TRÁI: FORM ĐĂNG KÝ (SIDEBAR) --- */
+        .sidebar-panel { width: var(--sidebar-width); background: var(--white); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); z-index: 1000; overflow-y: auto; }
+        .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-color); background: #f8fafc; transition: background 0.3s; }
+        .sidebar-header.edit-mode { background: var(--warning-soft); }
+        
+        .sidebar-title h5 { font-weight: 800; color: var(--dark-bg); margin: 0; font-size: 1.2rem; }
+        .sidebar-title p { margin: 5px 0 0; font-size: 0.85rem; color: var(--secondary); }
+
+        .sidebar-content { padding: 20px; }
+
+        /* Form Styling */
+        .form-label { font-weight: 700; font-size: 0.85rem; color: var(--secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-control, .form-select { padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border-color); font-size: 0.95rem; transition: 0.3s; background: #f8fafc; }
+        .form-control:focus, .form-select:focus { background: white; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); outline: none; }
+        .form-control:invalid { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2); }
+        .input-group-text { background: white; border-color: var(--border-color); color: var(--primary); font-size: 1rem; }
+
+        .btn-search-addr { background: var(--primary); color: white; border: none; border-radius: 0 10px 10px 0; font-weight: 600; padding: 0 15px; transition: 0.3s; }
+        .btn-search-addr:hover { background: var(--primary-dark); }
+
+        #pickerMap { height: 220px; width: 100%; border-radius: 12px; border: 2px solid var(--border-color); margin-bottom: 10px; z-index: 1; cursor: crosshair; }
+
+        .btn-submit { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--gradient-main); color: white; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; margin-top: 15px; box-shadow: 0 10px 20px rgba(13, 110, 253, 0.25); text-transform: uppercase; letter-spacing: 0.5px; }
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(13, 110, 253, 0.35); }
+        
+        .btn-update { background: var(--gradient-warning); box-shadow: 0 10px 20px rgba(245, 158, 11, 0.25); }
+        .btn-update:hover { box-shadow: 0 15px 25px rgba(245, 158, 11, 0.35); background: #f59e0b; color: white;}
+        
+        .btn-cancel { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: white; color: var(--secondary); font-weight: 600; display: none; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; margin-top: 10px; }
+        .btn-cancel:hover { background: #f1f5f9; color: var(--dark-bg); }
+
+        /* --- CỘT PHẢI: BẢNG DỮ LIỆU (CONTENT AREA) --- */
+        .content-area { flex: 1; display: flex; flex-direction: column; background: var(--light-bg); overflow: hidden; }
+
+        .stats-bar { padding: 24px 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .stat-card { background: var(--white); border-radius: 16px; padding: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 15px; transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .bg-blue { background: var(--primary-soft); color: var(--primary); }
+        .bg-green { background: var(--success-soft); color: var(--success); }
+        .bg-orange { background: #fff7ed; color: var(--warning); }
+        .stat-text h3 { margin: 0; font-weight: 800; font-size: 1.6rem; color: var(--dark-bg); }
+        .stat-text p { margin: 0; font-size: 0.8rem; color: var(--secondary); font-weight: 600; text-transform: uppercase; }
+
+        .table-wrapper { flex: 1; margin: 0 30px 30px; background: var(--white); border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; overflow: hidden; }
+        .table-toolbar { padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; flex-wrap: wrap; gap: 15px; }
+        .filter-group { display: flex; gap: 15px; flex: 1; max-width: 600px; }
+        .search-wrapper { position: relative; flex: 2; }
+        .search-input-table { width: 100%; padding: 10px 15px 10px 40px; border-radius: 10px; border: 1px solid var(--border-color); background: white; font-size: 0.9rem; transition: 0.3s; }
+        .search-input-table:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px var(--primary-soft); }
+        .search-icon-table { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--secondary); }
+
+        .status-filter { flex: 1; padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border-color); background-color: white; color: var(--secondary); font-weight: 600; font-size: 0.9rem; cursor: pointer; outline: none; }
+
+        .table-scroll { flex: 1; overflow-y: auto; }
+        .custom-table { width: 100%; border-collapse: collapse; }
+        .custom-table th { background: white; padding: 16px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: var(--secondary); border-bottom: 2px solid var(--border-color); position: sticky; top: 0; z-index: 10; }
+        .custom-table td { padding: 16px 24px; vertical-align: middle; border-bottom: 1px solid var(--border-color); color: var(--dark-bg); font-size: 0.9rem; }
+        .custom-table tr:hover { background-color: #fcfcfc; }
+
+        .user-cell { display: flex; align-items: center; gap: 15px; }
+        .avatar-circle { width: 42px; height: 42px; border-radius: 12px; background: var(--primary-soft); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; }
+        .user-details h6 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--dark-bg); }
+        .user-details span { font-size: 0.8rem; color: var(--secondary); font-weight: 600; }
+
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; }
+        .badge-ok { background: var(--success-soft); color: var(--success); border: 1px solid #bbf7d0; }
+        .badge-wait { background: #fff7ed; color: var(--warning); border: 1px solid #fde68a; }
+
+        .action-cell { display: flex; justify-content: flex-end; gap: 8px; }
+        .btn-icon { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border-color); background: white; color: var(--secondary); display: flex; align-items: center; justify-content: center; transition: 0.2s; cursor: pointer; text-decoration: none; }
+        .btn-icon:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+        .btn-edit:hover { border-color: var(--warning); color: var(--warning); background: var(--warning-soft); }
+        .btn-delete:hover { border-color: var(--danger); color: var(--danger); background: #fef2f2; }
+
+        .table-footer { padding: 15px 24px; border-top: 1px solid var(--border-color); background: white; display: flex; justify-content: space-between; align-items: center; }
+        .hidden-row { display: none !important; }
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-icon { font-size: 4rem; color: #cbd5e1; margin-bottom: 15px; display: block; }
+
+        @media (max-width: 991px) {
+    /* 1. Đập bỏ cấu trúc 2 cột ngang, ép xếp dọc từ trên xuống */
+    .app-container {
+        flex-direction: column !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    /* 2. Cột Form đăng ký bung rộng 100% màn hình */
+    .sidebar-panel {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 4px solid var(--primary) !important;
+        height: auto !important;
+    }
+
+    /* 3. Cột Bảng dữ liệu tự động dãn theo nội dung */
+    .content-area {
+        overflow: visible !important;
+    }
+
+    /* 4. Các thẻ Thống kê (Tổng HV, Phân tuyến...) xếp dọc thành 3 hàng */
+    .stats-bar {
+        grid-template-columns: 1fr !important;
+        padding: 15px !important;
+    }
+
+    /* 5. Căn lề lại bảng dữ liệu cho vừa mép điện thoại */
+    .table-wrapper {
+        margin: 15px !important;
+    }
+
+    /* 6. Khung tìm kiếm rớt dòng cho dễ bấm */
+    .filter-group {
+        flex-direction: column;
+    }
+}
+
+    </style>
+    
+</head>
+{% if not user.is_authenticated or not user.is_staff %}<script>window.location.href="{% url 'trang_chu' %}";</script>{% endif %}
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="{% url 'trang_chu' %}">
+                <div class="brand-icon"><i class="bi bi-people-fill"></i></div>
+                <div>TOÁN <span>GIS</span> <small class="d-block fw-normal text-muted" style="font-size: 0.7rem;">Student Manager</small></div>
+            </a>
+            
+            <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav mx-auto align-items-center">
+{% if user.is_authenticated and user.is_staff %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'thong_ke_page' %}"><i class="bi bi-grid-fill me-1"></i> Tổng Quan</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'quan_ly_page' %}"><i class="bi bi-people-fill me-1"></i> Học Viên</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_giao_vien' %}"><i class="bi bi-person-video3 me-1"></i> Giáo Viên</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_lop_page' %}"><i class="bi bi-easel2-fill me-1"></i> Lớp Học</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_hoc_phi' %}"><i class="bi bi-piggy-bank-fill me-1"></i> Học Phí</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'xep_lich_page' %}"><i class="bi bi-calendar3 me-1"></i> Xếp Lịch</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'chi_nhanh_page' %}"><i class="bi bi-geo-alt-fill me-1"></i> Chi Nhánh</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dieu_phoi_page' %}"><i class="bi bi-map-fill me-1"></i> Bản Đồ</a></li>
+                    {% endif %}
+                    </ul>
+                
+                <div class="d-flex align-items-center gap-3 ms-lg-3">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-white" data-bs-toggle="dropdown">
+                                <div class="user-avatar-sm me-2">{{ user.username|slice:":1"|upper }}</div>
+                                <span class="d-none d-md-inline font-display fw-bold" style="font-size: 0.95rem;">{{ user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom">
+                                <li><a class="dropdown-item" href="{% url 'trang_chu' %}"><i class="bi bi-speedometer2 me-2"></i>Dashboard Quản Trị</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Đăng Xuất</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn-login-nav">
+                            <i class="bi bi-box-arrow-in-right"></i> Đăng Nhập
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="app-container">
+        
+        <aside class="sidebar-panel">
+            <div class="sidebar-header" id="formHeader">
+                <div class="sidebar-title">
+                    <h5 id="formTitleText">Thêm Học Viên Mới</h5>
+                </div>
+                <p id="formSubText">Khởi tạo hồ sơ và lưu vị trí địa lý.</p>
+            </div>
+
+            <div class="sidebar-content">
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} shadow-sm border-0 rounded-3 mb-4 d-flex align-items-center" style="font-size: 0.85rem;">
+                            <i class="bi {% if message.tags == 'error' %}bi-exclamation-triangle-fill text-danger{% else %}bi-check-circle-fill text-success{% endif %} me-2 fs-5"></i> 
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" id="studentForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="student_id" id="editStudentId" value="">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Họ và Tên <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-bounding-box"></i></span>
+                            <input type="text" id="nameInput" name="ten" class="form-control" placeholder="Ví dụ: Nguyễn Văn A" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Khối Lớp</label>
+                        <select name="khoi_lop" id="gradeSelect" class="form-select">
+                            <option value="9" selected>Lớp 9 (Luyện thi)</option>
+                            <option value="8">Lớp 8 (Cơ bản)</option>
+                            <option value="7">Lớp 7</option>
+                            <option value="6">Lớp 6 (Đầu cấp)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3 p-3 bg-primary-soft rounded-3 border border-primary border-opacity-25">
+                        <label class="form-label text-primary mb-2"><i class="bi bi-geo-alt-fill me-1"></i> Tìm tọa độ qua địa chỉ</label>
+                        <div class="input-group mb-2">
+                            <input type="text" id="addressInput" class="form-control bg-white" placeholder="Tìm địa danh toàn cầu..." onkeypress="if(event.key === 'Enter'){ event.preventDefault(); searchAddress(); }">
+                            <button class="btn-search-addr" type="button" id="btnSearchAddress" onclick="searchAddress()">
+                                <i class="bi bi-search"></i> Tìm
+                            </button>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <span class="text-muted" style="font-size: 0.75rem;">Hoặc lấy vị trí của bạn:</span>
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-1 px-3 fw-bold" onclick="geolocateMe()">
+                                <i class="bi bi-crosshair me-1"></i> GPS Của Tôi
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Tọa Độ Trái Đất (Lat / Lon) <span class="text-danger">*</span></label>
+                        <div id="pickerMap" title="Click để chọn vị trí"></div>
+                        <div class="form-text mt-1 mb-2 text-secondary" style="font-size: 0.75rem">
+                            <i class="bi bi-cursor-fill me-1"></i>Click trên bản đồ hoặc tự nhập tọa độ chính xác.
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <span class="input-group-text p-1 ps-2 pe-2" style="font-size: 0.7rem">LAT</span>
+                                    <input type="number" step="any" id="latInput" name="lat" class="form-control fw-bold text-primary" value="10.776900" min="-90" max="90" required onchange="updateMapFromInput()">
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <span class="input-group-text p-1 ps-2 pe-2" style="font-size: 0.7rem">LON</span>
+                                    <input type="number" step="any" id="lonInput" name="lon" class="form-control fw-bold text-primary" value="106.700900" min="-180" max="180" required onchange="updateMapFromInput()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnSubmitForm" class="btn-submit">
+                        <i class="bi bi-save-fill me-2 fs-5"></i> Lưu Hồ Sơ
+                    </button>
+                    
+                    <button type="button" id="btnCancelEdit" class="btn-cancel" onclick="cancelEdit()">
+                        <i class="bi bi-x-circle"></i> Hủy Chỉnh Sửa
+                    </button>
+                </form>
+
+            </div>
+        </aside>
+
+        <main class="content-area">
+            
+            <div class="stats-bar animate__animated animate__fadeInDown">
+                <div class="stat-card">
+                    <div class="stat-icon bg-blue"><i class="bi bi-people-fill"></i></div>
+                    <div class="stat-text">
+                        <h3>{{ danh_sach.count }}</h3>
+                        <p>Tổng Học Viên</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-green"><i class="bi bi-check-circle-fill"></i></div>
+                    <div class="stat-text">
+                        <h3>100%</h3>
+                        <p>Đã Phân Tuyến</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-orange"><i class="bi bi-building-check"></i></div>
+                    <div class="stat-text">
+                        <h3>3</h3>
+                        <p>Cơ Sở Đào Tạo</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-wrapper animate__animated animate__fadeInUp">
+                <div class="table-toolbar">
+                    <h5 class="m-0 fw-bold" style="color: var(--dark-bg);"><i class="bi bi-list-columns-reverse me-2 text-primary"></i>Danh Sách Học Viên</h5>
+                    
+                    <div class="filter-group">
+                        <div class="search-wrapper">
+                            <i class="bi bi-search search-icon-table"></i>
+                            <input type="text" id="searchInput" class="search-input-table" placeholder="Tìm kiếm tên, mã số..." onkeyup="filterTable()">
+                        </div>
+                        
+                        <select id="statusFilter" class="status-filter" onchange="filterTable()">
+                            <option value="ALL">Tất cả trạng thái</option>
+                            <option value="ASSIGNED">Chỉ hiện Đã Xếp Lớp</option>
+                            <option value="PENDING">Chỉ hiện Chưa Xếp Lớp</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="table-scroll">
+                    <table class="custom-table" id="studentTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">ID</th>
+                                <th>Thông Tin Cơ Bản</th>
+                                <th>Tọa Độ GPS</th>
+                                <th>Trạng Thái Phân Tuyến</th>
+                                <th class="text-end">Hành Động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hv in danh_sach %}
+                            <tr class="student-row" data-status="{% if hv.co_so_gan_nhat %}ASSIGNED{% else %}PENDING{% endif %}">
+                                <td class="fw-bold text-secondary">#{{ hv.id|stringformat:"04d" }}</td>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="avatar-circle">{{ hv.ten|slice:":1" }}</div>
+                                        <div class="user-details">
+                                            <h6 class="searchable-name">{{ hv.ten }}</h6>
+                                            <span>Khối {{ hv.khoi_lop }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="font-family: monospace; color: var(--primary); font-weight: 600;">
+                                    <i class="bi bi-crosshair me-1 text-secondary"></i> {{ hv.lat|stringformat:".4f" }}, {{ hv.lon|stringformat:".4f" }}
+                                </td>
+                                <td>
+                                    {% if hv.co_so_gan_nhat %}
+                                        <div class="status-badge badge-ok">
+                                            <i class="bi bi-geo-alt-fill"></i> {{ hv.co_so_gan_nhat.ten }}
+                                        </div>
+                                        <div class="small text-muted mt-1 ms-1">Đã tối ưu khoảng cách</div>
+                                    {% else %}
+                                        <div class="status-badge badge-wait">
+                                            <i class="bi bi-exclamation-triangle-fill"></i> Chưa xếp lớp
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="action-cell">
+                                        <a href="javascript:void(0);" 
+                                           class="btn-icon btn-edit" 
+                                           title="Chỉnh sửa thông tin" 
+                                           data-bs-toggle="tooltip"
+                                           onclick="editStudent('{{ hv.id }}', '{{ hv.ten }}', '{{ hv.khoi_lop }}', '{{ hv.lat }}', '{{ hv.lon }}')">
+                                            <i class="bi bi-pencil-square text-warning"></i>
+                                        </a>
+
+                                        <a href="javascript:void(0);" 
+                                           class="btn-icon delete" 
+                                           title="Xóa hồ sơ" 
+                                           data-bs-toggle="tooltip"
+                                           onclick="confirmDelete('{{ hv.id }}', '{{ hv.ten }}')">
+                                            <i class="bi bi-trash3-fill"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="empty-state">
+                                        <i class="bi bi-person-vcard empty-icon"></i>
+                                        <h4 class="fw-bold text-dark">Chưa có hồ sơ học viên</h4>
+                                        <p class="text-secondary">Sử dụng Form bên trái để thêm học viên mới.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            
+                            <tr id="emptySearchRow" class="hidden-row">
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="empty-state">
+                                        <i class="bi bi-search empty-icon"></i>
+                                        <h4 class="fw-bold text-dark">Không tìm thấy kết quả</h4>
+                                        <p class="text-secondary">Vui lòng thử lại với từ khóa hoặc bộ lọc khác.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="table-footer">
+                    <span class="text-muted small fw-bold"><i class="bi bi-database me-1"></i> Hiển thị {{ danh_sach|length }} bản ghi</span>
+                    <nav>
+                        <ul class="pagination pagination-sm m-0">
+                            <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
+                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 1. Kích hoạt Tooltips của Bootstrap
+        document.addEventListener("DOMContentLoaded", function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+            
+            initPickerMap();
+        });
+
+        // 2. KHỞI TẠO BẢN ĐỒ CHỌN TỌA ĐỘ
+        let pickerMap, currentMarker;
+        const latInput = document.getElementById('latInput');
+        const lonInput = document.getElementById('lonInput');
+        
+        const pinIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/2776/2776067.png',
+            iconSize: [40, 40], iconAnchor: [20, 40]
+        });
+
+        function initPickerMap() {
+            if (pickerMap !== undefined && pickerMap !== null) pickerMap.remove();
+
+            pickerMap = L.map('pickerMap').setView([10.7769, 106.7009], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+}).addTo(pickerMap);
+
+// SAU (dùng CartoDB - miễn phí, không cần Referer)
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    subdomains: 'abcd',
+    maxZoom: 20
+}).addTo(pickerMap);
+            setTimeout(() => pickerMap.invalidateSize(), 200);
+
+            // Cắm ghim mặc định
+            currentMarker = L.marker([10.7769, 106.7009], {icon: pinIcon, draggable: true}).addTo(pickerMap);
+            
+            currentMarker.on('dragend', function(e) {
+                let pos = e.target.getLatLng();
+                updateInputs(pos.lat, pos.lng);
+            });
+
+            pickerMap.on('click', function(e) {
+                currentMarker.setLatLng(e.latlng);
+                updateInputs(e.latlng.lat, e.latlng.lng);
+            });
+        }
+
+        function updateInputs(lat, lon) {
+            latInput.value = lat.toFixed(6);
+            lonInput.value = lon.toFixed(6);
+        }
+
+        // CẬP NHẬT TỪ Ô NHẬP LÊN BẢN ĐỒ VÀ KIỂM TRA LOGIC
+        function updateMapFromInput() {
+            let lat = parseFloat(latInput.value);
+            let lon = parseFloat(lonInput.value);
+
+            if (isNaN(lat) || isNaN(lon)) return;
+
+            // Kiểm tra xem có nằm trên Trái Đất không
+            if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+                Swal.fire('Lỗi Tọa Độ', 'Tọa độ vượt quá giới hạn của Trái Đất!\nVĩ độ: [-90, 90]\nKinh độ: [-180, 180]', 'error');
+                return;
+            }
+
+            // Bay tới vị trí và cắm ghim
+            pickerMap.flyTo([lat, lon], 15);
+            if (currentMarker) {
+                currentMarker.setLatLng([lat, lon]);
+            }
+        }
+
+        // Bắt lỗi khi người dùng bấm Submit Form
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            let lat = parseFloat(latInput.value);
+            let lon = parseFloat(lonInput.value);
+
+            // Chặn gửi nếu nhập sai quy chuẩn bản đồ thế giới
+            if (isNaN(lat) || lat < -90 || lat > 90) {
+                e.preventDefault();
+                Swal.fire('Lỗi Tọa Độ', 'Vĩ độ (Latitude) không hợp lệ! Vui lòng nhập từ -90 đến 90.', 'error');
+                return false;
+            }
+
+            if (isNaN(lon) || lon < -180 || lon > 180) {
+                e.preventDefault();
+                Swal.fire('Lỗi Tọa Độ', 'Kinh độ (Longitude) không hợp lệ! Vui lòng nhập từ -180 đến 180.', 'error');
+                return false;
+            }
+        });
+
+        // 3. TÌM KIẾM ĐỊA CHỈ TỰ DO (Toàn thế giới)
+        async function searchAddress() {
+            const address = document.getElementById('addressInput').value.trim();
+            if (!address) {
+                Swal.fire('Chú ý', 'Vui lòng nhập địa chỉ cần tìm.', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btnSearchAddress');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+            btn.disabled = true;
+
+            try {
+                const query = encodeURIComponent(address);
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`);
+                const data = await response.json();
+
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+
+                    updateInputs(lat, lon);
+                    pickerMap.flyTo([lat, lon], 16);
+                    currentMarker.setLatLng([lat, lon]);
+
+                    Swal.fire({
+                        title: 'Đã tìm thấy!',
+                        text: 'Tọa độ đã được cập nhật thành công.',
+                        icon: 'success',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                } else {
+                    Swal.fire('Không tìm thấy', 'Không tìm thấy địa chỉ này trên bản đồ. Vui lòng nhập rõ hơn.', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Lỗi mạng', 'Không thể kết nối đến máy chủ bản đồ.', 'error');
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        }
+
+        // 4. LẤY VỊ TRÍ GPS HIỆN TẠI
+        function geolocateMe() {
+            if(navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(pos) {
+                        let lat = pos.coords.latitude;
+                        let lon = pos.coords.longitude;
+                        
+                        updateInputs(lat, lon);
+                        pickerMap.flyTo([lat, lon], 16);
+                        currentMarker.setLatLng([lat, lon]);
+                    }, 
+                    function() {
+                        Swal.fire('Lỗi', 'Vui lòng cấp quyền truy cập vị trí cho trình duyệt.', 'error');
+                    }
+                );
+            } else {
+                Swal.fire('Lỗi', 'Trình duyệt không hỗ trợ định vị GPS.', 'error');
+            }
+        }
+
+        // 5. BỘ LỌC BẢNG (TABLE FILTER)
+        function filterTable() {
+            let textTerm = document.getElementById("searchInput").value.toUpperCase();
+            let statusTerm = document.getElementById("statusFilter").value;
+            
+            let tableRows = document.querySelectorAll(".student-row");
+            let emptyRow = document.getElementById("emptySearchRow");
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                let nameText = row.querySelector('.searchable-name').innerText.toUpperCase();
+                let rowStatus = row.getAttribute('data-status');
+
+                let matchText = nameText.includes(textTerm);
+                let matchStatus = (statusTerm === "ALL") || (statusTerm === rowStatus);
+
+                if (matchText && matchStatus) {
+                    row.classList.remove("hidden-row");
+                    visibleCount++;
+                } else {
+                    row.classList.add("hidden-row");
+                }
+            });
+
+            if (visibleCount === 0 && tableRows.length > 0) {
+                emptyRow.classList.remove("hidden-row");
+            } else {
+                emptyRow.classList.add("hidden-row");
+            }
+        }
+
+        // 6. CHỨC NĂNG CHỈNH SỬA (EDIT STUDENT)
+        function editStudent(id, name, grade, lat, lon) {
+            // Điền data vào form
+            document.getElementById('editStudentId').value = id;
+            document.getElementById('nameInput').value = name;
+            document.getElementById('gradeSelect').value = grade;
+            
+            // Cập nhật bản đồ
+            let flatLat = parseFloat(lat.replace(',', '.')); // Đảm bảo đúng format số
+            let flatLon = parseFloat(lon.replace(',', '.'));
+            updateInputs(flatLat, flatLon);
+            pickerMap.flyTo([flatLat, flatLon], 16);
+            currentMarker.setLatLng([flatLat, flatLon]);
+
+            // Đổi giao diện Form sang chế độ Update
+            document.getElementById('formHeader').classList.add('edit-mode');
+            document.getElementById('formTitleText').innerHTML = `<i class="bi bi-pencil-square text-warning me-2"></i>Chỉnh sửa hồ sơ`;
+            document.getElementById('formSubText').innerText = `Đang cập nhật dữ liệu cho học viên #${id}`;
+            
+            let btnSubmit = document.getElementById('btnSubmitForm');
+            btnSubmit.classList.add('btn-update');
+            btnSubmit.innerHTML = '<i class="bi bi-check2-circle me-2 fs-5"></i> Cập Nhật Hồ Sơ';
+            
+            // Hiện nút Hủy
+            document.getElementById('btnCancelEdit').style.display = 'flex';
+
+            // Scroll về Form (Dành cho màn hình nhỏ)
+            document.querySelector('.sidebar-panel').scrollIntoView({behavior: 'smooth'});
+        }
+
+        function cancelEdit() {
+            // Reset dữ liệu
+            document.getElementById('editStudentId').value = '';
+            document.getElementById('studentForm').reset();
+            updateInputs(10.776900, 106.700900); // Tọa độ mặc định
+            pickerMap.flyTo([10.776900, 106.700900], 12);
+            currentMarker.setLatLng([10.776900, 106.700900]);
+
+            // Khôi phục giao diện Form
+            document.getElementById('formHeader').classList.remove('edit-mode');
+            document.getElementById('formTitleText').innerText = `Thêm Học Viên Mới`;
+            document.getElementById('formSubText').innerText = `Khởi tạo hồ sơ và lưu vị trí địa lý.`;
+
+            let btnSubmit = document.getElementById('btnSubmitForm');
+            btnSubmit.classList.remove('btn-update');
+            btnSubmit.innerHTML = '<i class="bi bi-save-fill me-2 fs-5"></i> Lưu Hồ Sơ';
+
+            // Ẩn nút Hủy
+            document.getElementById('btnCancelEdit').style.display = 'none';
+        }
+
+        // 7. SWEETALERT2 ACTIONS (XÓA CHỈ ĐỊNH XÓA)
+        function confirmDelete(id, name) {
+            Swal.fire({
+                title: 'Xóa Học Viên?',
+                text: `Hồ sơ và lộ trình của "${name}" sẽ bị xóa vĩnh viễn!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Đồng ý Xóa',
+                cancelButtonText: 'Hủy',
+                borderRadius: '16px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({title: 'Đang xử lý...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                    window.location.href = `/xoa-hoc-vien/${id}/`;
+                }
+            });
+        }
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quản Lý Giáo Viên - Toán GIS Pro</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary: #0d6efd; --primary-dark: #0a58ca; --primary-soft: #eff6ff;
+            --secondary: #64748b; --accent: #ffc107; --success: #10b981; --success-soft: #ecfdf5;
+            --danger: #ef4444; --warning: #f59e0b; --warning-soft: #fffbeb;
+            --dark-bg: #0f172a; --light-bg: #f8f9fa; --white: #ffffff; --border-color: #e2e8f0;
+            --gradient-main: linear-gradient(135deg, #0d6efd 0%, #00d2ff 100%);
+            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05); --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --navbar-height: 76px; --sidebar-width: 380px;
+            --font-head: 'Montserrat', sans-serif; --font-body: 'Open Sans', sans-serif;
+        }
+        body { font-family: var(--font-body); background-color: var(--light-bg); color: #334155; }
+        h1, h2, h3, h4, h5, h6, .btn, .navbar-brand { font-family: var(--font-head); }
+        a { text-decoration: none; transition: 0.3s; }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Navbar */
+        .navbar-custom { height: var(--navbar-height); background: var(--dark-bg); border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 2000; box-shadow: var(--shadow-md); }
+        .navbar-brand { font-weight: 800; font-size: 1.4rem; color: #fff !important; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        .brand-icon { width: 36px; height: 36px; background: var(--gradient-main); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: white; box-shadow: 0 0 15px rgba(13, 110, 253, 0.4); }
+        .navbar-brand span { color: var(--accent); }
+        .nav-link { color: rgba(255,255,255,0.7) !important; font-weight: 600; padding: 8px 16px !important; margin: 0 2px; border-radius: 50px; transition: 0.3s; font-size: 0.9rem; }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.1); color: white !important; }
+        .user-avatar-sm { width: 34px; height: 34px; background: var(--accent); color: var(--dark-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; border: 2px solid rgba(255,255,255,0.2); }
+        
+        /* Layout */
+        .app-container { display: flex; flex: 1; height: calc(100vh - var(--navbar-height)); overflow: hidden; }
+        .sidebar-panel { width: var(--sidebar-width); background: var(--white); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: var(--shadow-md); z-index: 1000; overflow-y: auto; }
+        .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-color); background: #f8fafc; transition: 0.3s; }
+        .sidebar-header.edit-mode { background: var(--warning-soft); }
+        .sidebar-title h5 { font-weight: 800; color: var(--dark-bg); margin: 0; font-size: 1.2rem; }
+        .sidebar-content { padding: 20px; }
+        
+        /* Form */
+        .form-label { font-weight: 700; font-size: 0.85rem; color: var(--secondary); margin-bottom: 8px; text-transform: uppercase; }
+        .form-control, .form-select { padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border-color); font-size: 0.95rem; background: #f8fafc; transition: 0.3s; }
+        .form-control:focus, .form-select:focus { background: white; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); outline: none; }
+        .input-group-text { background: white; border-color: var(--border-color); color: var(--primary); }
+        .btn-submit { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--gradient-main); color: white; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; margin-top: 15px; text-transform: uppercase; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(13, 110, 253, 0.25); }
+        .btn-update { background: var(--gradient-warning); }
+        .btn-cancel { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: white; color: var(--secondary); font-weight: 600; display: none; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; transition: 0.3s; }
+        .btn-cancel:hover { background: #f1f5f9; }
+
+        /* Content */
+        .content-area { flex: 1; display: flex; flex-direction: column; background: var(--light-bg); overflow: hidden; }
+        .stats-bar { padding: 24px 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .stat-card { background: var(--white); border-radius: 16px; padding: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 15px; transition: 0.3s; }
+        .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .stat-text h3 { margin: 0; font-weight: 800; font-size: 1.6rem; color: var(--dark-bg); }
+        .stat-text p { margin: 0; font-size: 0.8rem; color: var(--secondary); font-weight: 600; text-transform: uppercase; }
+        
+        /* Table */
+        .table-wrapper { flex: 1; margin: 0 30px 30px; background: var(--white); border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; overflow: hidden; }
+        .table-toolbar { padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+        .search-input-table { padding: 10px 15px 10px 40px; border-radius: 10px; border: 1px solid var(--border-color); width: 300px; }
+        .table-scroll { flex: 1; overflow-y: auto; }
+        .custom-table { width: 100%; border-collapse: collapse; }
+        .custom-table th { background: white; padding: 16px 24px; text-align: left; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; color: var(--secondary); border-bottom: 2px solid var(--border-color); position: sticky; top: 0; z-index: 10; }
+        .custom-table td { padding: 16px 24px; vertical-align: middle; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+        .avatar-circle { width: 40px; height: 40px; border-radius: 12px; background: var(--primary-soft); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; }
+        .action-cell { display: flex; justify-content: flex-end; gap: 8px; }
+        .btn-icon { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; transition: 0.2s; color: var(--secondary); cursor: pointer; }
+        .btn-icon:hover { border-color: var(--primary); background: var(--primary-soft); color: var(--primary); }
+        .btn-edit:hover { border-color: var(--warning); background: var(--warning-soft); color: var(--warning); }
+        .btn-delete:hover { border-color: var(--danger); background: #fef2f2; color: var(--danger); }
+        .hidden-row { display: none !important; }
+
+        /* ==================================================
+   GIAO DIỆN DÀNH RIÊNG CHO ĐIỆN THOẠI & TABLET (RESPONSIVE)
+================================================== */
+@media (max-width: 991px) {
+    /* Đập bỏ cấu trúc 2 cột ngang, ép xếp dọc từ trên xuống */
+    .app-container {
+        flex-direction: column !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    /* Cột Form đăng ký bung rộng 100% màn hình */
+    .sidebar-panel {
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 4px solid var(--primary) !important;
+        height: auto !important;
+    }
+
+    /* Cột Bảng dữ liệu tự động dãn theo nội dung */
+    .content-area {
+        overflow: visible !important;
+    }
+
+    /* Các thẻ Thống kê (Tổng GV, Môn Toán...) xếp dọc */
+    .stats-bar {
+        grid-template-columns: 1fr !important;
+        padding: 15px !important;
+        gap: 15px !important;
+    }
+
+    /* Căn lề lại bảng dữ liệu cho vừa mép điện thoại */
+    .table-wrapper {
+        margin: 15px !important;
+    }
+}
+    </style>
+</head>
+{% if not user.is_authenticated or not user.is_staff %}<script>window.location.href="{% url 'trang_chu' %}";</script>{% endif %}
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="{% url 'trang_chu' %}">
+                <div class="brand-icon"><i class="bi bi-person-workspace"></i></div>
+                <div>TOÁN <span>GIS</span> <small class="d-block fw-normal text-muted" style="font-size: 0.7rem;">Teacher Manager</small></div>
+            </a>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav mx-auto align-items-center">
+{% if user.is_authenticated and user.is_staff %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'thong_ke_page' %}"><i class="bi bi-grid-fill me-1"></i> Tổng Quan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_page' %}"><i class="bi bi-people-fill me-1"></i> Học Viên</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'quan_ly_giao_vien' %}"><i class="bi bi-person-video3 me-1"></i> Giáo Viên</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_lop_page' %}"><i class="bi bi-easel2-fill me-1"></i> Lớp Học</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_hoc_phi' %}"><i class="bi bi-piggy-bank-fill me-1"></i> Học Phí</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'xep_lich_page' %}"><i class="bi bi-calendar3 me-1"></i> Xếp Lịch</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'chi_nhanh_page' %}"><i class="bi bi-geo-alt-fill me-1"></i> Chi Nhánh</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dieu_phoi_page' %}"><i class="bi bi-map-fill me-1"></i> Bản Đồ</a></li>
+{% endif %}
+                </ul>
+                <div class="d-flex align-items-center gap-3 ms-lg-3">
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-white" data-bs-toggle="dropdown">
+                            <div class="user-avatar-sm me-2">{{ user.username|slice:":1"|upper }}</div>
+                            <span class="d-none d-md-inline font-display fw-bold" style="font-size: 0.95rem;">{{ user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1);">
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Đăng Xuất</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="app-container">
+        
+        <aside class="sidebar-panel">
+            <div class="sidebar-header" id="formHeader">
+                <div class="sidebar-title">
+                    <h5 id="formTitleText">Thêm Giáo Viên Mới</h5>
+                </div>
+                <p id="formSubText" class="text-muted small mt-1">Quản lý đội ngũ giảng dạy của trung tâm.</p>
+            </div>
+
+            <div class="sidebar-content">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} shadow-sm border-0 rounded-3 mb-4 d-flex align-items-center" style="font-size: 0.85rem;">
+                            <i class="bi {% if message.tags == 'error' %}bi-exclamation-triangle-fill text-danger{% else %}bi-check-circle-fill text-success{% endif %} me-2 fs-5"></i> 
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" id="teacherForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="gv_id" id="editTeacherId" value="">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Họ và Tên Giáo Viên <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                            <input type="text" id="nameInput" name="ten" class="form-control" placeholder="VD: Vũ Thị Phương" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 p-3 bg-warning-soft rounded-3 border border-warning border-opacity-25">
+                        <label class="form-label text-warning-dark mb-2"><i class="bi bi-shield-lock-fill me-1"></i> Tên Đăng Nhập (Tài Khoản)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-at"></i></span>
+                            <input type="text" id="accountInput" name="tai_khoan" class="form-control bg-white fw-bold text-primary" placeholder="VD: phuongvu, bean...">
+                        </div>
+                        <div class="form-text small mt-2"><i class="bi bi-info-circle-fill me-1"></i> Bắt buộc nhập chính xác tên tài khoản để hệ thống cấp quyền giáo viên.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Môn Giảng Dạy <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-book"></i></span>
+                            <input type="text" id="subjectInput" name="mon_day" class="form-control" placeholder="VD: Toán, Lý, IELTS..." required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Cơ Sở Trực Thuộc</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-building"></i></span>
+                            <select name="co_so" id="facilitySelect" class="form-select">
+                                <option value="">--- Chọn cơ sở ---</option>
+                                {% for cs in ds_co_so %}
+                                    <option value="{{ cs.id }}">{{ cs.ten }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-text small mt-1"><i class="bi bi-info-circle me-1"></i>Giáo viên có thể dạy ở nhiều nơi, đây là cơ sở quản lý chính.</div>
+                    </div>
+
+                    <button type="submit" id="btnSubmitForm" class="btn-submit">
+                        <i class="bi bi-person-plus-fill me-2 fs-5"></i> Lưu Hồ Sơ
+                    </button>
+                    <button type="button" id="btnCancelEdit" class="btn-cancel" onclick="cancelEdit()">
+                        <i class="bi bi-x-circle"></i> Hủy Cập Nhật
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <div class="stats-bar animate__animated animate__fadeInDown">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--primary-soft); color: var(--primary);"><i class="bi bi-person-video3"></i></div>
+                    <div class="stat-text">
+                        <h3>{{ stats.total }}</h3>
+                        <p>Tổng Số Giáo Viên</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--success-soft); color: var(--success);"><i class="bi bi-calculator"></i></div>
+                    <div class="stat-text">
+                        <h3>{{ stats.toan }}</h3>
+                        <p>Giáo Viên Bộ Môn Toán</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--warning-soft); color: var(--warning);"><i class="bi bi-translate"></i></div>
+                    <div class="stat-text">
+                        <h3>{{ stats.khac }}</h3>
+                        <p>Giáo Viên Môn Khác</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-wrapper animate__animated animate__fadeInUp">
+                <div class="table-toolbar">
+                    <h5 class="m-0 fw-bold text-dark"><i class="bi bi-card-list me-2 text-primary"></i>Danh Sách Nhân Sự</h5>
+                    <div style="position: relative;">
+                        <i class="bi bi-search" style="position: absolute; left: 15px; top: 12px; color: var(--secondary);"></i>
+                        <input type="text" id="searchInput" class="search-input-table" placeholder="Tìm kiếm tên, môn dạy..." onkeyup="filterTable()">
+                    </div>
+                </div>
+                
+                <div class="table-scroll">
+                    <table class="custom-table" id="teacherTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">ID</th>
+                                <th>Hồ Sơ Giáo Viên</th>
+                                <th>Tài Khoản App</th>
+                                <th>Chuyên Môn</th>
+                                <th>Cơ Sở Quản Lý</th>
+                                <th class="text-end">Hành Động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for gv in ds_giao_vien %}
+                            <tr class="teacher-row">
+                                <td class="fw-bold text-secondary">#{{ gv.id|stringformat:"03d" }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar-circle">{{ gv.ten|slice:":1" }}</div>
+                                        <div>
+                                            <h6 class="m-0 fw-bold text-dark searchable-text">{{ gv.ten }}</h6>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if gv.tai_khoan %}
+                                        <span class="badge bg-dark bg-opacity-10 text-dark border border-secondary border-opacity-25 px-2 py-1"><i class="bi bi-person-fill"></i> {{ gv.tai_khoan }}</span>
+                                    {% else %}
+                                        <span class="text-muted fst-italic small">Chưa cấp</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 searchable-text">
+                                        {{ gv.mon_day }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if gv.co_so %}
+                                        <div class="fw-medium text-dark"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ gv.co_so.ten }}</div>
+                                    {% else %}
+                                        <span class="text-muted fst-italic">Chưa điều phối</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="action-cell">
+                                        <a href="javascript:void(0);" class="btn-icon btn-edit" title="Chỉnh sửa" 
+                                           onclick="editTeacher('{{ gv.id }}', '{{ gv.ten }}', '{{ gv.tai_khoan|default:'' }}', '{{ gv.mon_day }}', '{{ gv.co_so.id|default:'' }}')">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a href="javascript:void(0);" class="btn-icon btn-delete" title="Xóa" 
+                                           onclick="confirmDelete('{{ gv.id }}', '{{ gv.ten }}')">
+                                            <i class="bi bi-trash3-fill"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center py-5 text-muted">Chưa có dữ liệu giáo viên trong hệ thống.</td></tr>
+                            {% endfor %}
+                            <tr id="emptySearchRow" class="hidden-row"><td colspan="6" class="text-center py-5 text-muted">Không tìm thấy giáo viên nào khớp với từ khóa.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function filterTable() {
+            let term = document.getElementById("searchInput").value.toLowerCase();
+            let rows = document.querySelectorAll(".teacher-row");
+            let emptyRow = document.getElementById("emptySearchRow");
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                let text = row.innerText.toLowerCase();
+                if (text.includes(term)) { row.classList.remove("hidden-row"); visibleCount++; } 
+                else { row.classList.add("hidden-row"); }
+            });
+            if (visibleCount === 0 && rows.length > 0) emptyRow.classList.remove("hidden-row");
+            else emptyRow.classList.add("hidden-row");
+        }
+
+        // Đã cập nhật: thêm tham số account để nhận Tên tài khoản
+        function editTeacher(id, name, account, subject, facilityId) {
+            document.getElementById('editTeacherId').value = id;
+            document.getElementById('nameInput').value = name;
+            document.getElementById('accountInput').value = account;
+            document.getElementById('subjectInput').value = subject;
+            document.getElementById('facilitySelect').value = facilityId;
+
+            document.getElementById('formHeader').classList.add('edit-mode');
+            document.getElementById('formTitleText').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Cập nhật hồ sơ`;
+            document.getElementById('formSubText').innerText = `Đang chỉnh sửa dữ liệu giáo viên #${id}`;
+            
+            let btn = document.getElementById('btnSubmitForm');
+            btn.classList.add('btn-update'); btn.innerHTML = '<i class="bi bi-check2-circle me-2 fs-5"></i> Lưu Thay Đổi';
+            document.getElementById('btnCancelEdit').style.display = 'flex';
+        }
+
+        function cancelEdit() {
+            document.getElementById('teacherForm').reset();
+            document.getElementById('editTeacherId').value = '';
+            document.getElementById('accountInput').value = '';
+            
+            document.getElementById('formHeader').classList.remove('edit-mode');
+            document.getElementById('formTitleText').innerText = `Thêm Giáo Viên Mới`;
+            document.getElementById('formSubText').innerText = `Quản lý đội ngũ giảng dạy của trung tâm.`;
+            
+            let btn = document.getElementById('btnSubmitForm');
+            btn.classList.remove('btn-update'); btn.innerHTML = '<i class="bi bi-person-plus-fill me-2 fs-5"></i> Lưu Hồ Sơ';
+            document.getElementById('btnCancelEdit').style.display = 'none';
+        }
+
+        function confirmDelete(id, name) {
+            Swal.fire({
+                title: 'Nghỉ Việc / Xóa Hồ Sơ?',
+                text: `Bạn có chắc chắn muốn xóa giáo viên "${name}"? Các lớp học do giáo viên này phụ trách sẽ bị trống!`,
+                icon: 'warning', showCancelButton: true,
+                confirmButtonColor: '#ef4444', cancelButtonColor: '#64748b',
+                confirmButtonText: 'Đồng ý Xóa', cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({title: 'Đang xử lý...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
+                    window.location.href = `/xoa-giao-vien/${id}/`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

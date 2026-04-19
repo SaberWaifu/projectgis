@@ -1,0 +1,853 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Hệ thống quản lý trung tâm Toán GIS - Giải pháp điều phối giáo dục thông minh">
+    <meta name="author" content="Toán GIS Team">
+    <title>Toán GIS Enterprise - Nền Tảng Giáo Dục Số</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        /* ==================================================
+           1. THEME SYSTEM & VARIABLES (DARK MODE DEFAULT)
+        ================================================== */
+        :root {
+            --primary: #3b82f6;      
+            --primary-dark: #2563eb;
+            --secondary: #94a3b8;    
+            --accent: #f59e0b;       
+            --dark-bg: #0B1121;      
+            --darker-bg: #060913;    
+            --glass-bg: rgba(30, 41, 59, 0.7); 
+            --white: #ffffff;
+            --gradient-main: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --gradient-text: linear-gradient(to right, #60a5fa, #c084fc);
+            --font-head: 'Montserrat', sans-serif;
+            --font-body: 'Open Sans', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--dark-bg);
+            color: var(--white);
+            line-height: 1.8;
+            overflow-x: hidden;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
+            font-family: var(--font-head);
+            letter-spacing: -0.5px;
+        }
+
+        a { text-decoration: none; }
+        .section-padding { padding: 100px 0; }
+        .bg-darker { background-color: var(--darker-bg); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+        /* ==================================================
+           2. NAVIGATION BAR
+        ================================================== */
+        .navbar {
+            padding: 20px 0; background: transparent; transition: all 0.4s ease;
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+        }
+        .navbar.scrolled {
+            background: rgba(11, 17, 33, 0.9); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .navbar-brand { font-weight: 900; font-size: 1.5rem; color: #fff !important; display: flex; align-items: center; gap: 12px; }
+        .brand-icon { width: 40px; height: 40px; background: var(--gradient-main); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: white; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+        .navbar-brand span { color: var(--accent); }
+        .nav-link { color: rgba(255,255,255,0.7) !important; font-weight: 600; margin: 0 12px; padding: 8px 0 !important; transition: 0.3s; position: relative; }
+        .nav-link:hover, .nav-link.active { color: #fff !important; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 0; background: var(--primary); transition: 0.3s; }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+
+        .btn-login-nav { background: transparent; color: white !important; border: 2px solid rgba(255,255,255,0.2); padding: 8px 24px !important; border-radius: 50px; font-weight: 700; transition: 0.3s; display: inline-block; }
+        .btn-login-nav:hover { background: white; color: var(--dark-bg) !important; border-color: white; }
+        .user-avatar-sm { width: 36px; height: 36px; background: var(--gradient-main); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; }
+
+        /* ==================================================
+           3. HERO SECTION
+        ================================================== */
+        .hero-section { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; padding-top: 80px; }
+        .hero-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 800px; height: 800px; background: var(--primary); border-radius: 50%; filter: blur(150px); opacity: 0.15; z-index: 0; }
+        .hero-content { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; }
+        .hero-badge { display: inline-block; padding: 8px 20px; border-radius: 50px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; font-weight: 700; font-size: 0.85rem; margin-bottom: 25px; letter-spacing: 1px; }
+        .hero-title { font-size: 4rem; font-weight: 900; line-height: 1.2; margin-bottom: 25px; }
+        .text-gradient { background: var(--gradient-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-desc { font-size: 1.15rem; color: var(--secondary); margin-bottom: 40px; padding: 0 50px; }
+        .hero-btn-group { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+        .btn-hero { padding: 16px 36px; border-radius: 50px; font-weight: 800; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 10px; }
+        .btn-hero-primary { background: var(--gradient-main); color: white; border: none; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4); }
+        .btn-hero-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(59, 130, 246, 0.6); color: white; }
+        .btn-hero-outline { background: rgba(255,255,255,0.05); color: white; border: 2px solid rgba(255,255,255,0.2); }
+        .btn-hero-outline:hover { background: rgba(255,255,255,0.1); border-color: white; color: white; transform: translateY(-3px); }
+
+        /* ==================================================
+           4. SECTIONS & CARDS
+        ================================================== */
+        .section-subtitle { color: var(--primary); font-weight: 800; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; display: block;}
+        .section-title { font-size: 2.5rem; font-weight: 800; margin-bottom: 50px; }
+        
+        .stats-section { border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.3); padding: 50px 0; }
+        .stat-num { font-size: 3rem; font-weight: 900; color: white; line-height: 1; margin-bottom: 10px; }
+        .stat-text { color: var(--secondary); font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
+
+        .glass-card { background: var(--glass-bg); border: 1px solid rgba(255,255,255,0.05); border-radius: 24px; padding: 40px 30px; height: 100%; transition: 0.4s; position: relative; overflow: hidden; }
+        .glass-card:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        
+        .step-circle { width: 60px; height: 60px; border-radius: 50%; background: var(--dark-bg); border: 2px solid var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; color: var(--primary); margin: 0 auto 20px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
+        .course-img { width: 100%; height: 200px; object-fit: cover; border-radius: 15px 15px 0 0; margin: -30px -30px 20px -30px; width: calc(100% + 60px); }
+        .teacher-img-wrap { width: 120px; height: 120px; border-radius: 50%; padding: 4px; background: var(--gradient-main); margin: 0 auto 20px; }
+        .teacher-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid var(--dark-bg); }
+
+        /* ==================================================
+           5. MAP STYLES & LEAFLET POPUP
+        ================================================== */
+        #homeMap { height: 450px; width: 100%; border-radius: 20px; border: 2px solid rgba(59, 130, 246, 0.5); z-index: 1; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .map-search-box { background: rgba(30,41,59,0.9); backdrop-filter: blur(10px); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+
+        .leaflet-popup-content-wrapper { background: #1e293b; color: white; border-radius: 12px; padding: 0; overflow: hidden; border: 1px solid rgba(59, 130, 246, 0.3); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .leaflet-popup-tip { background: #1e293b; }
+        .leaflet-popup-content { margin: 0; width: 220px !important; }
+        .popup-img { width: 100%; height: 120px; object-fit: cover; }
+        .popup-info { padding: 12px; }
+        .popup-title { font-weight: 800; color: #facc15; font-size: 16px; margin-bottom: 4px; font-family: var(--font-head); }
+        .popup-addr { font-size: 12px; color: #cbd5e1; line-height: 1.4; }
+        .popup-desc { font-size: 11px; color: #94a3b8; line-height: 1.4; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* ==================================================
+           6. FOOTER
+        ================================================== */
+        footer { background: #070B14; border-top: 1px solid rgba(255,255,255,0.05); padding: 80px 0 40px; color: var(--secondary); }
+        footer h5 { color: white; font-weight: 700; margin-bottom: 25px; }
+        .footer-links a { color: var(--secondary); display: block; margin-bottom: 12px; transition: 0.3s; }
+        .footer-links a:hover { color: var(--primary); padding-left: 5px; }
+        .social-icons a { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.05); color: white; margin-right: 10px; transition: 0.3s; }
+        .social-icons a:hover { background: var(--primary); transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+
+    <div id="preloader" style="position: fixed; inset: 0; background: var(--dark-bg); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'trang_chu' %}">
+                <div class="brand-icon"><i class="bi bi-geo-alt-fill"></i></div>
+                TOÁN <span>GIS</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" style="border-color: rgba(255,255,255,0.1);">
+                <i class="bi bi-list text-white fs-1"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav mx-auto align-items-center">
+                    {% if user.is_authenticated %}
+                        {% if user.is_staff or user.is_superuser %}
+                            <li class="nav-item"><a class="nav-link" href="/thong-ke/">Tổng Quan</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/quan-ly/">Học Viên</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/quan-ly-giao-vien/">Giáo Viên</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/quan-ly-lop/">Lớp Học</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/xep-lich/">Xếp Lịch</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/hoc-vien-moi/">Bản Đồ</a></li>
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link" href="/trang-nguoi-dung/">Bảng Điều Khiển</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/khoa-hoc/">Danh sách Lớp</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link active" href="#hero">Trang Chủ</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#about">Giới Thiệu</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#courses">Khóa Học</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#facilities">Tìm Cơ Sở</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#teachers">Giảng Viên</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#reviews">Đánh Giá</a></li> 
+                        <li class="nav-item"><a class="nav-link" href="#news">Tin Tức</a></li> 
+                    {% endif %}
+                </ul>
+
+                <div class="d-flex align-items-center gap-3 ms-lg-3">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-white" data-bs-toggle="dropdown">
+                                <div class="user-avatar-sm me-2">{{ user.username|slice:":1"|upper }}</div>
+                                <span class="d-none d-md-inline fw-bold small">{{ user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark" style="background: #1e293b; border-color: rgba(255,255,255,0.1);">
+                                {% if user.is_staff or user.is_superuser %}
+                                    <li><a class="dropdown-item" href="/thong-ke/"><i class="bi bi-speedometer2 me-2"></i>Dashboard Quản Trị</a></li>
+                                {% else %}
+                                    <li><a class="dropdown-item" href="/trang-nguoi-dung/"><i class="bi bi-person-badge me-2"></i>Hồ Sơ Của Tôi</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="/logout/"><i class="bi bi-box-arrow-right me-2"></i>Đăng Xuất</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn-login-nav">Đăng Nhập</a>
+                        <a href="{% url 'dang_ky_tai_khoan' %}" class="btn-login-nav" style="background: var(--primary); border: none;">Đăng Ký</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header id="hero" class="hero-section">
+        <div class="hero-glow"></div> 
+        <div class="container hero-content">
+            <div data-aos="fade-down">
+                <div class="hero-badge"><i class="bi bi-stars me-1"></i> TRUNG TÂM TOÁN HỌC CHUẨN QUỐC TẾ</div>
+            </div>
+            <h1 class="hero-title" data-aos="fade-up" data-aos-delay="100">
+                Đánh Thức Tiềm Năng Qua <br> <span class="text-gradient">Không Gian Kỹ Thuật Số</span>
+            </h1>
+            <p class="hero-desc" data-aos="fade-up" data-aos-delay="200">
+                Hệ thống giáo dục tiên phong ứng dụng công nghệ Bản đồ phân tuyến cơ sở gần nhất và Trí tuệ nhân tạo AI để tối ưu hóa lộ trình học tập của bạn.
+            </p>
+            <div class="hero-btn-group" data-aos="fade-up" data-aos-delay="300">
+                <a href="#facilities" class="btn btn-hero btn-hero-primary"><i class="bi bi-geo-alt-fill me-2"></i>Tìm Chi Nhánh Gần Bạn</a>
+                <a href="{% url 'trang_khoa_hoc' %}" class="btn btn-hero btn-hero-outline">Khám Phá Khóa Học</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="stats-section">
+        <div class="container">
+            <div class="row g-4 justify-content-center">
+                <div class="col-6 col-md-3 text-center">
+                    <div data-aos="fade-up" data-aos-delay="0">
+                        <div class="stat-num"><span class="counter" data-target="1500">0</span>+</div>
+                        <div class="stat-text">Học Viên Tin Tưởng</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 text-center">
+                    <div data-aos="fade-up" data-aos-delay="100">
+                        <div class="stat-num"><span class="counter" data-target="7">0</span></div>
+                        <div class="stat-text">Chi Nhánh Trung Tâm</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 text-center">
+                    <div data-aos="fade-up" data-aos-delay="200">
+                        <div class="stat-num"><span class="counter" data-target="100">0</span>%</div>
+                        <div class="stat-text">Đội Ngũ Giáo Viên Chuẩn</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 text-center">
+                    <div data-aos="fade-up" data-aos-delay="300">
+                        <div class="stat-num"><span class="counter" data-target="24">0</span>/7</div>
+                        <div class="stat-text">Hệ Thống Phục Vụ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="section-padding bg-darker">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000&auto=format&fit=crop" alt="Giới thiệu Toán GIS" class="img-fluid rounded-4 shadow-lg" style="border: 1px solid rgba(255,255,255,0.1);">
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <span class="section-subtitle">Triết lý giáo dục</span>
+                    <h2 class="section-title mb-4">Học Toán Không Chỉ Là Giải Số, Mà Là Giải Quyết Vấn Đề</h2>
+                    <p class="text-secondary mb-4">Tại Toán GIS, chúng tôi kết hợp giữa phương pháp sư phạm cốt lõi và công nghệ bản đồ số hiện đại. Hệ thống tự tự tính toán vị trí, xếp lịch bằng AI 100% không xung đột, giúp học viên tiết kiệm 40% thời gian di chuyển để tập trung tối đa cho việc học.</p>
+                    <a href="{% url 'dang_ky_tai_khoan' %}" class="btn btn-outline-light rounded-pill px-4 py-2 mt-3 fw-bold">Trở thành học viên ngay</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="courses" class="section-padding bg-darker">
+        <div class="container">
+            <div class="text-center" data-aos="fade-up">
+                <span class="section-subtitle">Chương trình đào tạo</span>
+                <h2 class="section-title">Khóa Học Tiêu Biểu</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="glass-card h-100 d-flex flex-column">
+                        <img src="https://images.unsplash.com/photo-1596495578065-6e0763fa1178?q=80&w=800&auto=format&fit=crop" class="course-img" alt="Toán Cấp 2">
+                        <span class="badge bg-primary bg-opacity-25 text-primary border border-primary mb-3" style="width: fit-content;">Trung Học Cơ Sở</span>
+                        <h4 class="fw-bold mb-3 text-white">Đại Số & Hình Học Lớp 9</h4>
+                        <p class="text-secondary mb-4 flex-grow-1">Tổng ôn toàn bộ kiến thức cấp THCS, luyện giải đề thi tuyển sinh vào lớp 10 chuyên.</p>
+                        <a href="{% url 'trang_khoa_hoc' %}" class="btn btn-outline-primary w-100 fw-bold rounded-3">Xem Chi Tiết</a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="glass-card h-100 d-flex flex-column" style="border-color: rgba(59,130,246,0.5); box-shadow: 0 0 20px rgba(59,130,246,0.15);">
+                        <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop" class="course-img" alt="Toán Nâng Cao">
+                        <span class="badge bg-warning bg-opacity-25 text-warning border border-warning mb-3" style="width: fit-content;">Lớp Chọn / HSG</span>
+                        <h4 class="fw-bold mb-3 text-white">Toán Nâng Cao Lớp 8</h4>
+                        <p class="text-secondary mb-4 flex-grow-1">Bồi dưỡng học sinh giỏi, giải đề thi HSG các cấp với phương pháp tư duy logic độc quyền.</p>
+                        <a href="{% url 'trang_khoa_hoc' %}" class="btn btn-primary w-100 fw-bold rounded-3">Đăng Ký Ngay</a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="glass-card h-100 d-flex flex-column">
+                        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop" class="course-img" alt="Toán Tư Duy">
+                        <span class="badge bg-success bg-opacity-25 text-success border border-success mb-3" style="width: fit-content;">Tiểu Học</span>
+                        <h4 class="fw-bold mb-3 text-white">Toán Tư Duy Tiểu Học</h4>
+                        <p class="text-secondary mb-4 flex-grow-1">Rèn luyện tư duy logic cho học sinh cấp 1 thông qua các trò chơi và tình huống thực tế.</p>
+                        <a href="{% url 'trang_khoa_hoc' %}" class="btn btn-outline-primary w-100 fw-bold rounded-3">Xem Chi Tiết</a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-5" data-aos="fade-up">
+                <a href="{% url 'trang_khoa_hoc' %}" class="text-primary fw-bold text-decoration-none">Xem toàn bộ khóa học đang mở <i class="bi bi-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <section id="facilities" class="section-padding">
+        <div class="container">
+            <div class="row g-5 align-items-center">
+                <div class="col-lg-5" data-aos="fade-right">
+                    <span class="section-subtitle">Định tuyến thông minh GIS</span>
+                    <h2 class="section-title mb-4">Bạn Đang Ở Đâu?</h2>
+                    <p class="text-secondary mb-4">Hệ thống sẽ tự động đo lường khoảng cách từ vị trí của bạn đến các cơ sở của Toán GIS để gợi ý nơi học thuật tiện lợi nhất.</p>
+                    
+                    <div class="map-search-box">
+                        <label class="text-white fw-bold mb-2 small">Cách 1: Tìm tự động bằng GPS</label>
+                        <button onclick="findNearestByGPS()" class="btn btn-primary w-100 fw-bold py-3 rounded-3 mb-4 shadow">
+                            <i class="bi bi-crosshair me-2"></i> Lấy Tọa Độ & Tìm Cơ Sở Gần Nhất
+                        </button>
+
+                        <label class="text-white fw-bold mb-2 small">Cách 2: Gõ địa chỉ của bạn</label>
+                        <div class="input-group">
+                            <input type="text" id="addressSearch" class="form-control bg-dark text-white border-secondary" placeholder="VD: Quận 1, TP.HCM...">
+                            <button onclick="findNearestByAddress()" class="btn btn-outline-info fw-bold px-4" id="btnSearch">Tìm</button>
+                        </div>
+                    </div>
+
+                    <div id="resultBox" class="p-4 rounded-4" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); display: none;">
+                        <h6 class="text-success fw-bold mb-1"><i class="bi bi-check-circle-fill"></i> TÌM THẤY CHI NHÁNH TỐI ƯU:</h6>
+                        <h3 class="text-white fw-bold" id="resBranchName">---</h3>
+                        <p class="text-secondary small mb-1"><i class="bi bi-geo-alt"></i> <span id="resBranchAddr">---</span></p>
+                        <p class="small mb-3" style="color: #94a3b8;" id="resBranchDesc"></p>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-success fs-6"><i class="bi bi-sign-turn-right-fill"></i> Cách bạn: <span id="resDistance">0</span> km</span>
+                            <a href="{% url 'dang_ky_tai_khoan' %}" class="btn btn-sm btn-outline-light rounded-pill ms-auto">Ghi danh ngay</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-7" data-aos="fade-left">
+                    <div class="position-relative">
+                        <div id="homeMap"></div>
+                        <div class="position-absolute top-0 start-50 translate-middle-y badge bg-warning text-dark py-2 px-4 rounded-pill fs-6 fw-bold shadow-lg" style="z-index: 10;">
+                            <i class="bi bi-info-circle-fill"></i> Nhấp trực tiếp lên bản đồ để chọn vị trí!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="teachers" class="section-padding">
+        <div class="container">
+            <div class="text-center" data-aos="fade-up">
+                <span class="section-subtitle">Chuyên môn cao</span>
+                <h2 class="section-title">Đội Ngũ Giảng Viên</h2>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="glass-card text-center p-4 h-100">
+                        <div class="teacher-img-wrap">
+                            <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=200&auto=format&fit=crop" class="teacher-img" alt="Thầy Hoàng Nam">
+                        </div>
+                        <h5 class="fw-bold text-white mb-1">Thầy Hoàng Nam</h5>
+                        <p class="text-primary small fw-bold mb-3">Trưởng Bộ Môn Toán</p>
+                        <p class="text-secondary small">10 năm kinh nghiệm luyện thi chuyên Toán.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="glass-card text-center p-4 h-100">
+                        <div class="teacher-img-wrap">
+                            <img src="https://tse1.mm.bing.net/th/id/OIP.ClGfTNv0qK082Fqkmv7DbwHaI9?rs=1&pid=ImgDetMain&o=7&rm=3" class="teacher-img" alt="Cô Trần Linh">
+                        </div>
+                        <h5 class="fw-bold text-white mb-1">Cô Trần Linh</h5>
+                        <p class="text-primary small fw-bold mb-3">Giảng Viên Toán THCS</p>
+                        <p class="text-secondary small">Chuyên gia tâm lý học đường, giúp lấy lại đam mê Toán.</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="glass-card text-center p-4 h-100">
+                        <div class="teacher-img-wrap">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop" class="teacher-img" alt="Thầy Lê Minh">
+                        </div>
+                        <h5 class="fw-bold text-white mb-1">Thầy Lê Minh</h5>
+                        <p class="text-primary small fw-bold mb-3">Giảng viên Toán Khối 12</p>
+                        <p class="text-secondary small">Tác giả của 3 đầu sách tham khảo luyện thi THPT QG.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="reviews" class="section-padding bg-darker">
+        <div class="container">
+            <div class="text-center" data-aos="fade-up">
+                <span class="section-subtitle" style="color: var(--accent);">Góc Nhìn Chân Thực</span>
+                <h2 class="section-title">Học Viên Nói Gì Về Toán GIS?</h2>
+            </div>
+            
+            <div class="row g-4">
+                {% for dg in ds_danh_gia_home|slice:":3" %}
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="glass-card p-4 h-100 d-flex flex-column">
+                        <div class="d-flex gap-3 align-items-center mb-3">
+                            <div class="user-avatar-sm fs-5" style="width: 50px; height: 50px; background: var(--accent);">{{ dg.ho_ten|slice:":1"|upper }}</div>
+                            <div>
+                                <h6 class="fw-bold text-white mb-1">{{ dg.ho_ten }}</h6>
+                                <div class="text-warning small">
+                                    {% for i in "12345" %}{% if forloop.counter <= dg.diem %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}{% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-secondary flex-grow-1 fst-italic">"{{ dg.noi_dung }}"</p>
+                        <div class="mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+                            <small class="text-primary fw-bold"><i class="bi bi-geo-alt-fill me-1"></i>{{ dg.co_so.ten|default:"Toán GIS Enterprise" }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="glass-card p-4 h-100 d-flex flex-column">
+                        <div class="d-flex gap-3 align-items-center mb-3">
+                            <div class="user-avatar-sm fs-5" style="width: 50px; height: 50px; background: var(--accent);">M</div>
+                            <div>
+                                <h6 class="fw-bold text-white mb-1">Minh Tuấn</h6>
+                                <div class="text-warning small">
+                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-secondary flex-grow-1 fst-italic">"Nhờ hệ thống xếp lịch thông minh và các bài giảng dễ hiểu, điểm Toán của mình đã cải thiện rõ rệt chỉ sau 2 tháng!"</p>
+                        <div class="mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+                            <small class="text-primary fw-bold"><i class="bi bi-geo-alt-fill me-1"></i>Cơ Sở Quận 1</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="glass-card p-4 h-100 d-flex flex-column">
+                        <div class="d-flex gap-3 align-items-center mb-3">
+                            <div class="user-avatar-sm fs-5" style="width: 50px; height: 50px; background: #10b981;">H</div>
+                            <div>
+                                <h6 class="fw-bold text-white mb-1">Hoàng Hà</h6>
+                                <div class="text-warning small">
+                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-secondary flex-grow-1 fst-italic">"Tính năng bản đồ GIS tìm đường đi rất tiện lợi. Mình không còn bị lạc khi tìm chi nhánh học gần nhà nữa."</p>
+                        <div class="mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+                            <small class="text-primary fw-bold"><i class="bi bi-geo-alt-fill me-1"></i>Trụ Sở Chính</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="glass-card p-4 h-100 d-flex flex-column">
+                        <div class="d-flex gap-3 align-items-center mb-3">
+                            <div class="user-avatar-sm fs-5" style="width: 50px; height: 50px; background: #8b5cf6;">L</div>
+                            <div>
+                                <h6 class="fw-bold text-white mb-1">Lê Quyên</h6>
+                                <div class="text-warning small">
+                                    <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-secondary flex-grow-1 fst-italic">"Giáo viên siêu nhiệt tình và tận tâm. Học phí thanh toán trực tuyến rất nhanh gọn, phụ huynh mình rất thích."</p>
+                        <div class="mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+                            <small class="text-primary fw-bold"><i class="bi bi-geo-alt-fill me-1"></i>Cơ Sở Quận 7</small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="text-center mt-5" data-aos="fade-up">
+                <a href="{% url 'danh_gia_page' %}" class="btn btn-hero btn-hero-outline px-5 py-3 rounded-pill fw-bold border-2" style="border-color: var(--accent);">
+                    <i class="bi bi-star-fill text-warning me-2"></i> Xem Thêm Hoặc Gửi Đánh Giá Của Bạn
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="section-padding">
+        <div class="container">
+            <div class="text-center mb-5 pb-3" data-aos="fade-up">
+                <h2 class="display-5 fw-bold">Tham Gia Chỉ Với 3 Bước</h2>
+                <p class="text-secondary mt-3 fs-5">Hệ thống tự động hóa sẽ lo toàn bộ phần còn lại cho bạn.</p>
+            </div>
+            
+            <div class="row text-center position-relative">
+                <div class="d-none d-lg-block position-absolute top-50 start-50 translate-middle" style="width: 70%; height: 2px; background: rgba(59, 130, 246, 0.2); z-index: 0; transform: translateY(-50px) !important;"></div>
+                
+                <div class="col-lg-4 position-relative z-1" data-aos="fade-up" data-aos-delay="100">
+                    <div class="step-circle">1</div>
+                    <h4 class="text-white fw-bold">Tạo Tài Khoản</h4>
+                    <p class="text-secondary px-3">Đăng ký thông tin và cung cấp địa chỉ lưu trú của học viên vào hệ thống.</p>
+                </div>
+                
+                <div class="col-lg-4 position-relative z-1 mt-5 mt-lg-0" data-aos="fade-up" data-aos-delay="200">
+                    <div class="step-circle" style="background: var(--gradient-main); color: white; border: none; box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);">2</div>
+                    <h4 class="text-white fw-bold">Chọn Khóa Học</h4>
+                    <p class="text-secondary px-3">Lựa chọn môn học mong muốn. Hệ thống tự quét GIS để chốt cơ sở gần nhất cho bạn.</p>
+                </div>
+                
+                <div class="col-lg-4 position-relative z-1 mt-5 mt-lg-0" data-aos="fade-up" data-aos-delay="300">
+                    <div class="step-circle">3</div>
+                    <h4 class="text-white fw-bold">Nhận Thời Khóa Biểu</h4>
+                    <p class="text-secondary px-3">Đóng học phí trực tuyến và tải ngay thời khóa biểu PDF do AI tự động sắp xếp.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="news" class="section-padding">
+        <div class="container">
+            <div class="text-center" data-aos="fade-up">
+                <span class="section-subtitle text-info">Cập Nhật Liên Tục</span>
+                <h2 class="section-title">Tin Tức & Sự Kiện</h2>
+            </div>
+            
+            <div class="row g-4">
+                {% for tin in ds_tin_tuc_home %}
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="glass-card h-100 d-flex flex-column" style="padding: 30px; {% if tin.loai_tin == 'TUYEN_SINH' %}border-color: rgba(16, 185, 129, 0.3); box-shadow: 0 0 20px rgba(16, 185, 129, 0.05);{% endif %}">
+                        
+                        {% with dau_anh=tin.cac_anh.first %}
+                            {% if dau_anh %}
+                                <img src="{{ dau_anh.hinh_anh.url }}" class="course-img" alt="{{ tin.tieu_de }}">
+                            {% else %}
+                                <div class="course-img d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.05);">
+                                    <i class="bi bi-image text-secondary" style="font-size: 3rem; opacity: 0.5;"></i>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge 
+                                {% if tin.loai_tin == 'CONG_NGHE' %}bg-primary text-primary border-primary
+                                {% elif tin.loai_tin == 'TUYEN_SINH' %}bg-success text-success border-success
+                                {% else %}bg-warning text-warning border-warning{% endif %} 
+                                bg-opacity-25 border" style="font-size: 0.7rem;">
+                                {% if tin.loai_tin == 'CONG_NGHE' %}Công Nghệ
+                                {% elif tin.loai_tin == 'TUYEN_SINH' %}Tuyển Sinh
+                                {% else %}Góc Học Tập{% endif %}
+                            </span>
+                            <small class="text-secondary fw-bold"><i class="bi bi-calendar3 me-1"></i> {{ tin.ngay_dang|date:"d/m/Y" }}</small>
+                        </div>
+                        
+                        <h4 class="fw-bold mb-3 text-white" style="font-size: 1.25rem;">{{ tin.tieu_de }}</h4>
+                        <p class="text-secondary mb-4 flex-grow-1" style="font-size: 0.95rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">{{ tin.tom_tat }}</p>
+                        
+                        <a href="{% url 'trang_tin_tuc' %}" class="
+                            {% if tin.loai_tin == 'CONG_NGHE' %}text-primary
+                            {% elif tin.loai_tin == 'TUYEN_SINH' %}text-success
+                            {% else %}text-warning{% endif %} 
+                            fw-bold text-decoration-none">
+                            Đọc chi tiết <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-inbox text-secondary" style="font-size: 3rem;"></i>
+                    <p class="text-secondary mt-3">Hiện tại trung tâm chưa có bản tin mới nào.</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="text-center mt-5" data-aos="fade-up">
+                <a href="{% url 'trang_tin_tuc' %}" class="btn btn-hero btn-hero-outline px-5 py-3 rounded-pill fw-bold border-2">
+                    Xem Thêm Tin Tức <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row g-4 text-start">
+                <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                    <a class="navbar-brand mb-4 d-inline-flex" href="#" style="font-size: 1.8rem;">
+                        <div class="brand-icon me-2"><i class="bi bi-geo-alt-fill"></i></div>
+                        TOÁN <span class="text-primary ms-2">GIS</span>
+                    </a>
+                    <p class="pe-lg-4">Hệ thống quản lý giáo dục tiên phong ứng dụng công nghệ Không gian (GIS) và Trí tuệ nhân tạo để mang lại trải nghiệm học tập trọn vẹn nhất.</p>
+                    <div class="social-icons mt-4">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-youtube"></i></a>
+                        <a href="#"><i class="bi bi-tiktok"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4 mb-lg-0 footer-links">
+                    <h5>Liên Kết Nhanh</h5>
+                    <a href="#hero">Trang chủ</a>
+                    <a href="#facilities">Định vị Cơ sở</a>
+                    <a href="#courses">Khóa học mở</a>
+                    <a href="#teachers">Đội ngũ</a>
+                    <a href="#reviews">Đánh giá</a>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0 footer-links">
+                    <h5>Phân Hệ Đăng Nhập</h5>
+                    <a href="{% url 'login' %}"><i class="bi bi-person me-1"></i> Học viên</a>
+                    <a href="{% url 'login' %}"><i class="bi bi-person-video3 me-1"></i> Giáo viên</a>
+                    <a href="{% url 'login' %}"><i class="bi bi-shield-lock me-1"></i> Quản trị viên</a>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <h5>Trụ Sở Chính</h5>
+                    <p class="mb-2"><i class="bi bi-geo-fill text-primary me-2"></i> Ký túc xá Khu A, ĐHQG TP.HCM</p>
+                    <p class="mb-2"><i class="bi bi-telephone-fill text-primary me-2"></i> 1900 8888 9999</p>
+                    <p class="mb-2"><i class="bi bi-envelope-fill text-primary me-2"></i> tuyensinh@toangis.edu.vn</p>
+                </div>
+            </div>
+            
+            <div class="border-top mt-5 pt-4 text-center" style="border-color: rgba(255,255,255,0.05) !important;">
+                <p class="mb-0">&copy; 2026 Toán GIS Enterprise System. Designed for Education Future.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Init AOS Animation
+        AOS.init({ duration: 800, once: true });
+
+        // Tắt Preloader
+        window.addEventListener('load', function() {
+            setTimeout(() => { document.getElementById('preloader').style.display = 'none'; }, 300);
+        });
+
+        // Hiệu ứng thanh Navbar khi cuộn
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 50) document.querySelector('.navbar').classList.add('scrolled');
+            else document.querySelector('.navbar').classList.remove('scrolled');
+        });
+
+        // Animation đếm số (Counters)
+        const counters = document.querySelectorAll('.counter');
+        const startCount = () => {
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    const target = +counter.getAttribute('data-target');
+                    const count = +counter.innerText;
+                    const inc = target / 50;
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + inc);
+                        setTimeout(updateCount, 40);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                updateCount();
+            });
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            if(entries[0].isIntersecting) {
+                startCount();
+                observer.disconnect();
+            }
+        }, { threshold: 0.5 });
+        
+        const statsSection = document.querySelector('.stats-section');
+        if (statsSection) observer.observe(statsSection);
+
+        // ==========================================
+        // THUẬT TOÁN BẢN ĐỒ VÀ TÌM KIẾM GIS
+        // ==========================================
+        let map, userMarker, routeLine;
+        
+        // Load danh sách Cơ sở từ Backend Django
+        const branches = [
+            {% for cs in danh_sach_co_so %}
+            { 
+                id: {{ cs.id }}, 
+                name: "{{ cs.ten|escapejs }}", 
+                address: "{{ cs.dia_chi|default:''|escapejs }}", 
+                lat: {{ cs.lat|default:0|stringformat:".6f" }}, 
+                lon: {{ cs.lon|default:0|stringformat:".6f" }},
+                image: "{% if cs.hinh_anh %}{{ cs.hinh_anh.url }}{% else %}{% endif %}",
+                mo_ta: "{{ cs.mo_ta|default:''|escapejs }}"
+            },
+            {% endfor %}
+        ];
+
+        // Khởi tạo bản đồ
+        document.addEventListener("DOMContentLoaded", () => {
+            map = L.map('homeMap').setView([10.7769, 106.7009], 12);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                subdomains: 'abcd', maxZoom: 20
+            }).addTo(map);
+
+            const branchIcon = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png',
+                iconSize: [40, 40], iconAnchor: [20, 40], popupAnchor: [0, -40]
+            });
+
+            // Vẽ các chi nhánh lên bản đồ
+            branches.forEach(b => {
+                if(b.lat !== 0) {
+                    let fallbackImg = b.id % 2 === 0 
+                        ? 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80' 
+                        : 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=80';
+                    
+                    let imgSrc = b.image ? b.image : fallbackImg;
+                    let imgHTML = `<img src="${imgSrc}" class="popup-img" alt="${b.name}" onerror="this.onerror=null; this.src='${fallbackImg}';">`;
+                    
+                    // Hiển thị mô tả nếu có
+                    let descHTML = b.mo_ta ? `<div class="popup-desc"><i class="bi bi-card-text me-1"></i>${b.mo_ta}</div>` : '';
+                    
+                    let popupContent = `
+                        <div class="custom-popup">
+                            ${imgHTML}
+                            <div class="popup-info">
+                                <div class="popup-title">${b.name}</div>
+                                <div class="popup-addr"><i class="bi bi-geo-alt-fill text-primary me-1"></i>${b.address || "Đang cập nhật địa chỉ"}</div>
+                                ${descHTML}
+                                <div class="d-flex gap-2 mt-3">
+                                    <a href="/co-so/${b.id}/" class="text-warning small fw-bold text-decoration-none">XEM CHI TIẾT <i class="bi bi-arrow-right ms-1"></i></a>
+                                    <span style="color:#475569;">|</span>
+                                    <a href="/dang-ky-tai-khoan/" class="text-primary small fw-bold text-decoration-none">ĐĂNG KÝ <i class="bi bi-person-plus ms-1"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    L.marker([b.lat, b.lon], {icon: branchIcon})
+                     .bindPopup(popupContent)
+                     .addTo(map);
+                }
+            });
+
+            map.on('click', function(e) {
+                processUserLocation(e.latlng.lat, e.latlng.lng, "Vị trí bạn đã chọn");
+            });
+
+            setTimeout(function () { map.invalidateSize(); }, 1000);
+        });
+
+        // Thuật toán Haversine tính khoảng cách
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Xử lý khi có tọa độ của User
+        function processUserLocation(lat, lon, label = "Bạn đang ở đây") {
+            if(userMarker) map.removeLayer(userMarker);
+            if(routeLine) map.removeLayer(routeLine);
+
+            const userIcon = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/1001/1001022.png',
+                iconSize: [45, 45], iconAnchor: [22, 45], popupAnchor: [0, -40]
+            });
+            userMarker = L.marker([lat, lon], {icon: userIcon}).bindPopup(`<div class="p-2 text-center text-dark"><b class="text-primary">${label}</b></div>`).addTo(map);
+
+            let nearestBranch = null;
+            let minDistance = Infinity;
+
+            branches.forEach(b => {
+                if(b.lat !== 0) {
+                    let d = calculateDistance(lat, lon, b.lat, b.lon);
+                    if (d < minDistance) {
+                        minDistance = d;
+                        nearestBranch = b;
+                    }
+                }
+            });
+
+            if (nearestBranch) {
+                routeLine = L.polyline([[lat, lon], [nearestBranch.lat, nearestBranch.lon]], {
+                    color: '#ef4444', weight: 4, dashArray: '10, 10'
+                }).addTo(map);
+
+                map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
+
+                document.getElementById('resultBox').style.display = 'block';
+                document.getElementById('resBranchName').innerText = nearestBranch.name;
+                document.getElementById('resBranchAddr').innerText = nearestBranch.address || "Đang cập nhật địa chỉ";
+                document.getElementById('resBranchDesc').innerText = nearestBranch.mo_ta || "";
+                document.getElementById('resDistance').innerText = minDistance.toFixed(2);
+                
+                userMarker.openPopup();
+            } else {
+                Swal.fire('Lỗi', 'Hiện chưa có cơ sở nào trên bản đồ hệ thống.', 'info');
+            }
+        }
+
+        // Lấy GPS tự động
+        function findNearestByGPS() {
+            if(navigator.geolocation) {
+                Swal.fire({title: 'Đang định vị...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }});
+                navigator.geolocation.getCurrentPosition(pos => {
+                    Swal.close();
+                    processUserLocation(pos.coords.latitude, pos.coords.longitude, "Vị trí GPS của bạn");
+                }, () => {
+                    Swal.fire('Lỗi GPS', 'Bạn chưa cấp quyền truy cập vị trí hoặc thiết bị không hỗ trợ. Hãy thử gõ địa chỉ.', 'error');
+                });
+            } else {
+                alert("Trình duyệt không hỗ trợ GPS.");
+            }
+        }
+
+        // Tìm bằng cách gõ địa chỉ
+        async function findNearestByAddress() {
+            const addr = document.getElementById('addressSearch').value;
+            if (!addr) { Swal.fire('Chú ý', 'Vui lòng nhập địa chỉ cần tìm!', 'warning'); return; }
+            
+            const btn = document.getElementById('btnSearch');
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; btn.disabled = true;
+
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr + ', Vietnam')}&limit=1`);
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    processUserLocation(parseFloat(data[0].lat), parseFloat(data[0].lon), data[0].display_name);
+                } else { 
+                    Swal.fire('Không tìm thấy', 'Địa chỉ quá chung chung. Vui lòng nhập rõ hơn (Ví dụ thêm Quận, TPHCM) hoặc nhấp trực tiếp lên bản đồ.', 'error'); 
+                }
+            } catch (e) { 
+                Swal.fire('Lỗi mạng', 'Không thể kết nối đến máy chủ bản đồ.', 'error'); 
+            } finally { 
+                btn.innerHTML = 'Tìm'; btn.disabled = false; 
+            }
+        }
+    </script>
+</body>
+</html>

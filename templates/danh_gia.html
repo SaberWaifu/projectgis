@@ -1,0 +1,257 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Đánh Giá - Toán GIS Enterprise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
+    <style>
+        :root {
+            --primary: #3b82f6; --accent: #f59e0b; --dark-bg: #0f172a;
+            --body-bg: #f1f5f9; --white: #fff; --border-color: #e2e8f0;
+            --secondary: #64748b; --gradient-main: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --shadow-hover: 0 20px 25px -5px rgba(0,0,0,0.1);
+            --font-head: 'Montserrat', sans-serif; --font-body: 'Open Sans', sans-serif;
+        }
+        body { 
+    font-family: var(--font-body); 
+    background: var(--body-bg); 
+    color: #334155; 
+    overflow-x: hidden !important; /* Thêm đoạn này */
+    width: 100% !important; /* Thêm đoạn này */
+}
+        h1,h2,h3,h4,h5,h6,.btn,.navbar-brand { font-family: var(--font-head); }
+        a { text-decoration: none; transition: 0.3s; }
+
+        .navbar-custom { height: 76px; background: var(--dark-bg); border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 2000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .navbar-brand { font-weight: 800; font-size: 1.4rem; color: #fff !important; display: flex; align-items: center; gap: 10px; }
+        .brand-icon { width: 38px; height: 38px; background: var(--gradient-main); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: white; }
+        .navbar-brand span { color: var(--accent); }
+        .nav-link { color: rgba(255,255,255,0.7) !important; font-weight: 600; padding: 8px 16px !important; border-radius: 50px; transition: 0.3s; font-size: 0.9rem; }
+        .nav-link:hover,.nav-link.active { background: rgba(255,255,255,0.1); color: white !important; }
+        .user-avatar-sm { width: 36px; height: 36px; background: var(--accent); color: var(--dark-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+        .dropdown-menu-dark-custom { background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; margin-top: 15px; }
+        .dropdown-item { color: #cbd5e1; padding: 10px 20px; }
+        .dropdown-item:hover { background: rgba(255,255,255,0.05); color: white; }
+
+        .main-container { padding: 40px 0 80px; }
+
+        .rating-hero { background: var(--gradient-main); border-radius: 24px; padding: 40px; color: white; position: relative; overflow: hidden; }
+        .rating-hero::before { content:''; position: absolute; top: -50%; right: -20%; width: 400px; height: 400px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+        .big-score { font-size: 4.5rem; font-weight: 900; line-height: 1; }
+        .star-display { color: var(--accent); font-size: 1.5rem; }
+        .bar-label { font-size: 0.85rem; font-weight: 600; min-width: 50px; }
+        .bar-track { flex: 1; height: 10px; background: rgba(255,255,255,0.15); border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--accent); border-radius: 10px; transition: width 1s; }
+        .bar-count { font-size: 0.85rem; min-width: 30px; text-align: right; }
+
+        .form-card { background: var(--white); border-radius: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow-lg); overflow: hidden; }
+        .form-card-header { background: #f8fafc; padding: 24px 30px; border-bottom: 1px solid var(--border-color); }
+        .form-card-body { padding: 30px; }
+
+        .star-rating { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 6px; }
+        .star-rating input { display: none; }
+        .star-rating label { cursor: pointer; font-size: 2.2rem; color: #cbd5e1; transition: 0.2s; }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label { color: var(--accent); transform: scale(1.15); }
+
+        .review-card { background: var(--white); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; transition: 0.3s; box-shadow: var(--shadow-sm); position: relative; }
+        .review-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+        .review-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--gradient-main); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; }
+        .review-stars { color: var(--accent); font-size: 0.9rem; }
+        .review-text { color: #475569; line-height: 1.7; font-size: 0.95rem; }
+        .review-meta { font-size: 0.8rem; color: var(--secondary); }
+        .badge-co-so { background: rgba(59,130,246,0.1); color: var(--primary); font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; }
+        .btn-delete-review { position: absolute; top: 12px; right: 12px; background: none; border: none; color: #cbd5e1; cursor: pointer; transition: 0.2s; font-size: 1.1rem; }
+        .btn-delete-review:hover { color: #ef4444; transform: scale(1.2); }
+        .empty-state { text-align: center; padding: 60px 20px; }
+        .empty-icon { font-size: 4rem; color: #cbd5e1; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'trang_chu' %}">
+                <div class="brand-icon"><i class="bi bi-grid-3x3-gap-fill"></i></div>
+                TOÁN <span>GIS</span>
+            </a>
+            <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav mx-auto">
+                {% if user.is_authenticated and user.is_staff %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'thong_ke_page' %}"><i class="bi bi-grid-fill me-1"></i> Tổng Quan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_page' %}"><i class="bi bi-people-fill me-1"></i> Học Viên</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_giao_vien' %}"><i class="bi bi-person-video3 me-1"></i> Giáo Viên</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_lop_page' %}"><i class="bi bi-easel2-fill me-1"></i> Lớp Học</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_hoc_phi' %}"><i class="bi bi-piggy-bank-fill me-1"></i> Học Phí</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'chi_nhanh_page' %}"><i class="bi bi-geo-alt-fill me-1"></i> Chi Nhánh</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'danh_gia_page' %}"><i class="bi bi-star-fill me-1"></i> Đánh Giá</a></li>
+                {% endif %}
+                </ul>
+                <div class="d-flex align-items-center gap-3 ms-lg-3">
+                    {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center dropdown-toggle text-white" data-bs-toggle="dropdown" style="text-decoration:none;">
+                            <div class="user-avatar-sm me-2">{{ user.username|slice:":1"|upper }}</div>
+                            <span class="d-none d-md-inline fw-bold" style="font-size:0.95rem;">{{ user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom">
+                            <li><a class="dropdown-item" href="{% url 'trang_chu' %}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+                            <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,0.1);"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Đăng Xuất</a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-bold"><i class="bi bi-box-arrow-in-right me-1"></i> Đăng Nhập</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        <div class="rating-hero mb-5 animate__animated animate__fadeInDown">
+            <div class="row align-items-center position-relative" style="z-index:2;">
+                <div class="col-lg-4 text-center text-lg-start mb-4 mb-lg-0">
+                    <div class="big-score">{{ stats.trung_binh }}</div>
+                    <div class="star-display mb-2">
+                        {% for i in "12345" %}{% if forloop.counter <= stats.trung_binh %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}{% endfor %}
+                    </div>
+                    <div style="opacity:0.8; font-weight:600;">{{ stats.tong }} đánh giá</div>
+                </div>
+                <div class="col-lg-5">
+                    {% for sao, so_luong, phan_tram in stats.phan_bo %}
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <div class="bar-label">{{ sao }} <i class="bi bi-star-fill" style="color:var(--accent); font-size:0.75rem;"></i></div>
+                        <div class="bar-track"><div class="bar-fill" style="width:{{ phan_tram }}%;"></div></div>
+                        <div class="bar-count">{{ so_luong }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="col-lg-3 text-center">
+                    <i class="bi bi-award-fill" style="font-size:5rem; opacity:0.2;"></i>
+                    <div class="fw-bold mt-2" style="opacity:0.8;">Chất Lượng Được Công Nhận</div>
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}{% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show shadow-sm border-0 mb-4" style="border-radius:12px;">
+            <div class="d-flex align-items-center">
+                <i class="bi {% if message.tags == 'error' %}bi-exclamation-triangle-fill text-danger{% else %}bi-check-circle-fill text-success{% endif %} fs-4 me-3"></i>
+                <div>{{ message }}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}{% endif %}
+
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="form-card animate__animated animate__fadeInLeft" style="position:sticky; top:100px;">
+                    <div class="form-card-header">
+                        <h5 class="m-0 fw-bold text-primary"><i class="bi bi-pencil-square me-2"></i>Gửi Đánh Giá</h5>
+                    </div>
+                    <div class="form-card-body">
+                        <form method="POST" id="reviewForm">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-secondary">Họ và Tên <span class="text-danger">*</span></label>
+                                <input type="text" name="ho_ten" class="form-control" placeholder="Nguyễn Văn A" required style="border-radius:10px;">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-secondary">Email <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control" placeholder="email@example.com" required style="border-radius:10px;">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-secondary">Chi Nhánh</label>
+                                <select name="co_so" class="form-select" style="border-radius:10px;">
+                                    <option value="">-- Chọn cơ sở --</option>
+                                    {% for cs in ds_co_so %}<option value="{{ cs.id }}">{{ cs.ten }}</option>{% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small text-secondary">Đánh giá <span class="text-danger">*</span></label>
+                                <div class="star-rating">
+                                    <input type="radio" name="diem" value="5" id="star5" checked><label for="star5"><i class="bi bi-star-fill"></i></label>
+                                    <input type="radio" name="diem" value="4" id="star4"><label for="star4"><i class="bi bi-star-fill"></i></label>
+                                    <input type="radio" name="diem" value="3" id="star3"><label for="star3"><i class="bi bi-star-fill"></i></label>
+                                    <input type="radio" name="diem" value="2" id="star2"><label for="star2"><i class="bi bi-star-fill"></i></label>
+                                    <input type="radio" name="diem" value="1" id="star1"><label for="star1"><i class="bi bi-star-fill"></i></label>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-secondary">Nội dung <span class="text-danger">*</span></label>
+                                <textarea name="noi_dung" class="form-control" rows="4" placeholder="Chia sẻ trải nghiệm của bạn..." required style="border-radius:10px;"></textarea>
+                            </div>
+
+                            <div class="mb-4 p-3 rounded-3" style="background: rgba(59, 130, 246, 0.05); border: 1px dashed rgba(59, 130, 246, 0.3);">
+                                <label class="form-label fw-bold small text-primary"><i class="bi bi-shield-lock-fill me-1"></i> Xác thực máy chủ <span class="text-danger">*</span></label>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-bold fs-5 text-dark bg-white px-3 py-2 rounded-3 border shadow-sm">{{ num1 }} + {{ num2 }} =</span>
+                                    <input type="number" name="captcha_answer" class="form-control py-2 text-center fw-bold" placeholder="Nhập..." required style="border-radius:10px; max-width: 100px;">
+                                </div>
+                                <small class="text-muted mt-2 d-block fst-italic">* Phép tính được tạo và xác thực bảo mật từ máy chủ.</small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 fw-bold py-3" style="border-radius:12px; background:var(--gradient-main); border:none; box-shadow:0 4px 12px rgba(59,130,246,0.3);">
+                                <i class="bi bi-send-fill me-2"></i>Gửi Đánh Giá
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold m-0"><i class="bi bi-chat-quote-fill text-primary me-2"></i>Nhận Xét Gần Đây</h4>
+                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2" style="border-radius:10px;">{{ stats.tong }} đánh giá</span>
+                </div>
+
+                {% for dg in ds_danh_gia %}
+                <div class="review-card mb-3 animate__animated animate__fadeInUp" style="animation-delay:{{ forloop.counter0 }}00ms;">
+                    {% if user.is_staff %}
+                    <a href="{% url 'xoa_danh_gia' dg.id %}" class="btn-delete-review" title="Xóa" onclick="return confirm('Xóa đánh giá của {{ dg.ho_ten }}?');"><i class="bi bi-trash"></i></a>
+                    {% endif %}
+                    <div class="d-flex gap-3">
+                        <div class="review-avatar">{{ dg.ho_ten|slice:":1"|upper }}</div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                <div>
+                                    <h6 class="fw-bold mb-0" style="color:var(--dark-bg);">{{ dg.ho_ten }}</h6>
+                                    <div class="review-stars">{% for i in "12345" %}{% if forloop.counter <= dg.diem %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}{% endfor %}</div>
+                                </div>
+                                {% if dg.co_so %}<span class="badge-co-so"><i class="bi bi-geo-alt-fill me-1"></i>{{ dg.co_so.ten }}</span>{% endif %}
+                            </div>
+                            <p class="review-text mt-2 mb-2">{{ dg.noi_dung }}</p>
+                            <div class="review-meta"><i class="bi bi-clock me-1"></i>{{ dg.ngay_tao|timesince }} trước</div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="bi bi-chat-dots empty-icon"></i>
+                    <h3 class="fw-bold mt-3">Chưa có đánh giá nào</h3>
+                    <p class="text-secondary">Hãy là người đầu tiên chia sẻ trải nghiệm!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-4 text-secondary mt-auto border-top bg-white">
+        <small><i class="bi bi-shield-check text-success me-1"></i> Hệ thống GIS Phân tích Không gian - Phiên bản Doanh nghiệp 2026</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    </body>
+</html>

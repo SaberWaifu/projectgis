@@ -1,0 +1,172 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký Thời Gian Rảnh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { background-color:#0B1121; color:#fff; font-family:'Segoe UI',sans-serif;
+            background-image:radial-gradient(circle at top right,rgba(16,185,129,0.08),transparent 40%); }
+        .glass-card { background:rgba(30,41,59,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); }
+        .text-gradient { background:linear-gradient(to right,#34d399,#3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .cell-ranh { background:rgba(16,185,129,0.2); border:1px solid rgba(16,185,129,0.5); cursor:pointer; }
+        .cell-ban { background:rgba(30,41,59,0.3); border:1px solid rgba(100,116,139,0.3); cursor:pointer; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    {% for message in messages %}
+    Swal.fire({
+        icon: '{% if message.tags == "error" %}error{% else %}success{% endif %}',
+        title: 'Thông báo',
+        text: '{{ message }}',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000
+    });
+    {% endfor %}
+});
+</script>
+{% endif %}
+
+<nav class="px-6 py-4 glass-card flex justify-between items-center sticky top-0 z-50">
+    <span class="text-2xl font-black text-white">TOÁN <span class="text-emerald-400">GIS</span></span>
+    <a href="{% url 'trang_giao_vien' %}" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+</nav>
+
+<main class="flex-grow p-4 md:p-8 max-w-5xl mx-auto w-full flex flex-col gap-6">
+
+    <div class="glass-card rounded-2xl p-6 border-l-4 border-l-emerald-500">
+        <h1 class="text-2xl font-bold text-white mb-1">Thời Gian Rảnh — <span class="text-gradient">{{ giao_vien.ten }}</span></h1>
+        <p class="text-gray-400 text-sm">Click vào ô để bật/tắt ca học. <span class="text-emerald-400 font-bold">Xanh = Rảnh</span>, Xám = Bận.</p>
+    </div>
+
+    <div class="glass-card rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+                <thead>
+                    <tr class="bg-black/30">
+                        <th class="p-4 text-gray-400 font-bold text-left">Ca \ Thứ</th>
+                        {% for thu in thu_range %}
+                        <th class="p-4 text-gray-300 font-bold text-center">Thứ {{ thu }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                    {% for ca in ca_range %}
+                    <tr>
+                        <td class="p-4 text-gray-400 font-bold whitespace-nowrap">Ca {{ ca }}</td>
+                        {% for thu in thu_range %}
+                        <td class="p-2 text-center">
+                            {% if thu|stringformat:"s" and ca|stringformat:"s" %}
+                            <form method="POST" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="thu" value="{{ thu }}">
+                                <input type="hidden" name="ca" value="{{ ca }}">
+                                {% if thu in ranh_set|default_if_none:"" %}
+                                {# check in ranh_set via template tag workaround #}
+                                {% endif %}
+                                <button type="submit"
+                                    name="action"
+                                    value="{% for r in ds_ranh %}{% if r.thu == thu and r.ca == ca %}xoa{% endif %}{% endfor %}"
+                                    class="w-full h-12 rounded-lg text-xs font-bold transition hover:opacity-80
+                                    {% for r in ds_ranh %}{% if r.thu == thu and r.ca == ca %}bg-emerald-500/30 text-emerald-300 border border-emerald-500/60 hover:bg-red-500/30 hover:text-red-300 hover:border-red-500/60{% endif %}{% endfor %}
+                                    {% with found=0 %}
+                                    {% for r in ds_ranh %}{% if r.thu == thu and r.ca == ca %}{% with found=1 %}{% endwith %}{% endif %}{% endfor %}
+                                    {% endwith %}
+                                    ">
+                                    {% with is_ranh=False %}
+                                    {% for r in ds_ranh %}{% if r.thu == thu and r.ca == ca %}
+                                    <span class="block"><i class="bi bi-check-circle-fill text-emerald-400 text-lg"></i><span class="block text-[10px]">Rảnh</span></span>
+                                    {% endif %}{% endfor %}
+                                    {% endwith %}
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Grid đơn giản hơn: dùng JS toggle -->
+    <div class="glass-card rounded-2xl p-6">
+        <h2 class="text-lg font-bold text-white mb-4"><i class="bi bi-grid-3x3-gap-fill text-emerald-400 me-2"></i>Chọn nhanh thời gian rảnh</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr>
+                        <th class="p-3 text-gray-400 text-left">Ca</th>
+                        {% for thu in thu_range %}<th class="p-3 text-gray-300 text-center font-bold">T{{ thu }}</th>{% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ca in ca_range %}
+                    <tr class="border-t border-slate-800">
+                        <td class="p-3 text-gray-400 font-bold">Ca {{ ca }}</td>
+                        {% for thu in thu_range %}
+                        <td class="p-2 text-center">
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="thu" value="{{ thu }}">
+                                <input type="hidden" name="ca" value="{{ ca }}">
+                                {% with matched=False %}
+                                {% for r in ds_ranh %}
+                                {% if r.thu == thu and r.ca == ca %}
+                                <button type="submit" name="action" value="xoa"
+                                    class="w-10 h-10 rounded-lg bg-emerald-500/30 border border-emerald-500/60 text-emerald-300 hover:bg-red-500/30 hover:text-red-300 hover:border-red-500/60 transition font-bold text-lg"
+                                    title="Thứ {{ thu }} Ca {{ ca }} - Đang rảnh. Click để xóa.">✓</button>
+                                {% endif %}
+                                {% endfor %}
+                                {% for r in ds_ranh %}{% if r.thu == thu and r.ca == ca %}{% with matched=True %}{% endwith %}{% endif %}{% endfor %}
+                                {% endwith %}
+                                {% with is_set=False %}
+                                {% for r in ds_ranh %}{% if r.thu == thu and r.ca == ca %}{% with is_set=True %}{% endwith %}{% endif %}{% endfor %}
+                                {% if not is_set %}
+                                <button type="submit" name="action" value="them"
+                                    class="w-10 h-10 rounded-lg bg-slate-700/50 border border-slate-600 text-gray-500 hover:bg-emerald-500/20 hover:text-emerald-300 hover:border-emerald-500/40 transition font-bold text-lg"
+                                    title="Thứ {{ thu }} Ca {{ ca }} - Bận. Click để thêm.">+</button>
+                                {% endif %}
+                                {% endwith %}
+                            </form>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="text-xs text-gray-500 mt-3"><i class="bi bi-info-circle me-1"></i> <span class="text-emerald-400">✓</span> = Đang rảnh (click để xóa) &bull; <span class="text-gray-400">+</span> = Bận (click để thêm)</p>
+    </div>
+
+    <div class="glass-card rounded-2xl p-5">
+        <h2 class="text-lg font-bold text-white mb-3"><i class="bi bi-list-check text-blue-400 me-2"></i> Tổng hợp ca rảnh ({{ ds_ranh.count }} ca)</h2>
+        {% if ds_ranh %}
+        <div class="flex flex-wrap gap-2">
+            {% for r in ds_ranh %}
+            <span class="bg-emerald-900/40 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full text-sm font-medium">
+                Thứ {{ r.thu }} Ca {{ r.ca }}
+            </span>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500 italic">Chưa đăng ký ca rảnh nào.</p>
+        {% endif %}
+    </div>
+</main>
+
+<footer class="mt-auto py-6 border-t border-gray-800 text-center text-sm text-gray-500">&copy; 2026 Hệ thống TOÁN GIS.</footer>
+</body>
+</html>

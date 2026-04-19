@@ -1,0 +1,262 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quản Lý Khóa Học - Toán GIS Pro</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        :root {
+            --primary: #10b981; --primary-dark: #059669; --primary-soft: #ecfdf5;
+            --secondary: #64748b; --accent: #f59e0b; 
+            --danger: #ef4444; --warning: #f59e0b;
+            --dark-bg: #0f172a; --light-bg: #f8fafc; --white: #ffffff; --border-color: #e2e8f0;
+            --gradient-main: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05); --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --navbar-height: 76px; --sidebar-width: 380px;
+            --font-head: 'Montserrat', sans-serif; --font-body: 'Open Sans', sans-serif;
+        }
+        body { font-family: var(--font-body); background-color: var(--light-bg); color: #334155; overflow: hidden; height: 100vh; display: flex; flex-direction: column; margin: 0; }
+        h1, h2, h3, h4, h5, h6, .btn, .navbar-brand { font-family: var(--font-head); }
+        a { text-decoration: none; transition: 0.3s; }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* Navbar */
+        .navbar-custom { height: var(--navbar-height); background: var(--dark-bg); border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 2000; box-shadow: var(--shadow-md); }
+        .navbar-brand { font-weight: 800; font-size: 1.4rem; color: #fff !important; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        .brand-icon { width: 36px; height: 36px; background: var(--gradient-main); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: white; }
+        .navbar-brand span { color: var(--accent); }
+        .nav-link { color: rgba(255,255,255,0.7) !important; font-weight: 600; padding: 8px 16px !important; margin: 0 2px; border-radius: 50px; transition: 0.3s; font-size: 0.9rem; }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.1); color: white !important; }
+        .user-avatar-sm { width: 34px; height: 34px; background: var(--accent); color: var(--dark-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; border: 2px solid rgba(255,255,255,0.2); }
+        
+        /* Layout */
+        .app-container { display: flex; flex: 1; height: calc(100vh - var(--navbar-height)); overflow: hidden; }
+        .sidebar-panel { width: var(--sidebar-width); background: var(--white); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: var(--shadow-md); z-index: 1000; overflow-y: auto; }
+        .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-color); background: #f8fafc; transition: 0.3s; }
+        .sidebar-header.edit-mode { background: var(--warning-soft); }
+        .sidebar-title h5 { font-weight: 800; color: var(--dark-bg); margin: 0; font-size: 1.2rem; }
+        .sidebar-content { padding: 20px; }
+        
+        /* Form */
+        .form-label { font-weight: 700; font-size: 0.85rem; color: var(--secondary); margin-bottom: 8px; text-transform: uppercase; }
+        .form-control, .form-select { padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border-color); font-size: 0.95rem; background: #f8fafc; transition: 0.3s; }
+        .form-control:focus, .form-select:focus { background: white; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); outline: none; }
+        .input-group-text { background: white; border-color: var(--border-color); color: var(--primary); }
+        .btn-submit { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--gradient-main); color: white; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; margin-top: 15px; text-transform: uppercase; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.25); }
+        .btn-update { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+        .btn-cancel { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: white; color: var(--secondary); font-weight: 600; display: none; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; transition: 0.3s; }
+        .btn-cancel:hover { background: #f1f5f9; }
+
+        /* Content */
+        .content-area { flex: 1; padding: 30px; overflow-y: auto; background: var(--light-bg); }
+        
+        /* Course Card */
+        .course-card { background: var(--white); border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; transition: 0.3s; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; height: 100%; }
+        .course-card:hover { transform: translateY(-8px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--primary); }
+        .course-img-wrap { position: relative; height: 180px; overflow: hidden; }
+        .course-img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .course-card:hover .course-img { transform: scale(1.05); }
+        .course-badge { position: absolute; top: 15px; right: 15px; background: var(--accent); color: var(--dark-bg); font-weight: 800; font-size: 0.75rem; padding: 5px 12px; border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        
+        .course-body { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; }
+        .course-title { font-weight: 800; font-size: 1.1rem; color: var(--dark-bg); margin-bottom: 10px; }
+        .course-desc { color: var(--secondary); font-size: 0.85rem; margin-bottom: 15px; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .course-price { font-size: 1.4rem; font-weight: 900; color: var(--primary); margin-bottom: 20px; }
+        
+        .card-actions { display: flex; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px; }
+        .btn-edit { flex: 1; background: var(--primary-soft); color: var(--primary); border: 1px solid rgba(16, 185, 129, 0.2); font-weight: 700; padding: 10px; border-radius: 10px; transition: 0.2s; }
+        .btn-edit:hover { background: var(--primary); color: white; }
+        .btn-delete { width: 45px; background: #fef2f2; color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-delete:hover { background: var(--danger); color: white; }
+    </style>
+</head>
+{% if not user.is_authenticated or not user.is_staff %}<script>window.location.href="{% url 'trang_chu' %}";</script>{% endif %}
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="{% url 'thong_ke_page' %}">
+                <div class="brand-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"><i class="bi bi-shop"></i></div>
+                <div>TOÁN <span>GIS</span> <small class="d-block fw-normal text-muted" style="font-size: 0.7rem;">Course Manager</small></div>
+            </a>
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav mx-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'thong_ke_page' %}"><i class="bi bi-grid-fill me-1"></i> Tổng Quan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_page' %}"><i class="bi bi-people-fill me-1"></i> Học Viên</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_giao_vien' %}"><i class="bi bi-person-video3 me-1"></i> Giáo Viên</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'quan_ly_khoa_hoc' %}"><i class="bi bi-shop me-1"></i> Khóa Học</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_lop_page' %}"><i class="bi bi-easel2-fill me-1"></i> Lớp Học</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_hoc_phi' %}"><i class="bi bi-piggy-bank-fill me-1"></i> Học Phí</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'xep_lich_page' %}"><i class="bi bi-calendar3 me-1"></i> Xếp Lịch</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'chi_nhanh_page' %}"><i class="bi bi-geo-alt-fill me-1"></i> Chi Nhánh</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3 ms-lg-3">
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-white" data-bs-toggle="dropdown">
+                            <div class="user-avatar-sm me-2">{{ user.username|slice:":1"|upper }}</div>
+                            <span class="d-none d-md-inline font-display fw-bold" style="font-size: 0.95rem;">{{ user.username }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1);">
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Đăng Xuất</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="app-container">
+        
+        <aside class="sidebar-panel">
+            <div class="sidebar-header" id="formHeader">
+                <div class="sidebar-title">
+                    <h5 id="formTitleText"><i class="bi bi-plus-circle me-2"></i>Thêm Khóa Học Mới</h5>
+                </div>
+                <p id="formSubText" class="text-muted small mt-1">Đăng bán các khóa học lên gian hàng để học viên có thể đăng ký.</p>
+            </div>
+
+            <div class="sidebar-content">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} shadow-sm border-0 rounded-3 mb-4 d-flex align-items-center" style="font-size: 0.85rem;">
+                            <i class="bi {% if message.tags == 'error' %}bi-exclamation-triangle-fill text-danger{% else %}bi-check-circle-fill text-success{% endif %} me-2 fs-5"></i> 
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" id="courseForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="kh_id" id="editCourseId" value="">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Tên Khóa Học <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-journal-text"></i></span>
+                            <input type="text" id="nameInput" name="ten_khoa_hoc" class="form-control" placeholder="VD: Toán Tư Duy Lớp 5" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả ngắn</label>
+                        <textarea id="descInput" name="mo_ta" class="form-control" rows="3" placeholder="Viết mô tả hấp dẫn để thu hút học viên..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-primary">Link Ảnh Bìa (URL)</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-image"></i></span>
+                            <input type="text" id="imageInput" name="hinh_anh" class="form-control" placeholder="VD: https://images.unsplash.com/...">
+                        </div>
+                        <div class="form-text small mt-1"><i class="bi bi-info-circle me-1"></i>Copy link ảnh từ web hoặc dán link Unsplash.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-success">Học Phí Trọn Khóa (VNĐ)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-success text-white border-success"><i class="bi bi-currency-dollar"></i></span>
+                            <input type="number" id="priceInput" name="hoc_phi" class="form-control border-success" placeholder="VD: 2500000">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnSubmitForm" class="btn-submit">
+                        <i class="bi bi-cart-plus-fill me-2 fs-5"></i> Đăng Khóa Học
+                    </button>
+                    <button type="button" id="btnCancelEdit" class="btn-cancel" onclick="cancelEdit()">
+                        <i class="bi bi-x-circle"></i> Hủy Cập Nhật
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="fw-bold m-0 text-dark"><i class="bi bi-shop me-2 text-success"></i>Gian Hàng Khóa Học</h4>
+                    <p class="text-muted small mt-1 mb-0">Quản lý {{ ds_khoa_hoc.count }} khóa học đang hiển thị ngoài giao diện học viên.</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                {% for kh in ds_khoa_hoc %}
+                <div class="col-xl-4 col-lg-6">
+                    <div class="course-card">
+                        <div class="course-img-wrap">
+                            <img src="{{ kh.hinh_anh|default:'https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop' }}" class="course-img" alt="{{ kh.ten_khoa_hoc }}">
+                            <div class="course-badge">HOT</div>
+                        </div>
+                        <div class="course-body">
+                            <h5 class="course-title">{{ kh.ten_khoa_hoc }}</h5>
+                            <p class="course-desc" title="{{ kh.mo_ta }}">{{ kh.mo_ta|default:"Chưa có mô tả chi tiết cho khóa học này." }}</p>
+                            <h4 class="course-price">{{ kh.hoc_phi|intcomma|default:"0" }} <span class="fs-6 text-muted fw-bold">VNĐ</span></h4>
+                            
+                            <div class="card-actions">
+                                <button class="btn btn-edit" onclick="editCourse('{{ kh.id }}', '{{ kh.ten_khoa_hoc|escapejs }}', '{{ kh.mo_ta|escapejs }}', '{{ kh.hinh_anh|escapejs }}', '{{ kh.hoc_phi }}')">
+                                    <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
+                                </button>
+                                <a href="{% url 'xoa_khoa_hoc' kh.id %}" class="btn btn-delete" title="Xóa khóa học này" onclick="return confirm('Bạn có chắc chắn muốn XÓA khóa học này khỏi gian hàng không?');">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <div class="p-5 bg-white rounded-4 border border-dashed border-2">
+                        <i class="bi bi-box-seam text-secondary" style="font-size: 4rem;"></i>
+                        <h4 class="fw-bold mt-3 text-dark">Gian hàng đang trống</h4>
+                        <p class="text-muted">Hãy sử dụng Form bên trái để tạo khóa học đầu tiên nhé!</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function editCourse(id, name, desc, img, price) {
+            document.getElementById('editCourseId').value = id;
+            document.getElementById('nameInput').value = name;
+            document.getElementById('descInput').value = desc === "None" ? "" : desc;
+            document.getElementById('imageInput').value = img === "None" ? "" : img;
+            document.getElementById('priceInput').value = price === "None" ? "" : price;
+            
+            document.getElementById('formHeader').classList.add('edit-mode');
+            document.getElementById('formTitleText').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Cập Nhật Khóa Học`;
+            document.getElementById('formSubText').innerText = `Đang chỉnh sửa khóa học #${id}`;
+            
+            let btn = document.getElementById('btnSubmitForm');
+            btn.classList.add('btn-update'); 
+            btn.innerHTML = '<i class="bi bi-check2-circle me-2 fs-5"></i> Lưu Thay Đổi';
+            
+            document.getElementById('btnCancelEdit').style.display = 'flex';
+        }
+
+        function cancelEdit() {
+            document.getElementById('courseForm').reset();
+            document.getElementById('editCourseId').value = '';
+            
+            document.getElementById('formHeader').classList.remove('edit-mode');
+            document.getElementById('formTitleText').innerHTML = `<i class="bi bi-plus-circle me-2"></i>Thêm Khóa Học Mới`;
+            document.getElementById('formSubText').innerText = `Đăng bán các khóa học lên gian hàng để học viên có thể đăng ký.`;
+            
+            let btn = document.getElementById('btnSubmitForm');
+            btn.classList.remove('btn-update'); 
+            btn.innerHTML = '<i class="bi bi-cart-plus-fill me-2 fs-5"></i> Đăng Khóa Học';
+            
+            document.getElementById('btnCancelEdit').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
