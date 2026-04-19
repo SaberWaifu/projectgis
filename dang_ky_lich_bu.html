@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác Nhận Lịch Bù</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { background-color:#0B1121; color:#fff; font-family:'Segoe UI',sans-serif; }
+        .glass-card { background:rgba(30,41,59,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); }
+        .choice-card { cursor:pointer; transition:all 0.2s; }
+        .choice-card:has(input:checked) { border-color: rgba(52,211,153,0.7); background:rgba(16,185,129,0.15); }
+        .choice-card-no:has(input:checked) { border-color: rgba(239,68,68,0.7); background:rgba(239,68,68,0.1); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    {% for message in messages %}
+    Swal.fire({icon:'{% if message.tags=="error" %}error{% else %}success{% endif %}',title:'Thông báo',text:'{{ message }}',toast:true,position:'top-end',showConfirmButton:false,timer:3000});
+    {% endfor %}
+});
+</script>
+{% endif %}
+
+<nav class="px-6 py-4 glass-card flex justify-between items-center sticky top-0 z-50">
+    <span class="text-2xl font-black text-white">TOÁN <span class="text-blue-400">GIS</span></span>
+    <a href="{% url 'xem_lich_bu' %}" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+</nav>
+
+<main class="flex-grow flex items-center justify-center p-4 md:p-8">
+    <div class="w-full max-w-md">
+
+        <div class="glass-card rounded-2xl p-6 mb-5 border-l-4 border-l-emerald-500">
+            <h1 class="text-xl font-bold text-white mb-3"><i class="bi bi-calendar-check text-emerald-400 me-2"></i>Xác Nhận Tham Dự</h1>
+            <div class="flex flex-col gap-2 text-sm text-gray-300">
+                <div><i class="bi bi-easel2 text-blue-400 me-2"></i>Lớp: <strong class="text-white">{{ lb.lop_hoc.ten_lop }}</strong></div>
+                <div><i class="bi bi-calendar3 text-emerald-400 me-2"></i>Ngày bù: <strong class="text-yellow-300">{{ lb.ngay_bu|date:"l, d/m/Y" }}</strong></div>
+                <div><i class="bi bi-clock text-blue-400 me-2"></i>Ca học: <strong class="text-white">Ca {{ lb.ca_bu }}</strong></div>
+                {% if lb.ly_do %}<div class="text-gray-400 italic text-xs mt-1"><i class="bi bi-info-circle me-1"></i>{{ lb.ly_do }}</div>{% endif %}
+            </div>
+        </div>
+
+        {% if da_dk %}
+        <div class="glass-card rounded-2xl p-4 mb-4 border border-blue-500/30 bg-blue-900/10">
+            <p class="text-blue-300 text-sm font-bold mb-1"><i class="bi bi-check2-circle me-1"></i> Bạn đã xác nhận trước đó:</p>
+            <p class="text-sm text-gray-300">{% if da_dk.co_mat %}<span class="text-green-400">✓ Sẽ tham dự</span>{% else %}<span class="text-red-400">✗ Sẽ vắng mặt</span>{% endif %}
+            {% if da_dk.ghi_chu %} — {{ da_dk.ghi_chu }}{% endif %}</p>
+        </div>
+        {% endif %}
+
+        <div class="glass-card rounded-2xl p-6">
+            <form method="POST" class="flex flex-col gap-4">
+                {% csrf_token %}
+
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="choice-card glass-card rounded-xl p-4 border border-slate-700 text-center">
+                        <input type="radio" name="co_mat" value="1" class="sr-only" {% if not da_dk or da_dk.co_mat %}checked{% endif %}>
+                        <i class="bi bi-check-circle-fill text-3xl text-emerald-400 block mb-2"></i>
+                        <span class="font-bold text-white block">Có thể tham dự</span>
+                        <span class="text-xs text-gray-400">Tôi sẽ đến học bù</span>
+                    </label>
+                    <label class="choice-card choice-card-no glass-card rounded-xl p-4 border border-slate-700 text-center">
+                        <input type="radio" name="co_mat" value="0" class="sr-only" {% if da_dk and not da_dk.co_mat %}checked{% endif %}>
+                        <i class="bi bi-x-circle-fill text-3xl text-red-400 block mb-2"></i>
+                        <span class="font-bold text-white block">Không thể tham dự</span>
+                        <span class="text-xs text-gray-400">Tôi bận, không đến được</span>
+                    </label>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-400 mb-1 block">Ghi chú (tùy chọn)</label>
+                    <textarea name="ghi_chu" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none text-sm" placeholder="Lý do vắng, hoặc ghi chú thêm...">{{ da_dk.ghi_chu|default:'' }}</textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="bi bi-send-fill"></i> Gửi Xác Nhận
+                </button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer class="mt-auto py-6 border-t border-gray-800 text-center text-sm text-gray-500">&copy; 2026 Hệ thống TOÁN GIS.</footer>
+</body>
+</html>

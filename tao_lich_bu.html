@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Lịch Học Bù</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { background-color:#0B1121; color:#fff; font-family:'Segoe UI',sans-serif; }
+        .glass-card { background:rgba(30,41,59,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    {% for message in messages %}
+    Swal.fire({
+        icon: '{% if message.tags == "error" %}error{% else %}success{% endif %}',
+        title: 'Thông báo',
+        text: '{{ message }}',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000
+    });
+    {% endfor %}
+    
+    // Pre-fill from URL param
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('xn')) document.getElementById('xin_nghi_id').value = params.get('xn');
+});
+</script>
+{% endif %}
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('xn')) {
+        const el = document.getElementById('xin_nghi_id');
+        if(el) el.value = params.get('xn');
+    }
+});
+</script>
+
+<nav class="px-6 py-4 glass-card flex justify-between items-center sticky top-0 z-50">
+    <span class="text-2xl font-black text-white">TOÁN <span class="text-emerald-400">GIS</span></span>
+    <div class="flex gap-3">
+        <a href="{% url 'quan_ly_xin_nghi' %}" class="bg-yellow-800 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+            <i class="bi bi-journal-check"></i> Xin Nghỉ
+        </a>
+        <a href="{% url 'xem_lich_bu' %}" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+            <i class="bi bi-arrow-left"></i> Lịch Bù
+        </a>
+    </div>
+</nav>
+
+<main class="flex-grow flex items-start justify-center p-4 md:p-8">
+    <div class="w-full max-w-xl">
+
+        <div class="glass-card rounded-2xl p-6 mb-5 border-l-4 border-l-emerald-500">
+            <h1 class="text-xl font-bold text-white mb-1"><i class="bi bi-calendar-plus text-emerald-400 me-2"></i>Tạo Lịch Học Bù</h1>
+            <p class="text-gray-400 text-sm">Thông báo buổi học bù cho học viên của lớp. Học viên sẽ xác nhận tham dự hay không.</p>
+        </div>
+
+        <!-- Danh sách đơn đã duyệt chờ lịch bù -->
+        {% if ds_xin_nghi %}
+        <div class="glass-card rounded-2xl p-4 mb-5 border border-yellow-500/30 bg-yellow-900/10">
+            <p class="text-yellow-300 font-bold text-sm mb-3"><i class="bi bi-info-circle me-1"></i> Đơn xin nghỉ đã duyệt — chưa có lịch bù:</p>
+            <div class="flex flex-col gap-2">
+                {% for xn in ds_xin_nghi %}
+                <div class="flex justify-between items-center bg-slate-800/50 p-3 rounded-lg border border-slate-700 text-sm">
+                    <div>
+                        <span class="font-bold text-white">{{ xn.ten_nguoi_xin }}</span>
+                        <span class="text-gray-400 mx-2">—</span>
+                        <span class="text-gray-300">{{ xn.lop_hoc.ten_lop }}</span>
+                        <span class="text-yellow-400 ml-2">({{ xn.ngay_nghi|date:"d/m/Y" }})</span>
+                    </div>
+                    <button type="button" onclick="document.getElementById('xin_nghi_id').value='{{ xn.id }}'; document.getElementById('lop_hoc').value='{{ xn.lop_hoc.id }}'"
+                        class="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-bold transition">Chọn</button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="glass-card rounded-2xl p-6">
+            <form method="POST" class="flex flex-col gap-4">
+                {% csrf_token %}
+                <input type="hidden" name="xin_nghi_id" id="xin_nghi_id" value="">
+
+                <div>
+                    <label class="text-xs font-bold text-gray-400 mb-1 block">Lớp học <span class="text-red-400">*</span></label>
+                    <select name="lop_hoc" id="lop_hoc" required class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="">-- Chọn lớp học --</option>
+                        {% for lop in ds_lop %}
+                        <option value="{{ lop.id }}">{{ lop.ten_lop }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 mb-1 block">Ngày dạy bù <span class="text-red-400">*</span></label>
+                        <input type="date" name="ngay_bu" required class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 mb-1 block">Ca học <span class="text-red-400">*</span></label>
+                        <select name="ca_bu" required class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            {% for ca in ca_range %}
+                            <option value="{{ ca }}">Ca {{ ca }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-400 mb-1 block">Ghi chú (tùy chọn)</label>
+                    <textarea name="ly_do" rows="3" class="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Thông tin thêm về buổi học bù..."></textarea>
+                </div>
+                <div class="bg-emerald-900/20 border border-emerald-500/30 rounded-xl p-3 text-xs text-emerald-300">
+                    <i class="bi bi-bell me-1"></i> Sau khi tạo, toàn bộ học viên trong lớp sẽ thấy lịch bù và có thể xác nhận tham dự.
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="bi bi-send-fill"></i> Thông Báo Lịch Bù
+                </button>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer class="mt-auto py-6 border-t border-gray-800 text-center text-sm text-gray-500">&copy; 2026 Hệ thống TOÁN GIS.</footer>
+</body>
+</html>

@@ -1,0 +1,205 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cửa Hàng Khóa Học - TOÁN GIS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { 
+            background-color: #0B1121; 
+            color: #ffffff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: radial-gradient(circle at top right, rgba(14, 165, 233, 0.1), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.1), transparent 40%);
+        }
+        .glass-card { 
+            background: rgba(30, 41, 59, 0.6); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hover-card:hover {
+            border-color: rgba(56, 189, 248, 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(56, 189, 248, 0.2);
+        }
+        .course-img { transition: transform 0.5s ease; }
+        .hover-card:hover .course-img { transform: scale(1.08); }
+        
+        /* Custom Pagination */
+        .page-link { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; transition: 0.3s; font-weight: bold; }
+        .page-link:hover { background: rgba(59, 130, 246, 0.2); color: #fff; border-color: #3b82f6; }
+        .page-link.active { background: #3b82f6; color: white; border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        .page-link.disabled { opacity: 0.5; pointer-events: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-blue-500... overflow-x-hidden w-full">
+    
+    <nav class="px-6 py-4 glass-card flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-500/30">
+                <i class="bi bi-cart-check"></i>
+            </div>
+            <span class="text-2xl font-black tracking-wider text-white">TOÁN <span class="text-blue-400">GIS</span></span>
+        </div>
+        
+        <div class="flex items-center gap-6">
+            <a href="{% url 'trang_nguoi_dung' %}" class="font-medium text-gray-300 hover:text-white transition-colors hidden md:block">
+                ← Về Bảng Điều Khiển
+            </a>
+            <a href="{% url 'logout' %}" class="bg-gray-800 hover:bg-red-500 hover:text-white border border-gray-700 hover:border-red-500 text-gray-300 px-5 py-2.5 rounded-lg transition-all duration-300 text-sm font-semibold shadow-md">
+                Đăng Xuất
+            </a>
+        </div>
+    </nav>
+
+    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full flex flex-col gap-8">
+        
+        <div class="text-center mt-4 mb-2">
+            <h1 class="text-3xl md:text-5xl font-bold mb-4">Hệ Sinh Thái <span class="text-gradient">Khóa Học</span></h1>
+            <p class="text-gray-400 text-lg max-w-2xl mx-auto mb-8">Chọn khóa học bạn yêu thích, chọn lịch học phù hợp và để AI sắp xếp lộ trình tối ưu nhất cho bạn.</p>
+            
+            <form method="GET" action="" class="max-w-2xl mx-auto relative flex items-center">
+                <i class="bi bi-search absolute left-4 text-gray-400"></i>
+                <input type="text" name="q" value="{{ query }}" placeholder="Tìm môn học, lớp học... (VD: Toán 9)" 
+                       class="w-full bg-slate-800/80 border border-slate-600 text-white px-12 py-4 rounded-full focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 transition-all text-lg shadow-lg">
+                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-blue-600 hover:bg-blue-500 text-white px-6 rounded-full font-bold transition-colors">
+                    Tìm Kiếm
+                </button>
+            </form>
+        </div>
+
+        {% if messages %}
+            <div class="max-w-3xl mx-auto w-full space-y-3">
+                {% for message in messages %}
+                    <div class="px-5 py-4 rounded-xl flex items-center gap-3 text-sm font-medium bg-green-500/10 border border-green-500/20 text-green-400">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="mt-4">
+            <h3 class="text-xl font-bold text-white mb-6 border-l-4 border-blue-500 pl-3">Khóa Học Tiêu Biểu</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for khoa in danh_sach_khoa_hoc %}
+                <div class="glass-card rounded-2xl transition-all duration-300 hover-card flex flex-col h-full bg-slate-800/40 overflow-hidden group">
+                    <div class="h-48 overflow-hidden relative">
+                        {% if khoa.hinh_anh %}
+                            <img src="{{ khoa.hinh_anh }}" alt="{{ khoa.ten_khoa_hoc }}" class="w-full h-full object-cover course-img">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1596495578065-6e0763fa1178?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover course-img">
+                        {% endif %}
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0f172a] to-transparent"></div>
+                        <span class="absolute top-3 right-3 px-3 py-1 bg-yellow-500 text-yellow-900 rounded-full text-xs font-bold shadow-lg">HOT</span>
+                    </div>
+
+                    <div class="p-6 flex flex-col flex-grow relative z-10 -mt-6">
+                        <h2 class="text-xl font-bold text-white mb-2">{{ khoa.ten_khoa_hoc }}</h2>
+                        <p class="text-gray-400 text-sm mb-4 flex-grow">{{ khoa.mo_ta }}</p>
+                        
+                        <div class="flex justify-between items-center mt-auto pt-4 border-t border-slate-700/50">
+                            <div>
+                                <span class="block text-xs text-gray-500">Học phí trọn khóa</span>
+                                <span class="text-xl font-bold text-emerald-400">{{ khoa.hoc_phi|intcomma }} đ</span>
+                            </div>
+                            <a href="#danh-sach-lop" class="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/30 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                                Xem Lịch
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-10 text-gray-500 border-2 border-dashed border-gray-700 rounded-xl">
+                    Không tìm thấy khóa học nào phù hợp với "{{ query }}".
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if danh_sach_khoa_hoc.has_other_pages %}
+            <div class="flex justify-center items-center gap-2 mt-8">
+                <a href="?q={{ query }}&page_kh=1&page_lop={{ danh_sach_lop.number }}" class="page-link {% if not danh_sach_khoa_hoc.has_previous %}disabled{% endif %}" title="Trang Đầu"><i class="bi bi-chevron-double-left"></i></a>
+                <a href="?q={{ query }}&page_kh={% if danh_sach_khoa_hoc.has_previous %}{{ danh_sach_khoa_hoc.previous_page_number }}{% else %}1{% endif %}&page_lop={{ danh_sach_lop.number }}" class="page-link {% if not danh_sach_khoa_hoc.has_previous %}disabled{% endif %}"><i class="bi bi-chevron-left"></i></a>
+                
+                <span class="page-link active">{{ danh_sach_khoa_hoc.number }} / {{ danh_sach_khoa_hoc.paginator.num_pages }}</span>
+                
+                <a href="?q={{ query }}&page_kh={% if danh_sach_khoa_hoc.has_next %}{{ danh_sach_khoa_hoc.next_page_number }}{% else %}{{ danh_sach_khoa_hoc.paginator.num_pages }}{% endif %}&page_lop={{ danh_sach_lop.number }}" class="page-link {% if not danh_sach_khoa_hoc.has_next %}disabled{% endif %}"><i class="bi bi-chevron-right"></i></a>
+                <a href="?q={{ query }}&page_kh={{ danh_sach_khoa_hoc.paginator.num_pages }}&page_lop={{ danh_sach_lop.number }}" class="page-link {% if not danh_sach_khoa_hoc.has_next %}disabled{% endif %}" title="Trang Cuối"><i class="bi bi-chevron-double-right"></i></a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div id="danh-sach-lop" class="mt-12 pt-10 border-t border-gray-800">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-2 h-8 bg-blue-500 rounded-full"></div>
+                <h2 class="text-2xl font-bold text-white">Lịch Khai Giảng & Chọn Lớp</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for lop in danh_sach_lop %}
+                <div class="glass-card rounded-2xl p-6 flex flex-col h-full border-l-4 border-l-blue-500 relative">
+                    
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="px-2 py-1 bg-green-500/10 text-green-400 border border-green-500/20 rounded text-[10px] font-bold tracking-wide uppercase">
+                            {% if lop.trang_thai == 'MO' %}Đang học{% else %}Đang tuyển{% endif %}
+                        </span>
+                        <span class="text-gray-400 text-xs font-semibold">Sĩ số: <span class="text-white">{{ lop.hoc_viens.count }}/{{ lop.si_so_toi_da }}</span></span>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-white mb-4">{{ lop.ten_lop }}</h3>
+                    
+                    <div class="space-y-2 text-sm text-gray-400 mb-6 flex-grow">
+                        <div class="flex items-center gap-2">
+                            <span class="w-5 text-center"><i class="bi bi-person-video3 text-blue-400"></i></span> <span>Giảng viên: <strong class="text-gray-200">{{ lop.giao_vien.ten }}</strong></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-5 text-center"><i class="bi bi-geo-alt-fill text-red-400"></i></span> <span>Cơ sở: <strong class="text-gray-200">{{ lop.giao_vien.co_so.ten|default:"Chưa sắp xếp" }}</strong></span>
+                        </div>
+                        {% if lop.khoa_hoc %}
+                        <div class="flex items-center gap-2">
+                            <span class="w-5 text-center"><i class="bi bi-tag-fill text-yellow-400"></i></span> <span>Khóa: <strong class="text-gray-200">{{ lop.khoa_hoc.ten_khoa_hoc }}</strong></span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <a href="{% url 'user_dang_ky_lop' lop.id %}" class="w-full py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white rounded-lg text-sm font-bold transition-all flex justify-center items-center shadow-lg shadow-blue-500/25">
+                        Ghi Danh Lớp Này
+                    </a>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12 glass-card rounded-2xl border-dashed border-2 border-slate-700">
+                    <h3 class="text-xl font-bold text-white mb-2">Chưa có lớp học nào được mở</h3>
+                    <p class="text-slate-400">Thử tìm kiếm với từ khóa khác hoặc quay lại sau!</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if danh_sach_lop.has_other_pages %}
+            <div class="flex justify-center items-center gap-2 mt-8">
+                <a href="?q={{ query }}&page_lop=1&page_kh={{ danh_sach_khoa_hoc.number }}" class="page-link {% if not danh_sach_lop.has_previous %}disabled{% endif %}" title="Trang Đầu"><i class="bi bi-chevron-double-left"></i></a>
+                <a href="?q={{ query }}&page_lop={% if danh_sach_lop.has_previous %}{{ danh_sach_lop.previous_page_number }}{% else %}1{% endif %}&page_kh={{ danh_sach_khoa_hoc.number }}" class="page-link {% if not danh_sach_lop.has_previous %}disabled{% endif %}"><i class="bi bi-chevron-left"></i></a>
+                
+                <span class="page-link active">{{ danh_sach_lop.number }} / {{ danh_sach_lop.paginator.num_pages }}</span>
+                
+                <a href="?q={{ query }}&page_lop={% if danh_sach_lop.has_next %}{{ danh_sach_lop.next_page_number }}{% else %}{{ danh_sach_lop.paginator.num_pages }}{% endif %}&page_kh={{ danh_sach_khoa_hoc.number }}" class="page-link {% if not danh_sach_lop.has_next %}disabled{% endif %}"><i class="bi bi-chevron-right"></i></a>
+                <a href="?q={{ query }}&page_lop={{ danh_sach_lop.paginator.num_pages }}&page_kh={{ danh_sach_khoa_hoc.number }}" class="page-link {% if not danh_sach_lop.has_next %}disabled{% endif %}" title="Trang Cuối"><i class="bi bi-chevron-double-right"></i></a>
+            </div>
+            {% endif %}
+
+        </div>
+    </main>
+
+    <footer class="mt-auto py-6 border-t border-slate-800/80 text-center text-sm text-slate-500 bg-slate-900/50">
+        &copy; 2026 Hệ thống TOÁN GIS. Bản quyền thuộc về quản trị viên.
+    </footer>
+</body>
+</html>
