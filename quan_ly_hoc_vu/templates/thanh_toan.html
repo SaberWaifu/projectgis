@@ -1,0 +1,232 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thanh Toán Học Phí - Toán GIS</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --dark-bg: #0B1121;
+            --glass-bg: rgba(30, 41, 59, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --momo: #a50064;
+            --vnpay: #005baa;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--dark-bg);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            overflow-x: hidden !important; 
+            width: 100% !important;
+        }
+
+        h1, h2, h3, h4, h5, .brand { font-family: 'Montserrat', sans-serif; }
+
+        /* Navbar tối giản cho trang thanh toán */
+        .checkout-nav {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(11, 17, 33, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        .brand { font-size: 1.5rem; font-weight: 800; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .brand-icon { width: 35px; height: 35px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Payment Methods */
+        .payment-method {
+            border: 1px solid var(--glass-border);
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .payment-method:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); }
+        .payment-method.active { border-color: var(--primary); background: rgba(59, 130, 246, 0.1); }
+        .payment-method.active-momo { border-color: var(--momo); background: rgba(165, 0, 100, 0.1); }
+        .payment-method.active-vnpay { border-color: var(--vnpay); background: rgba(0, 91, 170, 0.1); }
+        
+        .method-icon { width: 40px; height: 40px; border-radius: 8px; object-fit: contain; background: white; padding: 5px; }
+        .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+        
+        /* Thông tin đơn hàng */
+        .invoice-item { display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+        .invoice-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .total-price { font-size: 1.8rem; font-weight: 800; color: #f87171; }
+
+        .btn-pay { font-weight: 700; font-size: 1.1rem; padding: 15px; border-radius: 12px; transition: 0.3s; }
+        
+        /* Cờ ẩn khu vực QR code */
+        #qr-section { display: none; }
+    </style>
+</head>
+<body>
+
+    <nav class="checkout-nav mb-5">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="{% url 'trang_nguoi_dung' %}" class="brand">
+                <div class="brand-icon"><i class="bi bi-geo-alt-fill"></i></div>
+                TOÁN <span style="color: #f59e0b;">GIS</span>
+            </a>
+            <a href="{% url 'trang_nguoi_dung' %}" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại bảng điều khiển
+            </a>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        <div class="row g-4 justify-content-center">
+            
+            <div class="col-lg-7">
+                <h3 class="fw-bold mb-4">Phương thức thanh toán</h3>
+                <div class="glass-card mb-4">
+                    <form id="paymentForm" action="/xu-ly-thanh-toan/" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="khoa_hoc_id" value="1">
+
+                        <label class="payment-method" id="box-momo">
+                            <input class="form-check-input me-2 mt-0" type="radio" name="payment_method" value="momo" onchange="selectMethod('momo')">
+                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png" class="method-icon" alt="MoMo">
+                            <div>
+                                <h6 class="mb-0 fw-bold text-white">Ví MoMo</h6>
+                                <small class="text-secondary">Quét mã QR qua ứng dụng MoMo</small>
+                            </div>
+                        </label>
+
+                        <label class="payment-method" id="box-vnpay">
+                            <input class="form-check-input me-2 mt-0" type="radio" name="payment_method" value="vnpay" onchange="selectMethod('vnpay')">
+                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR.png" class="method-icon" alt="VNPay">
+                            <div>
+                                <h6 class="mb-0 fw-bold text-white">VNPay / Thẻ ATM</h6>
+                                <small class="text-secondary">Thanh toán qua cổng VNPay</small>
+                            </div>
+                        </label>
+
+                        <label class="payment-method" id="box-bank">
+                            <input class="form-check-input me-2 mt-0" type="radio" name="payment_method" value="bank" checked onchange="selectMethod('bank')">
+                            <div class="method-icon d-flex align-items-center justify-content-center bg-dark" style="border: 1px solid var(--glass-border);">
+                                <i class="bi bi-bank text-white fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold text-white">Chuyển khoản Ngân hàng</h6>
+                                <small class="text-secondary">Chuyển khoản thủ công 24/7</small>
+                            </div>
+                        </label>
+
+                        <div id="qr-section" class="mt-4 text-center p-4 rounded-4" style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.2);">
+                            <h6 class="text-info fw-bold mb-3"><i class="bi bi-qr-code-scan me-2"></i>Quét mã để thanh toán</h6>
+                            
+                            <img id="qr-image" src="" alt="QR Code" class="img-fluid rounded-3 mb-3 bg-white p-2" style="max-width: 220px; border: 4px solid white;">
+                            
+                            <div class="text-start p-3 rounded-3" style="background: rgba(255,255,255,0.05);">
+                                <p class="mb-1 small text-secondary">Ngân hàng: <strong class="text-white">Vietcombank</strong></p>
+                                <p class="mb-1 small text-secondary">Số tài khoản: <strong class="text-white fs-5">1234567890</strong></p>
+                                <p class="mb-1 small text-secondary">Chủ tài khoản: <strong class="text-white">TRUNG TAM TOAN GIS</strong></p>
+                                <p class="mb-0 small text-secondary">Nội dung: <strong class="text-warning">bedung TOAN6</strong></p>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 btn-pay mt-4">Xác Nhận & Thanh Toán</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <h3 class="fw-bold mb-4">Chi tiết đăng ký</h3>
+                <div class="glass-card position-sticky" style="top: 20px;">
+                    <h5 class="mb-4 text-primary fw-bold"><i class="bi bi-receipt me-2"></i>Hóa Đơn Của Bạn</h5>
+                    
+                    <div class="invoice-item">
+                        <span class="text-secondary">Tài khoản học viên:</span>
+                        <span class="fw-bold text-white">{{ user.username|default:"bedung" }}</span>
+                    </div>
+                    
+                    <div class="invoice-item">
+                        <span class="text-secondary">Khóa học:</span>
+                        <span class="fw-bold text-info text-end">Toán cao cấp (Toán Khối 6)</span>
+                    </div>
+                    
+                    <div class="invoice-item">
+                        <span class="text-secondary">Cơ sở đăng ký:</span>
+                        <span class="fw-bold text-white text-end">Cơ sở Gò Vấp</span>
+                    </div>
+
+                    <div class="invoice-item mt-3 pt-3">
+                        <span class="text-secondary mt-2">Tổng thanh toán:</span>
+                        <span class="total-price">1.000.000 đ</span>
+                    </div>
+
+                    <div class="alert mt-4 mb-0 small" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #93c5fd;">
+                        <i class="bi bi-shield-check me-2"></i>Giao dịch được mã hóa và bảo mật an toàn. Sau khi thanh toán, hệ thống GIS sẽ tự động kích hoạt lộ trình học của bạn.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Hiệu ứng đổi màu viền và hiển thị QR Code động
+        function selectMethod(method) {
+            // Xóa class active cũ
+            document.querySelectorAll('.payment-method').forEach(el => {
+                el.classList.remove('active', 'active-momo', 'active-vnpay');
+            });
+
+            const qrImage = document.getElementById('qr-image');
+            const qrSection = document.getElementById('qr-section');
+
+            // Xử lý hiển thị dựa trên phương thức được chọn
+            if(method === 'momo') {
+                document.getElementById('box-momo').classList.add('active-momo');
+                qrSection.style.display = 'block';
+                // Link ảnh mẫu MoMo (trên thực tế sẽ gọi API MoMo trả về QR)
+                qrImage.src = "https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png"; 
+            } 
+            else if (method === 'vnpay') {
+                document.getElementById('box-vnpay').classList.add('active-vnpay');
+                qrSection.style.display = 'none'; // VNPay chuyển trang nên không cần hiện QR ở đây
+            } 
+            else {
+                document.getElementById('box-bank').classList.add('active');
+                qrSection.style.display = 'block';
+                // Dùng API của VietQR tạo mã tự động dựa trên STK và số tiền
+                qrImage.src = "https://img.vietqr.io/image/vietcombank-1234567890-compact2.png?amount=1000000&addInfo=bedung%20TOAN6&accountName=TRUNG%20TAM%20TOAN%20GIS";
+            }
+        }
+
+        // Kích hoạt Ngân hàng làm mặc định khi load trang
+        window.onload = function() {
+            selectMethod('bank');
+        };
+    </script>
+</body>
+</html>

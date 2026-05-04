@@ -1,0 +1,251 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quản Lý Giới Thiệu - Toán GIS Enterprise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+      tinymce.init({
+        selector: '#noi_dung_editor',
+        plugins: 'image link media table lists paste preview',
+        toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image | removeformat | preview',
+        paste_data_images: true,
+        height: 350,
+        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:15px; color:#334155; }',
+        images_upload_handler: function(blobInfo, progress) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(blobInfo.blob());
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+      });
+    </script>
+    <style>
+        :root {
+            --primary: #0d6efd; --primary-dark: #0a58ca; --primary-soft: #eff6ff;
+            --secondary: #64748b; --accent: #ffc107; --success: #10b981;
+            --danger: #ef4444; --warning: #f59e0b; --teal: #14b8a6;
+            --dark-bg: #0f172a; --light-bg: #f8fafc; --white: #ffffff; --border-color: #e2e8f0;
+            --gradient-main: linear-gradient(135deg, #0d6efd 0%, #00d2ff 100%);
+            --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05); --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --font-head: 'Montserrat', sans-serif; --font-body: 'Open Sans', sans-serif;
+        }
+        body { font-family: var(--font-body); background: var(--light-bg); color: #334155; overflow-x: hidden; }
+        h1,h2,h3,h4,h5,h6,.navbar-brand { font-family: var(--font-head); }
+        a { text-decoration: none; transition: .3s; }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .navbar-custom { height: 76px; background: var(--dark-bg); border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 1000; box-shadow: var(--shadow-md); }
+        .navbar-brand { font-weight: 800; font-size: 1.4rem; color: #fff !important; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        .brand-icon { width: 36px; height: 36px; background: var(--gradient-main); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: white; }
+        .navbar-brand span { color: var(--accent); }
+        .nav-link { color: rgba(255,255,255,0.7) !important; font-weight: 600; padding: 8px 16px !important; border-radius: 50px; transition: .3s; font-size: 0.9rem; }
+        .nav-link:hover, .nav-link.active { background: rgba(255,255,255,0.1); color: white !important; }
+
+        .card-custom { background: var(--white); border-radius: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); overflow: hidden; }
+        .side-form-header { background: var(--primary-soft); padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; }
+        .form-label { font-weight: 700; font-size: 0.75rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .form-control, .form-select { border-radius: 12px; padding: 12px; border: 1px solid var(--border-color); background: #f8fafc; font-size: 0.95rem; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-soft); background: #fff; }
+
+        .gt-card { background: var(--white); border-radius: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; transition: .3s; overflow: hidden; height: 100%; }
+        .gt-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); border-color: var(--primary); }
+        .gt-img-wrap { height: 180px; position: relative; overflow: hidden; background: linear-gradient(135deg, #f1f5f9, #e2e8f0); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border-color); }
+        .gt-img { width: 100%; height: 100%; object-fit: cover; transition: transform .5s; }
+        .gt-card:hover .gt-img { transform: scale(1.07); }
+        .gt-badge { position: absolute; top: 12px; left: 12px; padding: 5px 12px; border-radius: 50px; font-size: 0.72rem; font-weight: 700; z-index: 2; }
+
+        .btn-action { width: 36px; height: 36px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; transition: .3s; background: var(--light-bg); border: 1px solid var(--border-color); color: var(--secondary); font-size: 1.1rem; }
+        .btn-action-edit:hover { background: var(--primary-soft); color: var(--primary); border-color: var(--primary); }
+        .btn-action-delete:hover { background: #fef2f2; color: var(--danger); border-color: var(--danger); }
+        .guide-box { background: #fffbeb; border: 1px dashed var(--warning); border-radius: 12px; padding: 15px; }
+        .text-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .text-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .badge-tong-quan { background: rgba(13,110,253,0.9); color: white; }
+        .badge-su-menh   { background: rgba(16,185,129,0.9); color: white; }
+        .badge-tam-nhin  { background: rgba(245,158,11,0.9); color: #333; }
+        .badge-thanh-tich{ background: rgba(168,85,247,0.9); color: white; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand" href="{% url 'trang_chu' %}">
+            <div class="brand-icon"><i class="bi bi-info-circle-fill"></i></div>
+            <div>TOÁN <span>GIS</span> <small class="d-block fw-normal text-muted" style="font-size:.7rem;">Giới Thiệu Admin</small></div>
+        </a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="{% url 'thong_ke_page' %}">Tổng Quan</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_page' %}">Học Viên</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_giao_vien' %}">Giáo Viên</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'chi_nhanh_page' %}">Chi Nhánh</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_tin_tuc' %}">Tin Tức</a></li>
+                <li class="nav-item"><a class="nav-link active" href="{% url 'quan_ly_gioi_thieu' %}">Giới Thiệu</a></li>
+            </ul>
+            <a href="{% url 'trang_gioi_thieu' %}" class="btn btn-outline-light btn-sm rounded-pill" target="_blank">
+                <i class="bi bi-eye me-1"></i> Xem trang
+            </a>
+        </div>
+    </div>
+</nav>
+
+{% if messages %}
+<div class="container-fluid px-lg-5 pt-3">
+    {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }} alert-dismissible fade show rounded-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="container-fluid py-5 px-lg-5">
+    <div class="row g-5">
+
+        <!-- SIDEBAR: Form thêm mục -->
+        <div class="col-lg-4 animate__animated animate__fadeInLeft">
+            <div class="card-custom sticky-top" style="top:90px;">
+                <div class="side-form-header">
+                    <i class="bi bi-pencil-square fs-3 text-primary"></i>
+                    <div>
+                        <h5 class="fw-bold mb-0 text-primary">Thêm Mục Giới Thiệu</h5>
+                        <small class="text-secondary">Soạn nội dung giới thiệu trung tâm</small>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Tiêu đề mục</label>
+                            <input type="text" name="tieu_de" class="form-control" placeholder="VD: Về Chúng Tôi" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Danh mục</label>
+                            <select name="loai_muc" class="form-select">
+                                <option value="TONG_QUAN">📋 Tổng Quan</option>
+                                <option value="SU_MENH">🎯 Sứ Mệnh & Giá Trị</option>
+                                <option value="TAM_NHIN">🔭 Tầm Nhìn</option>
+                                <option value="THANH_TICH">🏆 Thành Tích & Giải Thưởng</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Thứ tự hiển thị</label>
+                            <input type="number" name="thu_tu" class="form-control" value="0" min="0">
+                            <small class="text-secondary">Số nhỏ hiển thị trước</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tóm tắt (hiển thị ở trang chủ)</label>
+                            <textarea name="tom_tat" class="form-control" rows="2" placeholder="Mô tả ngắn gọn..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nội dung chi tiết</label>
+                            <textarea name="noi_dung" id="noi_dung_editor" class="form-control" rows="6"></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Album ảnh (nhiều ảnh)</label>
+                            <input type="file" name="hinh_anh" class="form-control" accept="image/*" multiple>
+                            <div class="guide-box mt-2 small text-secondary">
+                                <i class="bi bi-lightbulb-fill text-warning me-1"></i>
+                                Ảnh đầu tiên sẽ là ảnh bìa của mục này.
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-3 rounded-3 shadow" style="background:var(--gradient-main);border:none;">
+                            <i class="bi bi-cloud-upload-fill me-2"></i> ĐĂNG MỤC GIỚI THIỆU
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- DANH SÁCH MỤC -->
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom animate__animated animate__fadeInDown">
+                <h4 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-collection-fill text-primary me-2"></i>
+                    Các Mục Giới Thiệu
+                    <span class="badge bg-primary rounded-pill ms-2">{{ ds_gioi_thieu.count }}</span>
+                </h4>
+            </div>
+
+            <div class="row g-4">
+                {% for muc in ds_gioi_thieu %}
+                <div class="col-md-6 animate__animated animate__fadeInUp">
+                    <div class="gt-card">
+                        <div class="gt-img-wrap">
+                            {% if muc.loai_muc == 'TONG_QUAN' %}
+                                <span class="gt-badge badge-tong-quan">📋 Tổng Quan</span>
+                            {% elif muc.loai_muc == 'SU_MENH' %}
+                                <span class="gt-badge badge-su-menh">🎯 Sứ Mệnh</span>
+                            {% elif muc.loai_muc == 'TAM_NHIN' %}
+                                <span class="gt-badge badge-tam-nhin">🔭 Tầm Nhìn</span>
+                            {% else %}
+                                <span class="gt-badge badge-thanh-tich">🏆 Thành Tích</span>
+                            {% endif %}
+
+                            {% with dau_anh=muc.cac_anh.first %}
+                                {% if dau_anh %}
+                                    <img src="{{ dau_anh.hinh_anh.url }}" class="gt-img" alt="Ảnh bìa">
+                                {% else %}
+                                    <div class="text-center text-secondary">
+                                        <i class="bi bi-image" style="font-size:3rem;opacity:.3;"></i>
+                                        <div class="small mt-1" style="opacity:.5;">Chưa có ảnh</div>
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+
+                        <div class="p-4 flex-grow-1 d-flex flex-column">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <small class="text-secondary fw-bold"><i class="bi bi-hash me-1"></i>Thứ tự: {{ muc.thu_tu }}</small>
+                                <small class="text-secondary ms-auto"><i class="bi bi-calendar3 me-1"></i>{{ muc.ngay_tao|date:"d/m/Y" }}</small>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-2 text-clamp-2">{{ muc.tieu_de }}</h5>
+                            <p class="text-secondary small mb-4 flex-grow-1 text-clamp-3">{{ muc.tom_tat }}</p>
+
+                            <div class="d-flex align-items-center mt-auto pt-3 border-top">
+                                <div class="text-secondary small fw-bold">
+                                    <i class="bi bi-images text-primary me-1"></i> {{ muc.cac_anh.count }} ảnh
+                                </div>
+                                <div class="ms-auto d-flex gap-2">
+                                    <a href="{% url 'sua_gioi_thieu' muc.id %}" class="btn-action btn-action-edit" title="Sửa mục">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a href="{% url 'xoa_gioi_thieu' muc.id %}" class="btn-action btn-action-delete" title="Xóa mục"
+                                       onclick="return confirm('Xóa mục \'{{ muc.tieu_de }}\' và toàn bộ ảnh?');">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="text-center py-5 bg-white rounded-4 border">
+                        <i class="bi bi-info-circle text-secondary mb-3 d-block" style="font-size:4rem;opacity:.4;"></i>
+                        <h5 class="text-dark fw-bold">Chưa có mục giới thiệu nào</h5>
+                        <p class="text-secondary">Sử dụng biểu mẫu bên trái để thêm mục đầu tiên.</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Tập - {{ lop.ten_lop }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { background-color:#0B1121; color:#fff; font-family:'Segoe UI',sans-serif;
+            background-image:radial-gradient(circle at top right,rgba(14,165,233,0.08),transparent 40%); }
+        .glass-card { background:rgba(30,41,59,0.6); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.05); }
+        .text-gradient { background:linear-gradient(to right,#38bdf8,#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+{% if messages %}
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    {% for message in messages %}
+    Swal.fire({
+        icon: '{% if message.tags == "error" %}error{% else %}success{% endif %}',
+        title: 'Thông báo',
+        text: '{{ message }}',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000
+    });
+    {% endfor %}
+});
+</script>
+{% endif %}
+
+<nav class="px-6 py-4 glass-card flex justify-between items-center sticky top-0 z-50">
+    <span class="text-2xl font-black text-white">TOÁN <span class="text-blue-400">GIS</span></span>
+    <a href="{% url 'trang_nguoi_dung' %}" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+        <i class="bi bi-arrow-left"></i> Quay lại
+    </a>
+</nav>
+
+<main class="flex-grow p-4 md:p-8 max-w-5xl mx-auto w-full flex flex-col gap-6">
+
+    <div class="glass-card rounded-2xl p-6 border-l-4 border-l-blue-500">
+        <h1 class="text-2xl font-bold text-white mb-1">Bài Tập: <span class="text-gradient">{{ lop.ten_lop }}</span></h1>
+        <p class="text-gray-400 text-sm">Xem đề bài, nộp bài và kiểm tra điểm số.</p>
+    </div>
+
+    <div class="flex flex-col gap-4">
+        {% for bt, nop in ds_bai_tap_voi_nop %}
+        <div class="glass-card rounded-2xl p-5 border border-slate-700/50">
+            <div class="flex flex-col md:flex-row justify-between gap-4">
+                <div class="flex-grow">
+                    <div class="flex items-start gap-3 mb-2 flex-wrap">
+                        <h3 class="text-lg font-bold text-white flex-grow">{{ bt.tieu_de }}</h3>
+                        <span class="px-2 py-0.5 rounded-full text-xs font-bold {% if bt.hinh_thuc == 'ONL' %}bg-blue-900/50 text-blue-300 border border-blue-500/30{% else %}bg-orange-900/50 text-orange-300 border border-orange-500/30{% endif %}">
+                            {{ bt.get_hinh_thuc_display }}
+                        </span>
+                        {% if nop %}
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-green-900/50 text-green-300 border border-green-500/30">
+                                <i class="bi bi-check2-circle me-1"></i> Đã nộp
+                            </span>
+                        {% else %}
+                            <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-900/50 text-yellow-300 border border-yellow-500/30">
+                                <i class="bi bi-clock me-1"></i> Chưa nộp
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% if bt.mo_ta %}<p class="text-gray-400 text-sm mb-2">{{ bt.mo_ta }}</p>{% endif %}
+                    <div class="flex gap-4 text-xs text-gray-500 flex-wrap">
+                        <span><i class="bi bi-calendar3 me-1"></i> Giao: {{ bt.ngay_tao|date:"d/m/Y H:i" }}</span>
+                        {% if bt.han_nop %}
+                            <span class="text-yellow-400"><i class="bi bi-alarm me-1"></i> Hạn: {{ bt.han_nop|date:"d/m/Y H:i" }}</span>
+                        {% endif %}
+                        {% if bt.file_de %}
+                            <a href="{{ bt.file_de.url }}" target="_blank" class="text-blue-400 hover:underline">
+                                <i class="bi bi-download me-1"></i> Tải đề bài
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    {% if nop %}
+                    <div class="mt-3 bg-slate-800/50 p-3 rounded-lg border border-slate-700 text-sm">
+                        <div class="text-gray-300">
+                            <i class="bi bi-file-earmark-check text-green-400 me-1"></i>
+                            Nộp lúc {{ nop.ngay_nop|date:"d/m/Y H:i" }}
+                            {% if nop.file_nop %} — <a href="{{ nop.file_nop.url }}" target="_blank" class="text-blue-400 hover:underline">Xem file đã nộp</a>{% endif %}
+                            {% if nop.ghi_chu %} — {{ nop.ghi_chu }}{% endif %}
+                        </div>
+                        {% if nop.diem is not None %}
+                        <div class="mt-1 text-emerald-400 font-bold">
+                            <i class="bi bi-award me-1"></i> Điểm: {{ nop.diem }}/10
+                            {% if nop.nhan_xet %} — <span class="text-gray-300 font-normal">{{ nop.nhan_xet }}</span>{% endif %}
+                        </div>
+                        {% else %}
+                        <div class="mt-1 text-gray-500 text-xs"><i class="bi bi-hourglass me-1"></i> Chờ chấm điểm...</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                    <a href="{% url 'nop_bai_tap' bt.id %}" class="{% if nop %}bg-slate-700 hover:bg-slate-600 text-gray-300{% else %}bg-blue-600 hover:bg-blue-500 text-white{% endif %} px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-1 shadow">
+                        <i class="bi bi-{% if nop %}arrow-repeat{% else %}upload{% endif %}"></i>
+                        {% if nop %}Nộp lại{% else %}Nộp Bài{% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="glass-card rounded-2xl p-12 text-center border-dashed border-2 border-slate-700">
+            <i class="bi bi-inbox text-4xl text-gray-600 block mb-3"></i>
+            <p class="text-gray-400">Giáo viên chưa giao bài tập nào.</p>
+        </div>
+        {% endfor %}
+    </div>
+</main>
+
+<footer class="mt-auto py-6 border-t border-gray-800 text-center text-sm text-gray-500">&copy; 2026 Hệ thống TOÁN GIS.</footer>
+</body>
+</html>

@@ -1,0 +1,377 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sửa Chi Nhánh - Toán GIS Pro</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --dark-bg: #0f172a;
+            --body-bg: #f1f5f9;
+            --white: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body { 
+    font-family: var(--font-body); 
+    background-color: var(--light-bg); 
+    color: #334155; 
+    /* Thêm 2 dòng này vào */
+    overflow-x: hidden !important; 
+    width: 100% !important; 
+}
+
+        h1, h2, h3, h4, h5, .btn { font-family: 'Montserrat', sans-serif; }
+
+        .navbar-custom {
+            background: var(--dark-bg);
+            padding: 15px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .edit-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .edit-header {
+            background: #f8fafc;
+            padding: 25px 30px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .edit-body { padding: 30px; }
+
+        .form-label {
+            font-weight: 700;
+            color: #475569;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            transition: 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+        }
+
+        #editMap {
+            width: 100%;
+            height: 350px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            margin-bottom: 20px;
+            z-index: 1;
+        }
+
+        .map-instruction {
+            background: rgba(13, 110, 253, 0.1);
+            color: var(--primary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(13, 110, 253, 0.2);
+        }
+
+        /* ===== UPLOAD ZONE ===== */
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 14px;
+            background: #f8fafc;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(13,110,253,0.04);
+        }
+        .upload-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .upload-icon {
+            font-size: 2.5rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+            transition: 0.3s;
+        }
+        .upload-zone:hover .upload-icon { color: var(--primary); transform: translateY(-4px); }
+        .upload-text { font-weight: 600; color: #475569; margin: 0; font-size: 0.95rem; }
+        .upload-hint { color: #94a3b8; font-size: 0.8rem; margin: 4px 0 0; }
+
+        /* Preview ảnh mới */
+        .preview-wrap {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e2e8f0;
+        }
+        .preview-wrap img { width: 100%; height: 130px; object-fit: cover; display: block; }
+        .preview-remove {
+            position: absolute; top: 4px; right: 4px;
+            background: rgba(239,68,68,0.85);
+            border: none; border-radius: 50%;
+            width: 26px; height: 26px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; cursor: pointer; font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .preview-remove:hover { background: #ef4444; transform: scale(1.1); }
+        .preview-badge {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(15,23,42,0.6);
+            color: white; font-size: 0.7rem; font-weight: 600;
+            padding: 4px 8px; text-align: center;
+        }
+        .gallery-item { border-radius: 10px; overflow: hidden; }
+        .btn-xoa-anh { text-decoration: none; transition: 0.2s; }
+        .btn-xoa-anh:hover { transform: scale(1.15); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar-custom">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="text-white fw-bold fs-4" style="font-family: 'Montserrat', sans-serif;">
+                <i class="bi bi-buildings-fill me-2 text-primary"></i>TOÁN GIS
+            </div>
+            <a href="{% url 'chi_nhanh_page' %}" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-bold">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="edit-container">
+            <div class="edit-header">
+                <h3 class="m-0 fw-bold text-primary">
+                    <i class="bi bi-pencil-square me-2"></i>Chỉnh Sửa Chi Nhánh
+                </h3>
+                <span class="badge bg-secondary fs-6">ID: #{{ co_so.id }}</span>
+            </div>
+
+            <form method="POST" action="" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="edit-body">
+                    
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label">Tên Chi Nhánh <span class="text-danger">*</span></label>
+                            <input type="text" name="ten" class="form-control form-control-lg fw-bold text-dark" value="{{ co_so.ten }}" required>
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <label class="form-label">Địa Chỉ Chi Tiết</label>
+                            <input type="text" name="dia_chi" id="addressInput" class="form-control" value="{{ co_so.dia_chi }}" required>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">Mô Tả Chi Nhánh</label>
+                            <textarea name="mo_ta" class="form-control" rows="3" placeholder="VD: Cơ sở chính với 5 phòng học, trang bị máy chiếu và điều hòa...">{{ co_so.mo_ta|default:"" }}</textarea>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 text-secondary">
+
+                    <h5 class="fw-bold mb-3"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Định vị Không gian (GIS)</h5>
+                    <div class="map-instruction">
+                        <i class="bi bi-cursor-fill"></i> Kéo thả ghim đỏ hoặc click vào vị trí mới trên bản đồ để cập nhật tọa độ.
+                    </div>
+                    
+                    <div id="editMap"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary">Vĩ Độ (Latitude)</label>
+                            <input type="number" step="any" name="lat" id="inputLat" class="form-control bg-light font-monospace" value="{{ co_so.lat|stringformat:'.6f' }}" required readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary">Kinh Độ (Longitude)</label>
+                            <input type="number" step="any" name="lon" id="inputLon" class="form-control bg-light font-monospace" value="{{ co_so.lon|stringformat:'.6f' }}" required readonly>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 text-secondary">
+
+                    <!-- ===== KHU VỰC GALLERY ẢNH ===== -->
+                    <h5 class="fw-bold mb-3"><i class="bi bi-images text-primary me-2"></i>Hình Ảnh Chi Nhánh</h5>
+
+                    <!-- Ảnh đã có -->
+                    {% if ds_anh %}
+                    <div class="row g-3 mb-4" id="existingGallery">
+                        {% for anh in ds_anh %}
+                        <div class="col-6 col-md-3" id="anh-item-{{ anh.id }}">
+                            <div class="position-relative gallery-item">
+                                <img src="{{ anh.hinh_anh.url }}" class="img-fluid rounded-3 shadow-sm w-100" style="height:130px; object-fit:cover;" alt="Ảnh chi nhánh">
+                                {% if anh.thu_tu == 0 %}
+                                    <span class="position-absolute top-0 start-0 badge bg-warning text-dark m-1" style="font-size:0.65rem;">Ảnh bìa</span>
+                                {% endif %}
+                                <a href="{% url 'xoa_anh_co_so' anh.id %}"
+                                   class="btn-xoa-anh position-absolute top-0 end-0 m-1"
+                                   onclick="return confirm('Xóa ảnh này?')"
+                                   title="Xóa ảnh">
+                                    <i class="bi bi-x-circle-fill text-danger" style="font-size:1.4rem; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center text-muted py-3 mb-3" id="noImgNote">
+                        <i class="bi bi-image" style="font-size:2rem;"></i>
+                        <p class="mb-0 mt-1" style="font-size:0.9rem;">Chưa có ảnh nào. Thêm ảnh bên dưới.</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Upload ảnh mới -->
+                    <div class="upload-zone" id="uploadZone">
+                        <input type="file" name="hinh_anh" id="fileInput" multiple accept="image/*" class="d-none">
+                        <label for="fileInput" class="upload-label">
+                            <i class="bi bi-cloud-arrow-up-fill upload-icon"></i>
+                            <p class="upload-text">Kéo thả ảnh vào đây hoặc <span class="text-primary fw-bold">bấm để chọn</span></p>
+                            <p class="upload-hint">Hỗ trợ JPG, PNG, WEBP • Chọn nhiều ảnh cùng lúc</p>
+                        </label>
+                    </div>
+
+                    <!-- Preview ảnh mới chọn -->
+                    <div id="previewContainer" class="row g-3 mt-2" style="display:none!important;"></div>
+
+                </div>
+
+                <div class="p-4 bg-light border-top d-flex justify-content-end gap-3">
+                    <a href="{% url 'chi_nhanh_page' %}" class="btn btn-light border fw-bold px-4 rounded-3">Hủy Bỏ</a>
+                    <button type="submit" class="btn btn-primary fw-bold px-5 rounded-3 shadow-sm">
+                        <i class="bi bi-check-circle-fill me-2"></i>Lưu Thay Đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ===== BẢN ĐỒ =====
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentLat = parseFloat("{{ co_so.lat|stringformat:'.6f' }}");
+            let currentLon = parseFloat("{{ co_so.lon|stringformat:'.6f' }}");
+            if (isNaN(currentLat) || currentLat === 0) currentLat = 10.7769;
+            if (isNaN(currentLon) || currentLon === 0) currentLon = 106.7009;
+
+            const map = L.map('editMap').setView([currentLat, currentLon], 16);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                subdomains: 'abcd', maxZoom: 20
+            }).addTo(map);
+
+            const redPin = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/2776/2776067.png',
+                iconSize: [45, 45], iconAnchor: [22, 45]
+            });
+            let marker = L.marker([currentLat, currentLon], {icon: redPin, draggable: true}).addTo(map);
+
+            function updateCoords(lat, lon) {
+                document.getElementById('inputLat').value = lat.toFixed(6);
+                document.getElementById('inputLon').value = lon.toFixed(6);
+            }
+            marker.on('dragend', () => { let p = marker.getLatLng(); updateCoords(p.lat, p.lng); });
+            map.on('click', (e) => { marker.setLatLng(e.latlng); updateCoords(e.latlng.lat, e.latlng.lng); });
+            setTimeout(() => { map.invalidateSize(); }, 500);
+        });
+
+        // ===== UPLOAD PREVIEW =====
+        const fileInput   = document.getElementById('fileInput');
+        const previewBox  = document.getElementById('previewContainer');
+        const uploadZone  = document.getElementById('uploadZone');
+        let   selectedFiles = [];
+
+        uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone.addEventListener('drop', e => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            addFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', () => addFiles(fileInput.files));
+
+        function addFiles(fileList) {
+            Array.from(fileList).forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+                selectedFiles.push(file);
+                renderPreview(file, selectedFiles.length - 1);
+            });
+            syncFileInput();
+            previewBox.style.setProperty('display', 'flex', 'important');
+        }
+
+        function renderPreview(file, index) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-3';
+                col.id = `preview-${index}`;
+                col.innerHTML = `
+                    <div class="preview-wrap">
+                        <img src="${e.target.result}" alt="preview">
+                        <button type="button" class="preview-remove" onclick="removePreview(${index})">
+                            <i class="bi bi-x"></i>
+                        </button>
+                        <div class="preview-badge">${file.name.length > 16 ? file.name.slice(0,14)+'…' : file.name}</div>
+                    </div>`;
+                previewBox.appendChild(col);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePreview(index) {
+            selectedFiles[index] = null;
+            const el = document.getElementById(`preview-${index}`);
+            if (el) el.remove();
+            syncFileInput();
+        }
+
+        function syncFileInput() {
+            const dt = new DataTransfer();
+            selectedFiles.filter(f => f !== null).forEach(f => dt.items.add(f));
+            fileInput.files = dt.files;
+        }
+    </script>
+</body>
+</html>

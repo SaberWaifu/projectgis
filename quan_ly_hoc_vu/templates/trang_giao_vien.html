@@ -1,0 +1,233 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Giáo Viên - TOÁN GIS</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background-color: #0B1121; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.1), transparent 40%);
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+        .text-gradient { background: linear-gradient(to right, #34d399, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hover-scale { transition: transform 0.3s ease; }
+        .hover-scale:hover { transform: translateY(-5px); }
+        
+        /* Hiệu ứng mượt cho danh sách học sinh (Details/Summary) */
+        details > summary { list-style: none; cursor: pointer; transition: 0.3s; }
+        details > summary::-webkit-details-marker { display: none; }
+        details[open] summary ~ * { animation: slideDown 0.3s ease-in-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-blue-500... overflow-x-hidden w-full">
+
+    <nav class="px-6 py-4 glass-card flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-xl flex items-center justify-center font-bold text-lg shadow-lg shadow-emerald-500/30">
+                <i class="bi bi-person-video3 text-white"></i>
+            </div>
+            <span class="text-2xl font-black tracking-wider text-white">TOÁN <span class="text-emerald-400">GIS</span></span>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+            <span class="hidden md:block font-medium text-gray-300 me-2">Chào, <span class="text-white font-bold">{{ user.username }}</span>!</span>
+
+            <a href="{% url 'thoi_gian_ranh_gv' %}" class="bg-emerald-900/30 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-700/50 px-3 py-2 rounded-lg transition-all text-sm font-semibold flex items-center gap-1">
+                <i class="bi bi-calendar2-check"></i> <span class="hidden md:inline">Giờ Rảnh</span>
+            </a>
+            <a href="{% url 'xem_lich_bu' %}" class="bg-teal-900/30 hover:bg-teal-600 text-teal-300 hover:text-white border border-teal-700/50 px-3 py-2 rounded-lg transition-all text-sm font-semibold flex items-center gap-1">
+                <i class="bi bi-calendar-event"></i> <span class="hidden md:inline">Lịch Bù</span>
+            </a>
+            <a href="{% url 'quan_ly_xin_nghi' %}" class="bg-yellow-900/30 hover:bg-yellow-600 text-yellow-300 hover:text-white border border-yellow-700/50 px-3 py-2 rounded-lg transition-all text-sm font-semibold flex items-center gap-1">
+                <i class="bi bi-journal-check"></i> <span class="hidden md:inline">Xin Nghỉ</span>
+            </a>
+            <a href="{% url 'doi_mat_khau' %}" class="bg-blue-900/30 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-700/50 px-3 py-2 rounded-lg transition-all text-sm font-semibold flex items-center gap-1">
+                <i class="bi bi-shield-lock-fill"></i> <span class="hidden md:inline">Đổi MK</span>
+            </a>
+            <a href="{% url 'logout' %}" class="bg-gray-800 hover:bg-red-500 hover:text-white border border-gray-700 hover:border-red-500 text-gray-300 px-3 py-2 rounded-lg transition-all text-sm font-semibold flex items-center gap-1">
+                 <i class="bi bi-box-arrow-right"></i> <span class="hidden md:inline">Đăng Xuất</span>
+            </a>
+        </div>
+    </nav>
+
+    <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full flex flex-col gap-8">
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 glass-card rounded-2xl p-8 border-l-4 border-l-emerald-500 relative overflow-hidden flex flex-col justify-center">
+                <div class="relative z-10">
+                    <h1 class="text-3xl md:text-4xl font-bold mb-3">Portal Giảng Viên <span class="text-gradient">Toán GIS</span></h1>
+                    <p class="text-gray-400 text-lg max-w-2xl">Quản lý lịch giảng dạy, theo dõi danh sách lớp học, tải lên bài giảng video và kiểm tra sĩ số học viên.</p>
+                </div>
+                <div class="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl"></div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 flex flex-col justify-center gap-4">
+                <div class="flex items-center gap-4 pb-4 border-b border-slate-700/50">
+                    <div class="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center text-blue-400 text-xl"><i class="bi bi-journal-bookmark-fill"></i></div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-bold m-0">Lớp Đang Phụ Trách</p>
+                        <p class="text-2xl font-bold text-white m-0">{{ ds_lop.count }} Lớp</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400 text-xl"><i class="bi bi-people-fill"></i></div>
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-bold m-0">Tổng Số Học Viên</p>
+                        <p class="text-2xl font-bold text-white m-0">{{ tong_hoc_sinh }} Em</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-card rounded-2xl p-6 flex items-center gap-5 hover-scale border-t-2 border-t-emerald-500">
+                <div class="w-14 h-14 bg-gradient-to-tr from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg shadow-emerald-500/20 text-white">
+                    {{ giao_vien.ten|slice:":1"|upper }}
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-1">{{ giao_vien.ten }}</h3>
+                    <span class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-900/50 text-emerald-300 border border-emerald-500/30 flex items-center gap-1 w-fit">
+                        <i class="bi bi-book"></i> Chuyên môn: {{ giao_vien.mon_day }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 flex items-center gap-5 hover-scale border-t-2 border-t-red-500">
+                <div class="w-14 h-14 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 text-xl"><i class="bi bi-geo-alt-fill"></i></div>
+                <div>
+                    <span class="text-gray-400 text-xs font-bold uppercase tracking-wider block mb-1">Cơ sở công tác chính</span>
+                    <span class="text-xl font-bold text-white">{{ giao_vien.co_so.ten|default:"Chưa phân công" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-3 mb-4"><div class="w-2 h-6 bg-emerald-500 rounded-full"></div>Thời Khóa Biểu Giảng Dạy</h2>
+
+            {% if ds_lich %}
+            <div class="glass-card rounded-2xl overflow-hidden shadow-lg border border-slate-700/50">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-black/30 text-gray-400 text-xs uppercase tracking-wider">
+                                <th class="p-4 font-bold">Thứ / Ca</th>
+                                <th class="p-4 font-bold">Lớp Học</th>
+                                <th class="p-4 font-bold">Phòng Học</th>
+                                <th class="p-4 font-bold text-center">Tình Trạng</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800 text-gray-200">
+                            {% for lich in ds_lich %}
+                            <tr class="hover:bg-emerald-900/10 transition duration-200">
+                                <td class="p-4 font-bold text-emerald-300 whitespace-nowrap">
+                                    <i class="bi bi-calendar-check me-2"></i>Thứ {{ lich.thu }} - Ca {{ lich.ca }}
+                                </td>
+                                <td class="p-4 font-bold text-white">{{ lich.lop_hoc.ten_lop }}</td>
+                                <td class="p-4 text-gray-300"><i class="bi bi-door-open text-gray-400 me-2"></i>{{ lich.phong.ten|default:"Chưa xếp" }}</td>
+                                <td class="p-4 text-center">
+                                    {% if lich.lop_hoc.trang_thai == 'MO' %}
+                                        <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold border border-green-500/30">Đang dạy</span>
+                                    {% else %}
+                                        <span class="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-xs font-bold border border-yellow-500/30">Chờ khai giảng</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="glass-card rounded-2xl p-10 text-center border-dashed border-2 border-slate-700">
+                <i class="bi bi-calendar-x text-4xl mb-3 text-gray-600 block"></i>
+                <p class="text-gray-400">Thầy/Cô chưa có lịch giảng dạy nào được phân công. Admin sẽ xếp TKB và gửi lịch sớm.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="mt-4">
+            <h2 class="text-xl font-bold text-white flex items-center gap-3 mb-4"><div class="w-2 h-6 bg-blue-500 rounded-full"></div>Danh Sách Lớp Phụ Trách & Quản Lý Nội Dung</h2>
+            
+            <div class="grid grid-cols-1 gap-6">
+                {% for lop in ds_lop %}
+                <div class="glass-card rounded-2xl border border-slate-700/50 overflow-hidden flex flex-col md:flex-row md:items-center">
+                    <div class="p-5 flex-grow border-b md:border-b-0 md:border-r border-slate-700/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-white mb-2"><i class="bi bi-easel2 text-blue-400 me-2"></i>{{ lop.ten_lop }}</h3>
+                            <div class="flex gap-3 text-xs">
+                                <span class="text-gray-400 bg-slate-800 px-2 py-1 rounded">
+                                    {% if lop.trang_thai == 'MO' %}<span class="text-green-400 font-bold"><i class="bi bi-circle-fill me-1"></i>Đang hoạt động</span>{% else %}<span class="text-yellow-400 font-bold">Đang tuyển sinh</span>{% endif %}
+                                </span>
+                                <span class="text-gray-400 bg-slate-800 px-2 py-1 rounded"><i class="bi bi-people-fill me-1"></i>Sĩ số: <b class="text-white">{{ lop.hoc_viens.count }}/{{ lop.si_so_toi_da }}</b></span>
+                            </div>
+                        </div>
+                        
+                        {% if lop.trang_thai == 'MO' %}
+                        <div class="flex gap-2 flex-wrap">
+                            <a href="{% url 'quan_ly_bai_giang_gv' lop.id %}" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition flex items-center gap-2 text-sm whitespace-nowrap">
+                                <i class="bi bi-cloud-arrow-up-fill"></i> Bài Giảng
+                            </a>
+                            <a href="{% url 'quan_ly_bai_tap_gv' lop.id %}" class="bg-blue-700 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-bold shadow-lg transition flex items-center gap-2 text-sm whitespace-nowrap">
+                                <i class="bi bi-list-task"></i> BTVN
+                            </a>
+                            <a href="{% url 'xin_nghi' lop.id %}" class="bg-yellow-700/60 hover:bg-yellow-600 text-yellow-200 hover:text-white px-4 py-2 rounded-lg font-bold shadow-lg transition flex items-center gap-2 text-sm whitespace-nowrap border border-yellow-600/40">
+                                <i class="bi bi-calendar-x"></i> Xin Nghỉ
+                            </a>
+                        </div>
+                        {% else %}
+                        <button disabled class="bg-gray-700 text-gray-400 px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 cursor-not-allowed">
+                            <i class="bi bi-lock-fill"></i> Lớp chưa khai giảng
+                        </button>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="p-4 w-full md:w-1/3 bg-slate-800/20">
+                        <details class="group">
+                            <summary class="flex justify-between items-center bg-slate-800/60 p-3 rounded-lg border border-slate-700 hover:bg-slate-700 transition">
+                                <span class="font-bold text-sm text-gray-200"><i class="bi bi-list-ul me-2"></i>Danh sách học sinh</span>
+                                <i class="bi bi-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                            </summary>
+                            <div class="mt-3 bg-slate-900/50 rounded-lg border border-slate-700/50 p-3 max-h-40 overflow-y-auto">
+                                {% if lop.hoc_viens.count > 0 %}
+                                    <ul class="space-y-2">
+                                        {% for hv in lop.hoc_viens.all %}
+                                        <li class="flex items-center gap-3 text-sm text-gray-300 p-2 hover:bg-slate-800 rounded transition">
+                                            <div class="w-6 h-6 rounded-full bg-slate-700 flex justify-center items-center text-xs font-bold text-white">{{ forloop.counter }}</div>
+                                            <span class="font-medium flex-grow">{{ hv.ten }}</span>
+                                            <span class="text-xs text-blue-400 bg-blue-900/20 px-2 py-0.5 rounded">Khối {{ hv.khoi_lop }}</span>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="text-sm text-gray-500 text-center py-2 italic m-0">Chưa có học viên nào.</p>
+                                {% endif %}
+                            </div>
+                        </details>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-10 glass-card rounded-2xl border-dashed border-2 border-slate-700">
+                    <p class="text-gray-400 mb-0">Thầy/Cô chưa được phân công quản lý lớp nào.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-auto py-6 border-t border-gray-800 text-center text-sm text-gray-500 bg-gray-900/50">
+        &copy; 2026 Hệ thống TOÁN GIS. Dành riêng cho Giảng Viên.
+    </footer>
+</body>
+</html>

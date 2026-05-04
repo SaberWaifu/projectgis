@@ -1,0 +1,182 @@
+============================================================
+   HƯỚNG DẪN CÀI ĐẶT VÀ CHẠY ỨNG DỤNG WEB QUẢN LÝ HỌC VỤ
+                        NHÓM 12 - GIS
+============================================================
+
+Bộ cài đặt gồm 2 thứ:
+  - Thư mục source code  : Toàn bộ mã nguồn ứng dụng web
+  - toan_gis.sql         : Dữ liệu database (PostgreSQL)
+
+============================================================
+BƯỚC 1: CÀI ĐẶT PHẦN MỀM CẦN THIẾT
+============================================================
+
+1.1. Cài Python 3.10 trở lên
+     - Tải tại: https://www.python.org/downloads/
+     - !!! QUAN TRỌNG: Khi cài phải TICK chọn "Add Python to PATH"
+       trước khi bấm Install
+     - Kiểm tra cài thành công: mở CMD gõ  python --version
+
+1.2. Cài PostgreSQL (phiên bản 14 trở lên)
+     - Tải tại: https://www.postgresql.org/download/windows/
+     - Trong quá trình cài đặt:
+         + Nhớ mật khẩu đã đặt cho user "postgres" (dùng lại ở Bước 3)
+         + Giữ nguyên cổng mặc định: 5432
+     - Sau khi cài xong, mở pgAdmin 4 để kiểm tra kết nối
+
+============================================================
+BƯỚC 2: KHÔI PHỤC DATABASE TỪ FILE toan_gis.sql
+============================================================
+
+2.1. Mở pgAdmin 4
+
+2.2. Tạo database mới:
+     - Chuột phải vào "Databases" > chọn "Create" > "Database..."
+     - Đặt tên: toan_gis_db
+     - Bấm Save
+
+2.3. Restore dữ liệu (chọn 1 trong 2 cách):
+
+  --- CÁCH 1: Dùng pgAdmin (dễ hơn) ---
+     - Chuột phải vào database "toan_gis_db" vừa tạo
+     - Chọn "Restore..."
+     - Ở mục "Filename": chọn file "toan_gis.sql"
+     - Ở mục "Format": chọn "Plain"
+     - Bấm "Restore"
+     - Chờ đến khi hoàn tất (Process returned exit code 0 là thành công)
+
+  --- CÁCH 2: Dùng lệnh CMD ---
+     Mở CMD (chạy quyền Admin), gõ lệnh:
+
+     psql -U postgres -d toan_gis_db -f "đường_dẫn_đến\toan_gis.sql"
+
+     Ví dụ: psql -U postgres -d toan_gis_db -f "C:\Users\ten\Desktop\toan_gis.sql"
+     (Nhập mật khẩu postgres khi được hỏi)
+
+============================================================
+BƯỚC 3: SAO CHÉP VÀ CẤU HÌNH SOURCE CODE
+============================================================
+
+3.1. Sao chép thư mục source code vào một vị trí bất kỳ trên máy
+     Ví dụ: C:\projectgis\
+
+3.2. Mở file: trung_tam_project\settings.py
+     Tìm đến phần DATABASES (khoảng dòng 72) và chỉnh sửa:
+
+     DATABASES = {
+         'default': {
+             'ENGINE': 'django.db.backends.postgresql',
+             'NAME': 'toan_gis_db',    <- Giữ nguyên
+             'USER': 'postgres',       <- Giữ nguyên
+             'PASSWORD': '123456',     <- ĐỔI THÀNH MẬT KHẨU POSTGRES CỦA BẠN
+             'HOST': 'localhost',      <- Giữ nguyên
+             'PORT': '5432',           <- Giữ nguyên
+         }
+     }
+
+     !!! Đổi PASSWORD thành mật khẩu bạn đã đặt khi cài PostgreSQL ở Bước 1.2
+
+============================================================
+BƯỚC 4: CÀI ĐẶT THƯ VIỆN PYTHON
+============================================================
+
+4.1. Mở PowerShell hoặc CMD
+4.2. Di chuyển vào thư mục source code:
+
+     cd C:\projectgis
+
+4.3. Cài tất cả thư viện bằng 1 lệnh duy nhất:
+
+     pip install django psycopg2-binary django-allauth Pillow openpyxl requests
+
+     (Chờ đến khi cài xong tất cả - có thể mất vài phút tùy tốc độ mạng)
+
+============================================================
+BƯỚC 5: CHẠY ỨNG DỤNG
+============================================================
+
+5.1. Đảm bảo PostgreSQL đang chạy
+     - Vào Services (Windows + R > gõ services.msc)
+     - Tìm dòng "postgresql-x64-..." > đảm bảo Status là "Running"
+     - Hoặc kiểm tra qua pgAdmin 4
+
+5.2. Mở PowerShell/CMD, di chuyển vào thư mục source code:
+
+     cd C:\projectgis
+
+5.3. Chạy lệnh:
+
+     python manage.py runserver
+
+5.4. Chờ đến khi thấy thông báo:
+
+     Starting development server at http://127.0.0.1:8000/
+     Quit the server with CTRL-BREAK.
+
+============================================================
+BƯỚC 6: MỞ TRÌNH DUYỆT VÀ ĐĂNG NHẬP
+============================================================
+
+Mở trình duyệt (Chrome, Firefox...) và truy cập:
+
+  Trang chủ  :  http://127.0.0.1:8000/
+  Trang admin:  http://127.0.0.1:8000/admin/
+
+  Tài khoản admin mặc định:
+     - Username : admin
+     - Password : admin
+
+  !!! Sau khi đăng nhập admin lần đầu, nên đổi mật khẩu ngay !!!
+
+============================================================
+XỬ LÝ LỖI THƯỜNG GẶP
+============================================================
+
+LỖI: "No module named 'django'"
+  → Chạy lại: pip install django
+
+LỖI: "No module named 'psycopg2'"
+  → Chạy lại: pip install psycopg2-binary
+
+LỖI: "Connection refused" hoặc "could not connect to server"
+  → PostgreSQL chưa chạy. Vào Services > tìm "postgresql" > Start
+
+LỖI: "password authentication failed for user postgres"
+  → Sai mật khẩu. Mở settings.py, sửa lại PASSWORD đúng với
+    mật khẩu PostgreSQL của máy bạn
+
+LỖI: "database toan_gis_db does not exist"
+  → Chưa tạo database. Quay lại Bước 2 để tạo và restore database
+
+LỖI: "psql is not recognized" hoặc "pg_restore is not recognized"
+  → PostgreSQL chưa được thêm vào PATH. Thêm thủ công:
+    C:\Program Files\PostgreSQL\[version]\bin
+    (Thay [version] bằng số phiên bản đang cài, ví dụ: 16)
+
+LỖI: Trang web hiện lỗi 500 sau khi chạy
+  → Kiểm tra lại mật khẩu PostgreSQL trong settings.py
+  → Đảm bảo đã restore database thành công ở Bước 2
+
+============================================================
+THÔNG TIN DỰ ÁN
+============================================================
+
+  Tên dự án : Hệ thống Quản lý Học vụ - TOÁN GIS
+  Nhóm      : Nhóm 12
+  Framework : Django (Python)
+  Database  : PostgreSQL
+
+  Các tính năng chính:
+    + Bản đồ GIS - Tìm chi nhánh gần nhất theo tọa độ GPS
+    + Đăng nhập tài khoản thường và Google OAuth
+    + Quản lý học viên, giáo viên, lớp học, phòng học
+    + Xếp lịch học tự động (tránh trùng phòng, trùng giáo viên)
+    + Quản lý học phí, hóa đơn và xuất báo cáo Excel
+    + Bài giảng (video YouTube + file đính kèm)
+    + Giao và chấm bài tập online
+    + Quản lý đơn xin nghỉ và lịch học bù
+    + Tin tức, trang giới thiệu, đánh giá chi nhánh
+
+============================================================
+Mọi thắc mắc vui lòng liên hệ Nhóm 12.
+============================================================

@@ -1,0 +1,1515 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Hệ thống GIS phân tích không gian và điều phối giáo dục - Toán GIS Enterprise">
+    <meta name="author" content="Toán GIS Team - Ultimate Edition">
+    <title>Bản Đồ Số & Phân Tích Không Gian Thực Tế - Toán GIS Pro Max</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+
+    <style>
+        /* ==================================================
+           3. HỆ THỐNG BIẾN MÀU SẮC (ULTIMATE CSS VARIABLES)
+        ================================================== */
+        :root {
+            /* Brand Primary Colors */
+            --primary-100: #dbeafe;
+            --primary-200: #bfdbfe;
+            --primary-300: #93c5fd;
+            --primary-400: #60a5fa;
+            --primary:     #3b82f6; /* Main Primary */
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --primary-800: #1e40af;
+            --primary-900: #1e3a8a;
+            
+            /* Status Colors */
+            --success: #10b981;
+            --success-dark: #047857;
+            --success-soft: #d1fae5;
+            
+            --warning: #f59e0b;
+            --warning-dark: #b45309;
+            --warning-soft: #fef3c7;
+            
+            --danger: #ef4444;
+            --danger-dark: #b91c1c;
+            --danger-soft: #fee2e2;
+
+            --info: #0ea5e9;
+            --info-soft: #e0f2fe;
+
+            /* Grayscale & Backgrounds */
+            --slate-50:  #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --slate-950: #020617;
+            
+            /* Glassmorphism Variables */
+            --glass-bg-light: rgba(255, 255, 255, 0.85);
+            --glass-bg-dark: rgba(15, 23, 42, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            
+            /* Gradients */
+            --grad-primary: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            --grad-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --grad-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --grad-danger: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            --grad-dark: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            
+            /* Box Shadows (Elevation) */
+            --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            
+            /* Dimensions */
+            --navbar-height: 80px;
+            --sidebar-width: 440px; /* Rộng hơn để chứa nhiều thông tin hơn */
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
+            --border-radius-xl: 24px;
+            
+            /* Fonts */
+            --font-display: 'Montserrat', sans-serif;
+            --font-body: 'Open Sans', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        /* ==================================================
+           4. GLOBAL RESET & TYPOGRAPHY
+        ================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--light-bg);
+            color: #334155;
+            /* Sửa thành min-height để nó có thể dài hơn 100vh nếu cần */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            /* Chỉ ẩn cuộn ngang, cho phép cuộn dọc */
+            overflow-x: hidden !important; 
+            width: 100% !important;
+        }
+
+        h1, h2, h3, h4, h5, h6, .font-display {
+            font-family: var(--font-display);
+            color: var(--slate-900);
+        }
+
+        /* Custom Scrollbar Siêu Mượt */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--slate-400); }
+
+        /* ==================================================
+           5. THIẾT KẾ NAVBAR (TRÊN CÙNG)
+        ================================================== */
+        .navbar-custom {
+            height: var(--navbar-height);
+            background: var(--slate-900);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            z-index: 2000;
+            padding: 0;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .navbar-brand {
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: var(--white) !important;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+        }
+        
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--grad-primary);
+            border-radius: var(--border-radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: var(--white);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover .brand-icon {
+            transform: rotate(15deg) scale(1.1);
+        }
+        
+        .navbar-brand span {
+            color: var(--warning);
+        }
+
+        .nav-link {
+            color: var(--slate-300) !important;
+            font-weight: 600;
+            padding: 10px 20px !important;
+            margin: 0 5px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            font-family: var(--font-display);
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--white) !important;
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.active {
+            background: var(--primary);
+            color: var(--white) !important;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .user-avatar-sm {
+            width: 38px;
+            height: 38px;
+            background: var(--grad-warning);
+            color: var(--slate-900);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-login-nav {
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--white);
+            border-radius: 50px;
+            padding: 8px 25px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-login-nav:hover {
+            background: var(--white);
+            color: var(--slate-900);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .dropdown-menu-dark-custom {
+            background: var(--slate-800);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: var(--shadow-2xl);
+            margin-top: 15px;
+            border-radius: var(--border-radius-lg);
+            padding: 10px;
+        }
+        
+        .dropdown-item {
+            color: var(--slate-200);
+            padding: 10px 20px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-radius: var(--border-radius-sm);
+            transition: 0.2s;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
+            padding-left: 25px;
+        }
+
+        /* ==================================================
+           6. BỐ CỤC APP VÀ SIDEBAR BÊN TRÁI
+        ================================================== */
+        .app-container {
+            display: flex;
+            height: calc(100vh - var(--navbar-height));
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sidebar-panel {
+            width: var(--sidebar-width);
+            background: var(--white);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-2xl);
+            z-index: 1500;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-header {
+            padding: 25px 25px 15px 25px;
+            background: var(--slate-50);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .sidebar-title h5 {
+            font-weight: 900;
+            color: var(--slate-900);
+            margin: 0;
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Search Box (Input) */
+        .search-box {
+            position: relative;
+            margin-top: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 14px 15px 14px 45px;
+            border: 2px solid var(--slate-200);
+            border-radius: var(--border-radius-md);
+            background: var(--white);
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 4px var(--primary-soft);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--slate-400);
+            font-size: 1.2rem;
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 5px;
+            margin-top: 20px;
+            background: var(--slate-200);
+            padding: 6px;
+            border-radius: var(--border-radius-md);
+        }
+        
+        .filter-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.85rem;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--slate-600);
+            transition: all 0.3s ease;
+        }
+        
+        .filter-tab:hover {
+            color: var(--primary);
+        }
+        
+        .filter-tab.active {
+            background: var(--white);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ==================================================
+           7. DANH SÁCH HỌC VIÊN (STUDENT CARDS)
+        ================================================== */
+        .student-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--slate-50);
+        }
+        
+        .student-card {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid transparent;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .student-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--slate-300);
+        }
+        
+        .student-card.active {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* Hiệu ứng dải màu bên trái card đang chọn */
+        .student-card.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background: var(--grad-primary);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .st-name {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--slate-900);
+            margin-bottom: 4px;
+        }
+        
+        .st-meta {
+            font-size: 0.8rem;
+            color: var(--slate-500);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .st-id-badge {
+            background: var(--slate-200);
+            color: var(--slate-700);
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-ok { background: var(--success-soft); color: var(--success-dark); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .status-wait { background: var(--warning-soft); color: var(--warning-dark); border: 1px solid rgba(245, 158, 11, 0.2); }
+
+        .st-info {
+            font-size: 0.9rem;
+            color: var(--slate-600);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--slate-200);
+            font-weight: 500;
+        }
+
+        .sidebar-footer {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            background: var(--white);
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--slate-400);
+            font-weight: 500;
+        }
+
+        /* ==================================================
+           8. MAP AREA & FLOATING WIDGETS
+        ================================================== */
+        .map-container {
+            flex: 1;
+            position: relative;
+            background: var(--slate-200);
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Vùng chứa các Widget Tool bên phải */
+        .widget-stack {
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            z-index: 1000;
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            width: 300px; 
+        }
+
+        /* Thiết kế chung cho 1 Widget Box */
+        .map-widget {
+            background: var(--glass-bg-light); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 20px; 
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-xl); 
+            border: 1px solid var(--glass-border);
+            animation: fadeInRight 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        /* WIDGET 0: Map Switcher */
+        .layer-switcher {
+            display: flex; 
+            gap: 5px; 
+            background: var(--slate-200); 
+            padding: 5px; 
+            border-radius: var(--border-radius-md);
+        }
+        
+        .layer-btn {
+            flex: 1; 
+            border: none; 
+            background: transparent; 
+            color: var(--slate-500);
+            padding: 8px 5px; 
+            border-radius: var(--border-radius-sm); 
+            font-weight: 700; 
+            font-size: 0.75rem;
+            transition: all 0.3s ease; 
+            cursor: pointer; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 4px;
+        }
+        
+        .layer-btn i { font-size: 1.2rem; }
+        
+        .layer-btn:hover { color: var(--primary); }
+        .layer-btn.active { 
+            background: var(--white); 
+            color: var(--primary); 
+            box-shadow: var(--shadow-sm); 
+        }
+
+        /* Tựa đề Widget */
+        .widget-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+        }
+        
+        .widget-title { 
+            font-family: var(--font-display);
+            font-weight: 800; 
+            font-size: 0.85rem; 
+            color: var(--slate-800); 
+            text-transform: uppercase; 
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+        
+        .widget-val { 
+            font-family: var(--font-mono);
+            font-weight: 800; 
+            color: var(--primary); 
+            font-size: 1rem; 
+        }
+
+        /* WIDGET 1: Geocoding */
+        .geocode-input { 
+            font-size: 0.9rem; 
+            border-radius: var(--border-radius-md); 
+            border: 2px solid var(--slate-200); 
+            padding: 10px 15px;
+            font-weight: 500;
+        }
+        .geocode-input:focus { 
+            border-color: var(--success); 
+            box-shadow: 0 0 0 4px var(--success-soft); 
+            outline: none;
+        }
+
+        /* WIDGET 2: Radar Slider */
+        .range-slider { 
+            width: 100%; 
+            cursor: pointer; 
+            height: 8px; 
+            border-radius: 10px; 
+            accent-color: var(--primary); 
+            margin-bottom: 20px; 
+        }
+        
+        /* CÁC NÚT BẤM TRONG WIDGET (FIX HIỂN THỊ MÀU SẮC RÕ RÀNG) */
+        .btn-action-widget {
+            width: 100%; 
+            border: none; 
+            color: var(--white) !important; 
+            font-weight: 700; 
+            padding: 12px; 
+            border-radius: var(--border-radius-md); 
+            font-size: 0.9rem; 
+            transition: all 0.3s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-geocode {
+            background: var(--grad-success) !important; 
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+        .btn-geocode:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
+
+        .btn-scan {
+            background: var(--grad-primary) !important; 
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        .btn-scan:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4); }
+
+        /* ==================================================
+           9. ROUTE INFO OVERLAY (BẢNG THÔNG TIN LỘ TRÌNH ĐÁY)
+        ================================================== */
+        .route-info-card {
+            position: absolute; 
+            bottom: 40px; 
+            left: 50%; 
+            transform: translateX(-50%) translateY(200%); 
+            background: var(--white); 
+            padding: 0; 
+            border-radius: var(--border-radius-xl);
+            width: 550px; 
+            max-width: 95%; 
+            box-shadow: var(--shadow-2xl); 
+            z-index: 3000;
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            border: 1px solid var(--border-color); 
+            overflow: hidden;
+        }
+        
+        .route-info-card.active { transform: translateX(-50%) translateY(0); }
+        
+        .route-header { 
+            padding: 20px 25px; 
+            background: var(--slate-50); 
+            border-bottom: 1px solid var(--slate-200); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        
+        .route-avatar { 
+            width: 45px; 
+            height: 45px; 
+            background: var(--grad-primary); 
+            color: var(--white); 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.4rem; 
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-close-route { 
+            background: var(--slate-200); 
+            border: none; 
+            color: var(--slate-600); 
+            width: 35px; height: 35px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; cursor: pointer; transition: 0.3s; 
+        }
+        
+        .btn-close-route:hover { 
+            background: var(--danger-soft); color: var(--danger); 
+            transform: rotate(90deg); 
+        }
+        
+        .route-body { padding: 25px; }
+        
+        /* Box chứa 2 điểm Đầu - Cuối */
+        .routing-points { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            background: var(--slate-50); 
+            padding: 20px; 
+            border-radius: var(--border-radius-lg); 
+            margin-bottom: 20px; 
+            border: 1px dashed var(--slate-300); 
+        }
+        
+        .point-name { font-weight: 800; color: var(--slate-800); font-size: 0.9rem; margin-top: 5px; }
+        
+        .btn-swap { 
+            width: 45px; height: 45px; 
+            background: var(--white); border: 1px solid var(--slate-200); 
+            border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+            color: var(--primary); font-size: 1.3rem; cursor: pointer; 
+            box-shadow: var(--shadow-md); transition: all 0.3s ease; 
+        }
+        .btn-swap:hover { background: var(--primary); color: var(--white); transform: rotate(180deg) scale(1.1); }
+        
+        /* List Cơ sở gợi ý */
+        .facility-list { 
+            max-height: 180px; overflow-y: auto; margin-bottom: 20px; 
+            border: 1px solid var(--border-color); border-radius: var(--border-radius-md); 
+            background: var(--white); 
+        }
+        
+        .facility-item { 
+            padding: 15px 20px; border-bottom: 1px solid var(--border-color); 
+            display: flex; justify-content: space-between; align-items: center; 
+            cursor: pointer; transition: 0.2s; 
+        }
+        .facility-item:last-child { border-bottom: none; }
+        .facility-item:hover { background: var(--slate-50); }
+        
+        .facility-item.active.bg-highlight { 
+            background: var(--success-soft); border-left: 4px solid var(--success);
+        }
+        
+        .fac-name { font-weight: 800; font-size: 0.95rem; color: var(--slate-800); }
+        
+        .fac-dist { 
+            font-family: var(--font-mono); font-size: 0.85rem; color: var(--primary-700); 
+            font-weight: 700; background: var(--white); padding: 4px 12px; 
+            border-radius: 20px; border: 1px solid var(--primary-200); box-shadow: var(--shadow-xs);
+        }
+        
+        /* Thống kê quãng đường */
+        .route-stats { 
+            display: flex; justify-content: space-around; 
+            background: var(--slate-900); color: var(--white);
+            padding: 20px; border-radius: var(--border-radius-lg); margin-bottom: 20px; 
+            box-shadow: var(--shadow-lg);
+        }
+        .r-label { font-size: 0.7rem; text-transform: uppercase; color: var(--slate-400); font-weight: 700; letter-spacing: 1px; margin-bottom: 5px;}
+        .r-value { font-family: var(--font-mono); font-size: 1.6rem; font-weight: 800; color: var(--warning); }
+        .r-divider { width: 1px; background: rgba(255,255,255,0.1); }
+        
+        /* Nút Chạy AI Mô phỏng */
+        .btn-run-gis { 
+            background: var(--grad-warning); color: var(--slate-900) !important; border: none; 
+            padding: 15px 30px; border-radius: 50px; font-weight: 800; font-size: 1rem;
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4); 
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px; 
+            transition: all 0.3s; width: 100%; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .btn-run-gis:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 15px 30px rgba(245, 158, 11, 0.5); }
+        
+        /* ==================================================
+           10. TÍNH NĂNG ĐẶC BIỆT: AI TERMINAL OVERLAY
+        ================================================== */
+        #aiTerminal {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+            background: rgba(15, 23, 42, 0.95); z-index: 5000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden; transition: 0.4s; backdrop-filter: blur(10px); 
+            border-radius: 24px; color: var(--success); font-family: var(--font-mono);
+        }
+        #aiTerminal.active { opacity: 1; visibility: visible; }
+        
+        .radar-spinner {
+            width: 80px; height: 80px; border: 4px solid rgba(16, 185, 129, 0.2);
+            border-top: 4px solid var(--success); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* ==================================================
+          /* ==================================================
+           11. TOAST NOTIFICATION (BẢNG THÔNG BÁO ĐÃ FIX MÀU CHỮ)
+        ================================================== */
+        .gis-toast { 
+            position: fixed; 
+            top: -150px; /* Ẩn sâu lên trên để hiệu ứng trượt mượt hơn */
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: #ffffff; 
+            padding: 18px 26px; 
+            border-radius: 16px; 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1); 
+            z-index: 99999; /* Đảm bảo luôn nằm trên cùng */
+            display: flex; 
+            align-items: center; 
+            gap: 18px; 
+            min-width: 420px; /* Mở rộng bảng để chứa tên cơ sở dài */
+            max-width: 600px;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            border: 1px solid #e2e8f0; 
+        }
+        
+        .gis-toast.active { 
+            top: 100px; /* Đẩy bảng xuống dưới thanh Navbar màu đen */
+        }
+        
+        .toast-icon { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 14px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.6rem; 
+            flex-shrink: 0; 
+        }
+
+        .toast-content {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .toast-content h6 { 
+            margin: 0; 
+            font-weight: 900; 
+            color: #0f172a; /* Màu đen xanh đậm - rất dễ đọc */
+            font-size: 1.1rem; 
+        }
+        
+        .toast-content p { 
+            margin: 0; 
+            font-size: 0.95rem; /* Phóng to chữ */
+            color: #1e293b; /* Đổi từ màu xám sang đen đậm */
+            white-space: pre-line; 
+            line-height: 1.5;
+            font-weight: 600; /* Làm chữ đậm lên */
+        }
+        
+        .toast-success .toast-icon { background: #dcfce7; color: #16a34a; }
+        .toast-info .toast-icon { background: #eff6ff; color: #2563eb; }
+        .toast-error .toast-icon { background: #fee2e2; color: #dc2626; }
+    </style>
+</head>
+{% if not user.is_authenticated or not user.is_staff %}<script>window.location.href="{% url 'trang_chu' %}";</script>{% endif %}
+<body>
+
+    <div id="gisToast" class="gis-toast toast-success">
+        <div class="toast-icon">
+            <i class="bi bi-check-lg"></i>
+        </div>
+        <div class="toast-content">
+            <h6 id="toastTitle">Thông báo</h6>
+            <p id="toastMsg">Nội dung thông báo...</p>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="{% url 'trang_chu' %}">
+                <div class="brand-icon"><i class="bi bi-geo-alt-fill"></i></div>
+                <div>TOÁN <span>GIS</span> <small class="d-block fw-normal text-muted" style="font-size: 0.7rem;">Map Module</small></div>
+            </a>
+            
+            <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav mx-auto align-items-center">
+{% if user.is_authenticated and user.is_staff %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'thong_ke_page' %}"><i class="bi bi-grid-fill me-1"></i> Tổng Quan</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_page' %}"><i class="bi bi-people-fill me-1"></i> Học Viên</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_giao_vien' %}"><i class="bi bi-person-video3 me-1"></i> Giáo Viên</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_lop_page' %}"><i class="bi bi-easel2-fill me-1"></i> Lớp Học</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'quan_ly_hoc_phi' %}"><i class="bi bi-piggy-bank-fill me-1"></i> Học Phí</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'xep_lich_page' %}"><i class="bi bi-calendar3 me-1"></i> Xếp Lịch</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'chi_nhanh_page' %}"><i class="bi bi-geo-alt-fill me-1"></i> Chi Nhánh</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'dieu_phoi_page' %}"><i class="bi bi-map-fill me-1"></i> Bản Đồ</a></li>
+                    {% endif %}
+                    </ul>
+
+                <div class="d-flex align-items-center gap-3 ms-lg-3">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-white" data-bs-toggle="dropdown">
+                                <div class="user-avatar-sm me-2">{{ user.username|slice:":1"|upper }}</div>
+                                <span class="d-none d-md-inline font-display fw-bold" style="font-size: 0.95rem;">{{ user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom">
+                                <li><a class="dropdown-item" href="{% url 'thong_ke_page' %}"><i class="bi bi-speedometer2 me-2"></i>Admin Panel</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Đăng Xuất</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn-login-nav"><i class="bi bi-box-arrow-in-right"></i> Đăng Nhập</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="app-container">
+        
+        <aside class="sidebar-panel">
+            <div class="sidebar-header">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="sidebar-title font-display">Hồ Sơ Bản Đồ</h5>
+                    <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">{{ hoc_vien.count }}</span>
+                </div>
+                
+                <div class="search-box">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Tìm kiếm tên, ID học viên..." onkeyup="filterList()">
+                </div>
+
+                <div class="filter-tabs">
+                    <div class="filter-tab active" onclick="filterStatus('all', this)">Tất cả</div>
+                    <div class="filter-tab" onclick="filterStatus('assigned', this)">Đã xếp</div>
+                    <div class="filter-tab" onclick="filterStatus('pending', this)">Chưa xếp</div>
+                </div>
+            </div>
+
+            <div class="student-list" id="studentContainer">
+                {% for hv in hoc_vien %}
+                <div class="student-card animate__animated animate__fadeInUp" 
+                     id="card-{{ hv.id }}" 
+                     data-id="{{ hv.id }}"
+                     data-status="{% if hv.co_so_gan_nhat %}assigned{% else %}pending{% endif %}"
+                     onclick="selectStudent({{ hv.id }})">
+                    
+                    <div class="card-top">
+                        <div>
+                            <div class="st-name">{{ hv.ten }}</div>
+                            <div class="st-meta mt-1">
+                                <span class="st-id-badge">ID: #{{ hv.id }}</span> <span>• Khối {{ hv.khoi_lop }}</span>
+                            </div>
+                        </div>
+                        
+                        {% if hv.co_so_gan_nhat %}
+                            <span class="status-badge status-ok" id="badge-{{ hv.id }}">ĐÃ XẾP</span>
+                        {% else %}
+                            <span class="status-badge status-wait" id="badge-{{ hv.id }}">CHỜ XỬ LÝ</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="st-info">
+                        {% if hv.co_so_gan_nhat %}
+                            <i class="bi bi-geo-alt-fill text-primary fs-5"></i> 
+                            <span id="dest-{{ hv.id }}">Tuyến: <b>{{ hv.co_so_gan_nhat.ten }}</b></span>
+                        {% else %}
+                            <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i> 
+                            <span id="dest-{{ hv.id }}">Chưa có lộ trình AI</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1 mb-3 opacity-50"></i>
+                    <p class="fw-bold">Chưa có dữ liệu học viên.</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="sidebar-footer font-mono">
+                GIS Core Engine v3.0 • Cập nhật: {% now "d/m/Y H:i" %}
+            </div>
+        </aside>
+
+        <main class="map-container">
+            <div id="map"></div>
+
+            <div class="widget-stack">
+                <div class="map-widget" style="padding: 10px;">
+                    <div class="layer-switcher">
+                        <button class="layer-btn active" onclick="changeMapLayer('street', this)"><i class="bi bi-map"></i> Đường phố</button>
+                        <button class="layer-btn" onclick="changeMapLayer('satellite', this)"><i class="bi bi-globe-americas"></i> Vệ tinh</button>
+                        <button class="layer-btn" onclick="changeMapLayer('dark', this)"><i class="bi bi-moon-stars"></i> Ban đêm</button>
+                    </div>
+                </div>  
+                <div class="map-widget">
+                    <div class="radar-header">
+                        <h6 class="widget-title"><i class="bi bi-radar me-2 text-primary"></i>Radar Quét Không Gian</h6>
+                        <div class="radar-val" id="radiusValue">5 km</div>
+                    </div>
+                    <input type="range" class="form-range range-slider" min="1" max="20" step="1" id="radiusRange" value="5" oninput="updateRadiusLabel(this.value)">
+                    <button class="btn-action-widget btn-scan" id="btnScan" onclick="scanNearby()">
+                        <i class="bi bi-broadcast"></i> Phát Sóng Dò Tìm
+                    </button>
+                </div>
+            </div>
+
+            <div id="routeOverlay" class="route-info-card">
+                
+                <div id="aiTerminal">
+                    <div class="radar-spinner"></div>
+                    <h4 class="fw-bold mb-3">HỆ THỐNG ĐANG TÍNH TOÁN</h4>
+                    <p id="aiLogText" class="m-0">Initializing Spatial Filter...</p>
+                    <p id="aiLogText2" class="opacity-50 mt-1">Connecting to OSRM Server...</p>
+                </div>
+
+                <div class="route-header">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="route-avatar" id="overlayIcon"><i class="bi bi-bezier2"></i></div>
+                        <div>
+                            <div style="font-size: 0.7rem; font-weight: 800; color: var(--primary); letter-spacing: 1px;" id="overlaySubtitle">KẾT QUẢ PHÂN TUYẾN</div>
+                            <div class="font-display fw-bold text-dark fs-5" id="overlayTitle">---</div>
+                        </div>
+                    </div>
+                    <button class="btn-close-route" onclick="clearRoute(true)"><i class="bi bi-x-lg"></i></button>
+                </div>
+                
+                <div class="route-body" id="routeContentArea">
+                    </div>
+            </div>
+
+            <div class="map-controls">
+                <button class="map-btn" onclick="map.zoomIn()" title="Phóng to"><i class="bi bi-plus-lg"></i></button>
+                <button class="map-btn" onclick="map.zoomOut()" title="Thu nhỏ"><i class="bi bi-dash-lg"></i></button>
+                <button class="map-btn" onclick="clearRoute(true)" title="Reset Bản Đồ"><i class="bi bi-arrow-counterclockwise"></i></button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- 1. CHUẨN BỊ DỮ LIỆU TỪ BACKEND (XỬ LÝ LỖI DẤU PHẨY MẶC ĐỊNH) ---
+        const students = [
+            {% for hv in hoc_vien %}
+            {
+                id: {{ hv.id }}, 
+                name: "{{ hv.ten }}", 
+                lat: parseFloat("{{ hv.lat }}".replace(',', '.')), 
+                lon: parseFloat("{{ hv.lon }}".replace(',', '.')),
+                assigned: {% if hv.co_so_gan_nhat %}true{% else %}false{% endif %},
+                {% if hv.co_so_gan_nhat %}
+                dest_lat: parseFloat("{{ hv.co_so_gan_nhat.lat }}".replace(',', '.')), 
+                dest_lon: parseFloat("{{ hv.co_so_gan_nhat.lon }}".replace(',', '.')), 
+                dest_name: "{{ hv.co_so_gan_nhat.ten }}"
+                {% endif %}
+            },
+            {% endfor %}
+        ];
+
+        const facilities = [
+            {% for cs in co_so %}
+            { 
+                id: {{ cs.id }}, 
+                name: "{{ cs.ten }}", 
+                lat: parseFloat("{{ cs.lat }}".replace(',', '.')), 
+                lon: parseFloat("{{ cs.lon }}".replace(',', '.')) 
+            },
+            {% endfor %}
+        ];
+        let currentMode = null; 
+        let currentEntityId = null; 
+        let routeDirection = 'forward';
+
+
+        const map = L.map('map', { zoomControl: false }).setView([10.762622, 106.660172], 13);
+
+       const baseMaps = {
+    street: L.tileLayer('http://mt0.google.com/vt/lyrs=m&hl=vi&x={x}&y={y}&z={z}', { 
+        maxZoom: 20,
+        attribution: '© Google Maps'
+    }),
+    satellite: L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&hl=vi&x={x}&y={y}&z={z}', { 
+        maxZoom: 20, 
+        subdomains:['mt0','mt1','mt2','mt3'],
+        attribution: '© Google Maps'
+    }),
+    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { 
+        maxZoom: 19,
+        attribution: '© CARTO'
+    })
+};
+        baseMaps.street.addTo(map);
+        let currentMapLayer = baseMaps.street;
+
+        function changeMapLayer(type, btn) {
+            map.removeLayer(currentMapLayer);
+            currentMapLayer = baseMaps[type];
+            currentMapLayer.addTo(map);
+            
+            document.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // Định dạng Icon
+        const iconSchool = L.icon({iconUrl: 'https://cdn-icons-png.flaticon.com/512/167/167707.png', iconSize: [44, 44], popupAnchor: [0, -20]});
+        const iconStudent = L.icon({iconUrl: 'https://cdn-icons-png.flaticon.com/512/9131/9131546.png', iconSize: [38, 38], iconAnchor: [19, 38]});
+        const iconUser = L.icon({iconUrl: 'https://cdn-icons-png.flaticon.com/512/747/747376.png', iconSize: [44, 44], iconAnchor: [22, 44]});
+        const iconPin = L.icon({iconUrl: 'https://cdn-icons-png.flaticon.com/512/2776/2776067.png', iconSize: [44, 44], iconAnchor: [22, 44]});
+
+        // Layer Groups
+        const layers = { facilities: L.layerGroup().addTo(map), routes: L.layerGroup().addTo(map), radar: L.layerGroup().addTo(map) };
+        let routingControl = null;
+        let searchMarker = null;
+
+        // Cắm cờ Cơ sở lên bản đồ mặc định
+        facilities.forEach(f => {
+            L.marker([f.lat, f.lon], {icon: iconSchool})
+             .bindTooltip(`<div class="text-center font-display fw-bold">${f.name}</div>`, {direction: 'top', offset: [0,-10]})
+             .addTo(layers.facilities)
+             .on('click', () => selectFacility(f.id));
+        });
+
+        // --- 3. HỆ THỐNG TOAST THÔNG BÁO ---
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('gisToast');
+            const icon = toast.querySelector('.toast-icon');
+            
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMsg').innerText = message;
+            toast.className = `gis-toast toast-${type} active`;
+            
+            if (type === 'success') {
+                icon.innerHTML = '<i class="bi bi-check-lg"></i>';
+            } else if (type === 'error') {
+                icon.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i>';
+            } else {
+                icon.innerHTML = '<i class="bi bi-info-circle"></i>';
+            }
+
+            setTimeout(() => { toast.classList.remove('active'); }, 5000);
+        }
+
+        // --- 4. TÌM ĐỊA CHỈ (GEOCODING API OPENSTREETMAP) ---
+        function searchAddress() {
+            const address = document.getElementById('addressInput').value;
+            if (!address) { showToast("Cảnh báo", "Vui lòng nhập địa chỉ cần tìm!", "info"); return; }
+            
+            const btn = document.getElementById('btnSearchAddr');
+            const ogText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang dò tìm...';
+            btn.disabled = true;
+
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`;
+
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    btn.innerHTML = ogText; 
+                    btn.disabled = false;
+                    
+                    if (data && data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lon = parseFloat(data[0].lon);
+                        
+                        document.getElementById('geocoderResult').classList.remove('d-none');
+                        document.getElementById('geoLatLon').innerText = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                        
+                        if (searchMarker) map.removeLayer(searchMarker);
+                        searchMarker = L.marker([lat, lon], {icon: iconPin}).addTo(map).bindPopup(`<b>${data[0].display_name}</b>`).openPopup();
+                        map.flyTo([lat, lon], 16);
+                        
+                        showToast("Thành công", "Đã khóa mục tiêu tọa độ!", "success");
+                    } else {
+                        showToast("Thất bại", "Không tìm thấy địa chỉ. Vui lòng thử lại chi tiết hơn.", "error");
+                    }
+                }).catch(() => { 
+                    btn.innerHTML = ogText; btn.disabled = false; 
+                    showToast("Lỗi", "Lỗi Server Bản đồ. Vui lòng thử lại sau.", "error"); 
+                });
+        }
+
+        function copyGeo() {
+            const text = document.getElementById('geoLatLon').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Thành công", "Tọa độ đã lưu vào bộ nhớ tạm.", "success");
+            });
+        }
+
+        // --- 5. LOGIC CLICK HỌC VIÊN TỰ TÍNH TOÁN LỘ TRÌNH ---
+        function selectStudent(id) {
+            clearRoute(false);
+            currentMode = 'student'; 
+            currentEntityId = id; 
+            routeDirection = 'forward';
+            
+            document.querySelectorAll('.student-card').forEach(c => c.classList.remove('active'));
+            const card = document.getElementById('card-' + id);
+            if(card) { card.classList.add('active'); card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+
+            const st = students.find(s => s.id === id);
+            if(!st) return;
+
+            L.marker([st.lat, st.lon], {icon: iconStudent}).addTo(layers.routes).bindPopup(`<b>${st.name}</b>`).openPopup();
+            
+            document.getElementById('overlaySubtitle').innerText = "HỌC VIÊN ĐANG XÉT";
+            document.getElementById('overlayTitle').innerText = st.name;
+            document.getElementById('overlayIcon').innerHTML = '<i class="bi bi-person-bounding-box"></i>';
+            document.getElementById('routeOverlay').classList.add('active');
+
+            // Tính khoảng cách đường chim bay để sort danh sách cơ sở
+            let facWithDist = facilities.map(f => {
+                let distMeters = map.distance([st.lat, st.lon], [f.lat, f.lon]);
+                return { ...f, distance: (distMeters / 1000).toFixed(2) };
+            });
+            facWithDist.sort((a,b) => a.distance - b.distance);
+
+            let highlightFacName = st.assigned ? st.dest_name : facWithDist[0].name;
+            renderListUI(facWithDist, 'CƠ SỞ TƯƠNG THÍCH', highlightFacName);
+            
+            // Tự động gọi API vẽ đường
+            let targetFac = st.assigned ? facilities.find(f => f.name === st.dest_name) : facWithDist[0];
+            if (targetFac) {
+                drawRouteAction(st.lat, st.lon, targetFac.lat, targetFac.lon, targetFac.id);
+            }
+        }
+
+        // Logic Click Cơ Sở
+        function selectFacility(id) {
+            clearRoute(false);
+            currentMode = 'facility'; 
+            currentEntityId = id; 
+            routeDirection = 'forward';
+            
+            const fac = facilities.find(f => f.id === id);
+            map.flyTo([fac.lat, fac.lon], 14);
+            
+            document.getElementById('overlaySubtitle').innerText = "TRUNG TÂM TOÁN GIS";
+            document.getElementById('overlayTitle').innerText = fac.name;
+            document.getElementById('overlayIcon').innerHTML = '<i class="bi bi-building-check"></i>';
+            document.getElementById('routeOverlay').classList.add('active');
+
+            let stuWithDist = students.map(st => {
+                let distMeters = map.distance([fac.lat, fac.lon], [st.lat, st.lon]);
+                return { ...st, distance: (distMeters / 1000).toFixed(2) };
+            });
+            stuWithDist.sort((a,b) => a.distance - b.distance);
+
+            // Vẽ mạng nhện tới các học viên đã gán
+            stuWithDist.filter(st => st.dest_name === fac.name).forEach(st => {
+                L.polyline([[fac.lat, fac.lon], [st.lat, st.lon]], {color: '#10b981', weight: 3, dashArray: '5, 10', opacity: 0.6}).addTo(layers.routes);
+                L.marker([st.lat, st.lon], {icon: iconStudent}).addTo(layers.routes).bindTooltip(st.name);
+            });
+
+            renderListUI(stuWithDist, 'HỌC VIÊN THUỘC TUYẾN', fac.name);
+            if(stuWithDist.length > 0) {
+                drawRouteAction(fac.lat, fac.lon, stuWithDist[0].lat, stuWithDist[0].lon, stuWithDist[0].id);
+            }
+        }
+
+        // Tạo UI List trong Bảng báo cáo
+        function renderListUI(targetList, typeName, highlightName = "") {
+            let listHtml = targetList.map((item, index) => {
+                let isMatch = item.name === highlightName || item.dest_name === highlightName;
+                let iconClass = currentMode === 'student' ? 'bi-building' : 'bi-person-fill';
+                let btnAction = `drawRouteAction(null, null, ${item.lat}, ${item.lon}, ${item.id})`;
+
+                return `
+                <div class="facility-item ${isMatch ? 'active bg-highlight' : ''}" id="list-item-${item.id}" onclick="${btnAction}">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi ${iconClass} fs-5 ${isMatch ? 'text-success' : 'text-secondary'}"></i>
+                        <span class="fac-name">${item.name} ${isMatch ? '<i class="bi bi-check-circle-fill text-success ms-1"></i>' : ''}</span>
+                    </div>
+                    <span class="fac-dist"><i class="bi bi-signpost-2-fill me-1"></i> ${item.distance} km</span>
+                </div>`;
+            }).join('');
+
+            let point1Name = currentMode === 'student' ? 'Nhà Học Viên' : 'Cơ Sở';
+            let point2Name = currentMode === 'student' ? 'Cơ Sở Phân Tuyến' : 'Nhà Học Viên';
+            let icon1 = currentMode === 'student' ? '<i class="bi bi-house-door text-primary"></i>' : '<i class="bi bi-building text-success"></i>';
+            let icon2 = currentMode === 'student' ? '<i class="bi bi-building text-success"></i>' : '<i class="bi bi-house-door text-primary"></i>';
+
+            // --- THÊM LOGIC LẤY ID VÀ TRẠNG THÁI HỌC VIÊN Ở ĐÂY ---
+            let isAssigned = false;
+            if(currentMode === 'student'){
+                const st = students.find(s => s.id === currentEntityId);
+                isAssigned = st.assigned;
+            }
+
+            document.getElementById('routeContentArea').innerHTML = `
+                <div class="routing-points mb-3">
+                    <div class="point text-center">
+                        <div class="fs-3 mb-1" id="point1Icon">${icon1}</div>
+                        <div class="point-name" id="point1Name">${point1Name}</div>
+                    </div>
+                    <button class="btn-swap" onclick="toggleDirection()" title="Đảo chiều lộ trình"><i class="bi bi-arrow-left-right"></i></button>
+                    <div class="point text-center">
+                        <div class="fs-3 mb-1" id="point2Icon">${icon2}</div>
+                        <div class="point-name" id="point2Name">${point2Name}</div>
+                    </div>
+                </div>
+                
+                <div style="font-size:0.75rem; font-weight:800; color:var(--slate-500); margin-bottom:10px;">${typeName} THEO BÁN KÍNH:</div>
+                <div class="facility-list shadow-sm">${listHtml}</div>
+                
+                <div class="route-stats">
+                    <div class="r-stat-item">
+                        <div class="r-label">LỘ TRÌNH ĐƯỜNG BỘ</div>
+                        <div class="r-value" id="valDist">...</div>
+                    </div>
+                    <div class="r-divider"></div>
+                    <div class="r-stat-item">
+                        <div class="r-label">T.GIAN ƯỚC TÍNH</div>
+                        <div class="r-value" id="valTime">...</div>
+                    </div>
+                </div>
+                
+                ${(currentMode === 'student' && !isAssigned) ? `
+                <button class="btn-run-gis mt-3" onclick="simulateAIAlgorithm(${currentEntityId})">
+                    <i class="bi bi-magic fs-5"></i> Kích Hoạt Hệ Thống AI
+                </button>` : ''}
+            `;
+        }
+            
+
+        // Đảo điểm 
+        function toggleDirection() {
+            routeDirection = routeDirection === 'forward' ? 'reverse' : 'forward';
+            let p1Name = document.getElementById('point1Name'); let p2Name = document.getElementById('point2Name');
+            let p1Icon = document.getElementById('point1Icon'); let p2Icon = document.getElementById('point2Icon');
+            let tempName = p1Name.innerText; p1Name.innerText = p2Name.innerText; p2Name.innerText = tempName;
+            let tempIcon = p1Icon.innerHTML; p1Icon.innerHTML = p2Icon.innerHTML; p2Icon.innerHTML = tempIcon;
+            
+            let activeEl = document.querySelector('.facility-item.active');
+            if(activeEl){
+                let activeId = activeEl.id.replace('list-item-', '');
+                if (currentMode === 'student') {
+                    let fac = facilities.find(f => f.id == activeId); drawRouteAction(null, null, fac.lat, fac.lon, fac.id);
+                } else {
+                    let st = students.find(s => s.id == activeId); drawRouteAction(null, null, st.lat, st.lon, st.id);
+                }
+            }
+        }
+
+        // --- F. HÀM GỌI API CHỈ ĐƯỜNG OSRM (CÓ BACKUP) ---
+        function drawRouteAction(originLat, originLon, destLat, destLon, targetId) {
+            
+            document.querySelectorAll('.facility-item').forEach(el => { el.classList.remove('active'); el.classList.remove('bg-highlight'); });
+            let targetEl = document.getElementById('list-item-' + targetId);
+            if(targetEl) { targetEl.classList.add('active'); targetEl.classList.add('bg-highlight'); }
+
+            document.getElementById('valDist').innerHTML = '<span class="spinner-border spinner-border-sm text-warning"></span>';
+            document.getElementById('valTime').innerHTML = '<span class="spinner-border spinner-border-sm text-warning"></span>';
+
+            if (routingControl) map.removeControl(routingControl);
+            
+            let pOriginLat = originLat, pOriginLon = originLon;
+            if (!pOriginLat || !pOriginLon) {
+                if (currentMode === 'student') {
+                    const st = students.find(s => s.id === currentEntityId); pOriginLat = st.lat; pOriginLon = st.lon;
+                } else {
+                    const fac = facilities.find(f => f.id === currentEntityId); pOriginLat = fac.lat; pOriginLon = fac.lon;
+                }
+            }
+
+            let point1 = routeDirection === 'forward' ? L.latLng(pOriginLat, pOriginLon) : L.latLng(destLat, destLon);
+            let point2 = routeDirection === 'forward' ? L.latLng(destLat, destLon) : L.latLng(pOriginLat, pOriginLon);
+
+            // Phương án Backup tính độ dài Haversine đề phòng OSRM lỗi
+            const straightDist = map.distance(point1, point2);
+            const estDistKm = (straightDist * 1.3) / 1000; 
+            const estTimeMin = Math.round((estDistKm / 30) * 60); 
+
+            try {
+                routingControl = L.Routing.control({
+                    waypoints: [point1, point2],
+                    lineOptions: { styles: [{color: '#0d6efd', opacity: 0.9, weight: 6}], extendToWaypoints: true },
+                    createMarker: () => null, addWaypoints: false, draggableWaypoints: false, fitSelectedRoutes: true, show: false
+                }).addTo(map);
+
+                routingControl.on('routesfound', function(e) {
+                    const summary = e.routes[0].summary;
+                    document.getElementById('valDist').innerText = (summary.totalDistance / 1000).toFixed(1) + " km";
+                    document.getElementById('valTime').innerText = Math.round(summary.totalTime / 60) + " phút";
+                });
+                
+                routingControl.on('routingerror', function(e) {
+                    document.getElementById('valDist').innerText = "~" + estDistKm.toFixed(1) + " km";
+                    document.getElementById('valTime').innerText = "N/A";
+                    L.polyline([point1, point2], {color: '#f59e0b', weight: 4, dashArray: '10, 10'}).addTo(layers.routes);
+                    showToast("API Quá Tải", "Chuyển sang chế độ vẽ đường chim bay.", "info");
+                });
+
+            } catch(err) {
+                document.getElementById('valDist').innerText = "~" + estDistKm.toFixed(1) + " km";
+                document.getElementById('valTime').innerText = "N/A";
+                L.polyline([point1, point2], {color: '#f59e0b', weight: 4, dashArray: '10, 10'}).addTo(layers.routes);
+            }
+        }
+
+        // --- G. MÔ PHỎNG AI TERMINAL VÀ GỌI BACKEND THỰC SỰ ---
+        function simulateAIAlgorithm(studentId) {
+            if (!studentId) return;
+
+            const terminal = document.getElementById('aiTerminal');
+            const log1 = document.getElementById('aiLogText');
+            const log2 = document.getElementById('aiLogText2');
+            
+            terminal.classList.add('active');
+            
+            const logs = [
+                "Đang tính toán ma trận O-D...",
+                "Gọi OSRM API lấy dữ liệu luồng giao thông...",
+                "Phân tích sức chứa cơ sở...",
+                "Xác định lộ trình tối ưu thời gian...",
+                "Đang đồng bộ với cơ sở dữ liệu..."
+            ];
+            
+            let i = 0;
+            const interval = setInterval(() => {
+                log2.innerText = log1.innerText;
+                log1.innerText = logs[i];
+                i++;
+                
+                if(i >= logs.length) {
+                    clearInterval(interval);
+                    
+                    // GỌI FETCH XUỐNG BACKEND ĐỂ LƯU DATABASE THẬT
+                    fetch(`/chay-gis/${studentId}/`)
+                    .then(response => {
+                        terminal.classList.remove('active');
+                        if(response.ok) {
+                            document.getElementById('routeContentArea').innerHTML = `
+                                <div class="alert alert-success border-0 shadow-sm text-center mb-0 p-4 rounded-4 mt-3">
+                                    <i class="bi bi-check-circle-fill fs-1 d-block mb-2"></i>
+                                    <h5 class="fw-bold mb-1">Thành Công!</h5>
+                                    <p class="mb-0">Hệ thống AI đã tự động cập nhật Database.</p>
+                                </div>
+                            `;
+                            showToast("Hoàn Tất", "Lưu dữ liệu phân tuyến thành công.", "success");
+                            
+                            // Tải lại trang sau 1.5s để cập nhật nhãn ĐÃ XẾP màu xanh
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            showToast("Lỗi Server", "Không thể lưu vào Database.", "error");
+                        }
+                    })
+                    .catch(error => {
+                        terminal.classList.remove('active');
+                        // Nếu fetch lỗi (do block script), dùng cách chuyển trang truyền thống
+                        window.location.href = `/chay-gis/${studentId}/`;
+                    });
+                }
+            }, 800);
+        }
+
+        // --- H. CÁC HÀM DỌN DẸP VÀ QUÉT RADAR ---
+        function clearRoute(resetView = false) {
+            layers.routes.clearLayers(); layers.radar.clearLayers();
+            if (routingControl) { map.removeControl(routingControl); routingControl = null; }
+            if (searchMarker) { map.removeLayer(searchMarker); searchMarker = null; }
+            const geoResult = document.getElementById('geocoderResult');
+            if(geoResult) geoResult.classList.add('d-none');
+            
+            document.querySelectorAll('.student-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('routeOverlay').classList.remove('active'); 
+            currentMode = null; 
+            if(resetView) map.setView([10.762622, 106.660172], 13); 
+        }
+
+        function updateRadiusLabel(val) { document.getElementById('radiusValue').innerText = val + " km"; }
+
+        function scanNearby() {
+            if (!navigator.geolocation) return alert("Không có GPS.");
+            const btn = document.getElementById('btnScan');
+            const ogText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang quét...'; 
+            btn.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(pos => {
+                clearRoute(false); 
+                let lat = pos.coords.latitude, lon = pos.coords.longitude;
+                let rad = document.getElementById('radiusRange').value * 1000; 
+                
+                L.marker([lat, lon], {icon: iconUser}).addTo(layers.radar).bindPopup("Vị trí của bạn").openPopup();
+                L.circle([lat, lon], {color: '#0d6efd', fillOpacity: 0.1, radius: rad}).addTo(layers.radar); 
+                map.flyTo([lat, lon], 13);
+                
+                let found = facilities.filter(f => map.distance([lat, lon], [f.lat, f.lon]) <= rad);
+                setTimeout(() => {
+                    btn.innerHTML = ogText; btn.disabled = false;
+                    if(found.length > 0) {
+                        let msg = `Tìm thấy ${found.length} cơ sở trong bán kính:\n` + found.sort((a,b)=>a.d-b.d).map(f => `• ${f.name}`).join('\n');
+                        showToast("Hoàn Tất Quét Vệ Tinh", msg, "success");
+                    } else showToast("Thông báo", "Không có cơ sở trong vùng.", "info");
+                }, 1200);
+            }, () => { 
+                btn.innerHTML = ogText; btn.disabled = false; 
+                showToast("Lỗi", "Không lấy được GPS.", "error"); 
+            });
+        }
+        
+        function filterList() { 
+            let term = document.getElementById('searchInput').value.toLowerCase(); 
+            document.querySelectorAll('.student-card').forEach(c => {
+                let name = c.querySelector('.st-name').innerText.toLowerCase();
+                let id = c.querySelector('.st-id-badge').innerText.toLowerCase();
+                c.style.display = (name.includes(term) || id.includes(term)) ? 'block' : 'none';
+            }); 
+        }
+
+        function filterStatus(status, btn) {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.student-card').forEach(c => {
+                const isAssigned = c.querySelector('.status-ok') !== null;
+                if (status === 'all') c.style.display = 'block';
+                else if (status === 'assigned' && isAssigned) c.style.display = 'block';
+                else if (status === 'pending' && !isAssigned) c.style.display = 'block';
+                else c.style.display = 'none';
+            });
+        }
+
+        // Sửa lỗi Leaflet load hụt map
+        setTimeout(() => map.invalidateSize(), 500);
+
+    </script>
+</body>
+</html>
